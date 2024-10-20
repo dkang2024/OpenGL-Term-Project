@@ -1,3 +1,8 @@
+#version 460 core 
+
+in vec3 fragmentColor;
+out vec4 color;
+
 void main(){
-    gl_FragColor = vec4(0.1255, 0.7961, 0.1922, 1.0);
+    color = vec4(fragmentColor, 1.0);
 }

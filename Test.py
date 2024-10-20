@@ -13,7 +13,8 @@ class Test(mglw.WindowConfig):
         self.triangle = Triangle(self)
 
     def render(self, time, frameTime):
-        self.ctx.clear(1.0, 0.0, 0.0, 0.0)
+        self.ctx.clear()
+        self.triangle.render()
          
         if frameTime != 0:
             self.wnd.title = f'FPS: {1 / frameTime: .2f}'

@@ -20,11 +20,18 @@ class Triangle(Object):
 
         #x, y, z, r, g, b
         self.vertices = ( 
-            (-0.5, -0.5, -0.5, 1, 0, 0), 
-            (0.0, 0.0, 0.0, 0, 1, 0), 
-            (0.5, 0.5, 0.5, 0, 0, 1)
+            (-0.6, -0.8, 0.0, 1.0, 0.0, 0.0), 
+            (0.6, -0.8, 0.0, 0.0, 1.0, 0.0),
+            (0.0, 0.8, 0.0, 0.0, 0.0, 1.0)
         )
+        self.numVertices = 3 
         self.vertices = np.array(self.vertices, np.float32)
 
+        vertexShader, fragmentShader = self.getShaders('Default')
+        self.program = self.ctx.program(vertexShader, fragmentShader)
+
         self.vbo = self.ctx.buffer(self.vertices)
-        self.numVertices = 3 
+        self.vao = self.ctx.vertex_array(self.program, [(self.vbo, '3f 3f', 'vertexPosition', 'vertexColor')])
+
+    def render(self):
+        self.vao.render()
