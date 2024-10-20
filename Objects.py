@@ -27,8 +27,7 @@ class Triangle(Object):
         self.numVertices = 3 
         self.vertices = np.array(self.vertices, np.float32)
 
-        vertexShader, fragmentShader = self.getShaders('Default')
-        self.program = self.ctx.program(vertexShader, fragmentShader)
+        self.program = self.ctx.program(*self.getShaders('Default'))
 
         self.vbo = self.ctx.buffer(self.vertices)
         self.vao = self.ctx.vertex_array(self.program, [(self.vbo, '3f 3f', 'vertexPosition', 'vertexColor')])
