@@ -1,12 +1,19 @@
 from numba import njit
 import glm 
 
-class camera:
-    def __init__(self, app, cameraPosition, cameraSpeed, fov, lookAt, vectorUp = glm.vec3(0, 1, 0), viewportWidth = 2):
+def nearZero(v):
+    '''
+    Checks whether all elements of the vector are near zero
+    '''
+    epsilon = 1e-5
+    return v.x < epsilon and v.y < epsilon and v.z < epsilon
+
+class Camera:
+    def __init__(self, app, cameraPosition, cameraSpeed, fov, lookAt, vectorUp = glm.vec3(0, 1, 0)):
         self.app, self.ctx = app, app.ctx 
         self.cameraPosition, self.cameraSpeed, self.fov, self.lookAt, self.vectorUp = cameraPosition, cameraSpeed, fov, lookAt, vectorUp 
         self.dirX, self.dirY, self.dirZ = 1, 1, -1
-        self.mouseX, self.mouseY = 0.5, 0.5
+        self.dx, self.dy = 0, 0
 
         self.calculateUnitVectors()
 
@@ -14,12 +21,16 @@ class camera:
         '''
         Calculate the camera's unit vector in the +x direction
         '''
+        crossProduct = glm.cross(self.vectorUp, self.k)
+        if nearZero(crossProduct):
+            crossProduct = glm.cross(glm.vec3(0, 0, 1), self.k)
         self.i = glm.normalize(glm.cross(self.vectorUp, self.k))
     
     def calculateJ(self):
         '''
         Calculate the camera's unit vector in the +y direction
         '''
+        
         self.j = glm.cross(self.k, self.i)
 
     def calculateK(self):
@@ -65,7 +76,7 @@ class camera:
         '''
         Convert a normalized mouse delta on the screen into an angle for the camera unit vectors
         '''
-        return 178 * (mouseDelta - 0.5)
+        return 180 * (mouseDelta - 0.5)
     
     @staticmethod 
     def calculateExtraDisplacement(distancePoint, angle, unitVector):

@@ -20,7 +20,7 @@ class Test(mglw.WindowConfig):
         self.wnd.fullscreen_key = self.wnd.keys.F
 
         self.ctx.gc_mode = 'auto'
-        self.camera = camera(self, glm.vec3(0, 0, 0), 0.1, 60, glm.vec3(0, 0, -1))
+        self.camera = Camera(self, glm.vec3(0, 0, 0), 0.1, 60, glm.vec3(0, 0, -1))
 
         self.program = self.ctx.program(*self.loadWindow())
         self.initScreen()
