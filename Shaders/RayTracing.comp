@@ -1,25 +1,13 @@
-#version 460 core 
+// Initialize the version, uniforms, and invocation size
+#version 460 core
 
+// Set up invocation size and take in the screen texture to modify it per pixel
 layout(local_size_x = 8, local_size_y = 4) in;
 layout(rgba32f) uniform image2D screen;
 
-// Sphere Structure and functions associated 
-
-struct sphere3{
-    vec3 center;
-    float radius;
-};
-
-// Ray Structure and functions associated
-
-struct ray3{
-    vec3 origin;
-    vec3 direction;
-};
-
-vec3 rayIntersectPoint(ray3 ray, float t){
-    return ray.origin + ray.direction * t;
-}
+// Import files here using the "import" statement that Python processes
+import Ray
+import Sphere 
 
 vec3 rayColor(ray3 ray){
     vec3 unitDirection = normalize(ray.direction);
@@ -28,7 +16,6 @@ vec3 rayColor(ray3 ray){
 }
 
 // Main Function
-
 void main(){
     vec4 pixel = vec4(0.0, 0.5, 0.0, 1.0);
     ivec2 pixelCoord = ivec2(gl_GlobalInvocationID.xy);

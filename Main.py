@@ -1,3 +1,5 @@
+from Camera import *
+
 import moderngl_window as mglw
 import math 
 import moderngl as mgl 
@@ -7,7 +9,7 @@ class screenNames:
     TEXCOORD_0 = 'uv'
 
 class Test(mglw.WindowConfig):
-    resizable = True
+    resizable = True 
     aspect_ratio = None 
     gl_version = (4, 6)
     cursor = True  
@@ -18,9 +20,9 @@ class Test(mglw.WindowConfig):
         self.wnd.fullscreen_key = self.wnd.keys.F
 
         self.ctx.gc_mode = 'auto'
+        self.camera = camera(self, glm.vec3(0, 0, 0), 0.1, 60, glm.vec3(0, 0, -1))
 
         self.program = self.ctx.program(*self.loadWindow())
-
         self.initScreen()
         self.rayTracer = self.ctx.compute_shader(self.loadRayTracer())
 
@@ -38,12 +40,38 @@ class Test(mglw.WindowConfig):
         return vertexShader, fragmentShader
 
     @staticmethod 
-    def loadRayTracer():
+    def removeComments(rayTracer):
         '''
-        Load the ray tracing compute shader
+        Remove the comments from the ray tracer to avoid any shenanigans with "import" statements in comments
+        '''
+        return [line for line in rayTracer if not line.startswith('//')]
+    
+    @staticmethod 
+    def addImports(rayTracer):
+        '''
+        Add the imports from the 'import' statements in the rayTracer into the string
+        '''
+        for i, line in enumerate(rayTracer):
+            if not line.startswith('import'):
+                continue 
+            
+            importFileName = line[len('import') + 1:].strip()
+            try: 
+                with open(f'Shaders/{importFileName}.comp', 'r') as file:
+                    rayTracer[i] = file.read().strip()
+            except:
+                raise RuntimeError('This file does not exist')
+
+    def loadRayTracer(self):
+        '''
+        Load the ray tracing compute shader along with the other compute shaders beforehand to allow cleaner abstractions
         '''
         with open('Shaders/RayTracing.comp', 'r') as file:
-            return file.read()
+            rayTracer = file.read().strip().split('\n')
+
+        rayTracer = self.removeComments(rayTracer)
+        self.addImports(rayTracer)
+        return '\n'.join(rayTracer) 
         
     def initScreen(self):
         '''
@@ -53,6 +81,40 @@ class Test(mglw.WindowConfig):
         self.screen.repeat_x, self.screen.repeat_y = False, False 
         self.screen.bind_to_image(0)        
         self.screen.use(0)
+
+    def cameraMovementKeys(self, key, modifiers, isPress: int):
+        '''
+        If statements to deal with setting camera movement directions. isPress is 1 or -1 (with 1 being it's a key press, and -1 being a key release in order to reverse direction)
+        '''
+        if key == self.wnd.keys.W:
+            self.camera.dirZ = -1 * isPress  
+        elif key == self.wnd.keys.S: 
+            self.camera.dirZ = 1 * isPress
+        
+        if key == self.wnd.keys.A:
+            self.camera.dirX = -1 * isPress
+        elif key == self.wnd.keys.D: 
+            self.camera.dirX = 1 * isPress
+        
+        if key == self.wnd.keys.SPACE and not modifiers.shift: 
+            self.camera.dirZ = 1 * isPress
+        elif key == self.wnd.keys.SPACE and modifiers.shift:
+            self.camera.dirZ = -1 * isPress
+
+    def key_event(self, key, action, modifiers):
+        '''
+        Move the camera based on the keys 
+        '''
+        if action == self.wnd.keys.ACTION_PRESS: 
+            self.cameraMovementKeys(key, modifiers, 1)
+        else: 
+            self.cameraMovementKeys(key, modifiers, -1)
+    
+        self.camera.moveCamera()
+        
+    def mouse_position_event(self, mouseX, mouseY, dx, dy):
+
+        self.camera.updateMouse(mouseX, mouseY)
         
     def resize(self, screenWidth, screenHeight):
         '''
@@ -63,6 +125,9 @@ class Test(mglw.WindowConfig):
         self.ctx.viewport = (0, 0, screenWidth, screenHeight)
 
     def render(self, time, frameTime):
+        '''
+        Render the screen and display the fps
+        '''
         self.ctx.clear()
 
         self.rayTracer.run(math.ceil(self.window_size[0] / 8), math.ceil(self.window_size[1] / 4))
@@ -71,5 +136,6 @@ class Test(mglw.WindowConfig):
          
         if frameTime != 0:
             self.wnd.title = f'FPS: {1 / frameTime: .2f}'
-            
-Test.run()
+
+if __name__ == '__main__':  
+    Test.run()

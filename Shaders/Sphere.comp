@@ -1,0 +1,6 @@
+// Sphere Structure and functions associated 
+
+struct sphere3{
+    vec3 center;
+    float radius;
+};

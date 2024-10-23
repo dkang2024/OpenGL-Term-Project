@@ -1,0 +1,10 @@
+// Ray Structure and functions
+
+struct ray3{
+    vec3 origin;
+    vec3 direction;
+};
+
+vec3 rayIntersectPoint(ray3 ray, float t){
+    return ray.origin + ray.direction * t;
+}
