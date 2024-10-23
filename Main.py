@@ -7,13 +7,15 @@ class screenNames:
     TEXCOORD_0 = 'uv'
 
 class Test(mglw.WindowConfig):
-    resizable = False
+    resizable = True
+    aspect_ratio = None 
     gl_version = (4, 6)
     cursor = True  
     vsync = False 
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.wnd.fullscreen_key = self.wnd.keys.F
 
         self.ctx.gc_mode = 'auto'
 
@@ -53,7 +55,12 @@ class Test(mglw.WindowConfig):
         self.screen.use(0)
         
     def resize(self, screenWidth, screenHeight):
+        '''
+        Resize the texture to fit the bigger screen and reset viewport. 
+        '''
         self.window_size = (screenWidth, screenHeight)
+        self.initScreen()
+        self.ctx.viewport = (0, 0, screenWidth, screenHeight)
 
     def render(self, time, frameTime):
         self.ctx.clear()
@@ -64,5 +71,5 @@ class Test(mglw.WindowConfig):
          
         if frameTime != 0:
             self.wnd.title = f'FPS: {1 / frameTime: .2f}'
-
+            
 Test.run()
