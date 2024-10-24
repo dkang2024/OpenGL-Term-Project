@@ -43,7 +43,7 @@ void main(){
     float h = dot(cameraRay.direction, rayToSphereCenter);
     float c = dot(rayToSphereCenter, rayToSphereCenter) - pow(0.5, 2);
     if (simplifiedDiscriminant(a, c, h) >= 0){
-        pixel = vec4(0.9686, 0.0745, 0.0745, 1.0);
+        pixel = vec4(1.0, 0.0, 0.0, 1.0);
         
     } else {
         pixel = vec4(rayColor(cameraRay.direction), 1.0);

@@ -1,14 +1,18 @@
 from numba import njit
+import time 
 import glm 
 
 def nearZero(v):
     '''
-    Checks whether all elements of the vector are near zero
+    Checks whether all elements of the vector are near zero to deal with floating point inaccuracies
     '''
-    epsilon = 1e-5
+    epsilon = 1e-7
     return v.x < epsilon and v.y < epsilon and v.z < epsilon
 
 class Camera:
+    '''
+    Class for a moveable camera. I created all the code here without the help of any tutorials (I had to think up and create the functions / math myself). 
+    '''
     def __init__(self, app, cameraPosition, cameraSpeed, fov, lookAt, vectorUp = glm.vec3(0, 1, 0)):
         self.app = app
         self.cameraPosition, self.cameraSpeed, self.fov, self.lookAt, self.vectorUp = cameraPosition, cameraSpeed, fov, lookAt, vectorUp 
@@ -18,22 +22,22 @@ class Camera:
 
     def calculateI(self):
         '''
-        Calculate the camera's unit vector in the +x direction
+        Calculate the camera's unit vector in the +x direction by taking the cross product of the "up" direction with the k unit vector (random direction that is NOT in the direction of +z so that the cross product doesn't result in 0)
         '''
         crossProduct = glm.cross(self.vectorUp, self.k)
-        if nearZero(crossProduct):
+        if nearZero(crossProduct): #If vectorUp and k are almost parallel, take the cross with another vector that isn't parallel. 
             crossProduct = glm.cross(glm.vec3(0, 0, 1), self.k)
-        self.i = glm.normalize(glm.cross(self.vectorUp, self.k))
+        self.i = glm.normalize(crossProduct)
     
     def calculateJ(self):
         '''
-        Calculate the camera's unit vector in the +y direction
+        Calculate the camera's unit vector in the +y direction by taking the cross product of the k hat direction with the i hat direction (note the right handed coordinate system)
         '''
         self.j = glm.cross(self.k, self.i)
 
     def calculateK(self):
         '''
-        Calculate the camera's unit vector in the +z direction
+        Calculate the camera's unit vector in the +z direction by taking the vector from the lookAt to the camera position (keep in mind the camera looks in the -z direction because we need to adopt a right handed coordinate system)
         '''
         self.k = glm.normalize(self.cameraPosition - self.lookAt)
 
@@ -47,7 +51,7 @@ class Camera:
 
     def moveCamera(self, frameTime):
         '''
-        Move both the camera position and what it's looking at based on key movements
+        Move both the camera position and what it's looking at based on key movements (assuming no acceleration).
         '''
         deltaX, deltaY, deltaZ = self.dirX * self.i, self.dirY * self.j, self.dirZ * self.k 
         deltaTotal = self.cameraSpeed * (deltaX + deltaY + deltaZ) * frameTime
@@ -105,6 +109,9 @@ class Camera:
     @staticmethod
     @njit(cache = True)
     def numbaCalculateViewportWidth(viewportHeight, imageWidth, imageHeight):
+        '''
+        Calculate the viewport width by multiplying the viewport height by the same ratio of the imageWidth / imageHeight 
+        '''
         return viewportHeight * (imageWidth / imageHeight)
 
     def calculateViewportWidth(self):
@@ -115,7 +122,7 @@ class Camera:
 
     def calculateViewportHeight(self):
         '''
-        Calculate the viewport height
+        Calculate the viewport height given the vertical FOV (angle between the camera and the camera's unit z direction) 
         '''
         tanTheta = glm.tan(glm.radians(self.fov) / 2)
         self.viewportHeight = glm.abs(2 * tanTheta * self.focalLength)
