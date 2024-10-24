@@ -1,6 +1,23 @@
-// Sphere Structure and functions associated 
+// Sphere Structure
 
 struct sphere3{
     vec3 center;
     float radius;
 };
+
+// Sphere ray intersection helper functions 
+
+// Returns the discriminant given a simplified sphere equation
+float simplifiedDiscriminant(float a, float c, float h){
+    return pow(h, 2) - a * c;
+}
+
+// Returns the quadratic formula given a simplified sphere equation
+float simplifiedQuadFormula(float a, float h, float discriminant, float signValue){
+    return (h + signValue * pow(discriminant, 0.5)) / a; 
+}
+
+// Find the sphere's normal vector (not always made to point against the ray [this will be done in hit record])
+vec3 findSphereNormalVector(ray3 ray, float t, vec3 center, float radius){
+    return (rayIntersectPoint(ray, t) - center) / radius;
+}

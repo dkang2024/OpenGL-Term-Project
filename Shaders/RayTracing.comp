@@ -5,6 +5,11 @@
 layout(local_size_x = 8, local_size_y = 4) in;
 layout(rgba32f) uniform image2D screen;
 
+uniform vec3 cameraPosition;
+uniform vec3 pixelDX;
+uniform vec3 pixelDY;
+uniform vec3 initPixelPos;
+
 // Import files here using the "import" statement that Python processes
 import Ray
 import Sphere 
@@ -15,9 +20,26 @@ vec3 rayColor(ray3 ray){
     return (1.0 - a) * vec3(1.0, 1.0, 1.0) + a * vec3(0.5, 0.7, 1.0);
 }
 
+// Construct a ray from a camera to the viewport depending on the pixel coordinate
+ray3 constructRay(ivec2 pixelCoord){
+    vec3 rayDir = initPixelPos + pixelCoord.x * pixelDX + pixelCoord.y * pixelDY - cameraPosition;
+    struct ray3 ray = {cameraPosition, rayDir};
+    return ray;
+}
+
 // Main Function
 void main(){
-    vec4 pixel = vec4(0.0, 0.5, 0.0, 1.0);
     ivec2 pixelCoord = ivec2(gl_GlobalInvocationID.xy);
+    
+    ray3 cameraRay = constructRay(pixelCoord);
+    vec4 pixel = vec4(rayColor(cameraRay), 1.0);
+
+    vec3 rayToSphereCenter = vec3(0, 0, -1) - cameraRay.origin;
+    float a = dot(cameraRay.direction, cameraRay.direction);
+    float h = dot(cameraRay.direction, rayToSphereCenter);
+    float c = dot(rayToSphereCenter, rayToSphereCenter) - pow(0.5, 2);
+    if (simplifiedDiscriminant(a, c, h) >= 0){
+        pixel = vec4(1.0, 0.8, 0.8, 1.0);
+    }
     imageStore(screen, pixelCoord, pixel);
 }

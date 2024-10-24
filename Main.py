@@ -17,10 +17,10 @@ class Test(mglw.WindowConfig):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.wnd.fullscreen_key = self.wnd.keys.F
+        self.wnd.fullscreen_key = self.wnd.keys.F12
 
         self.ctx.gc_mode = 'auto'
-        self.camera = Camera(self, glm.vec3(0, 0, 0), 0.1, 60, glm.vec3(0, 0, -1))
+        self.camera = Camera(self, glm.vec3(0, 0, 0), 1, 60, glm.vec3(0, 0, -1))
 
         self.program = self.ctx.program(*self.loadWindow())
         self.initScreen()
@@ -54,7 +54,7 @@ class Test(mglw.WindowConfig):
         for i, line in enumerate(rayTracer):
             if not line.startswith('import'):
                 continue 
-            
+              
             importFileName = line[len('import') + 1:].strip()
             try: 
                 with open(f'Shaders/{importFileName}.comp', 'r') as file:
@@ -82,39 +82,42 @@ class Test(mglw.WindowConfig):
         self.screen.bind_to_image(0)        
         self.screen.use(0)
 
-    def cameraMovementKeys(self, key, modifiers, isPress: int):
+    def cameraMovementKeys(self):
         '''
-        If statements to deal with setting camera movement directions. isPress is 1 or -1 (with 1 being it's a key press, and -1 being a key release in order to reverse direction)
+        If statements to deal with setting camera movement directions. Utilizing the built in key_event function resulted in jank movement (it's much better suited to key presses rather than holds)
         '''
-        if key == self.wnd.keys.W:
-            self.camera.dirZ = -1 * isPress  
-        elif key == self.wnd.keys.S: 
-            self.camera.dirZ = 1 * isPress
+        if self.wnd.is_key_pressed(self.wnd.keys.W):
+            self.camera.dirZ = -1 
+        elif self.wnd.is_key_pressed(self.wnd.keys.S): 
+            self.camera.dirZ = 1
+        else:
+            self.camera.dirZ = 0
         
-        if key == self.wnd.keys.A:
-            self.camera.dirX = -1 * isPress
-        elif key == self.wnd.keys.D: 
-            self.camera.dirX = 1 * isPress
+        if self.wnd.is_key_pressed(self.wnd.keys.A):
+            self.camera.dirX = -1 
+        elif self.wnd.is_key_pressed(self.wnd.keys.D): 
+            self.camera.dirX = 1 
+        else:
+            self.camera.dirX = 0
         
-        if key == self.wnd.keys.SPACE and not modifiers.shift: 
-            self.camera.dirZ = 1 * isPress
-        elif key == self.wnd.keys.SPACE and modifiers.shift:
-            self.camera.dirZ = -1 * isPress
+        if self.wnd.is_key_pressed(self.wnd.keys.SPACE): 
+            self.camera.dirY = self.camera.movingDown * 1
+        else:
+            self.camera.dirY = 0
 
     def key_event(self, key, action, modifiers):
         '''
-        Move the camera based on the keys 
+        Set the camera to be moving down if you're pressing / holding shift
         '''
-        if action == self.wnd.keys.ACTION_PRESS: 
-            self.cameraMovementKeys(key, modifiers, 1)
-        else: 
-            self.cameraMovementKeys(key, modifiers, -1)
-    
-        self.camera.moveCamera()
+        if modifiers.shift:
+            self.camera.movingDown = -1
+        else:
+            self.camera.movingDown = 1
         
     def mouse_position_event(self, mouseX, mouseY, dx, dy):
-
-        self.camera.updateMouse(mouseX, mouseY)
+        #self.camera.updateMouse(dx, dy)
+        #self.camera.calculateLookAt()
+        pass  
         
     def resize(self, screenWidth, screenHeight):
         '''
@@ -129,6 +132,8 @@ class Test(mglw.WindowConfig):
         Render the screen and display the fps
         '''
         self.ctx.clear()
+        self.cameraMovementKeys()
+        self.camera.render(frameTime)
 
         self.rayTracer.run(math.ceil(self.window_size[0] / 8), math.ceil(self.window_size[1] / 4))
         self.ctx.memory_barrier()
