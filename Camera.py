@@ -160,5 +160,5 @@ class Camera:
         self.calculateRenderValues()
         self.app.rayTracer['cameraPosition'] = self.cameraPosition
         self.app.rayTracer['pixelDX'] = self.pixelDX
-        self.app.rayTracer['pixelDY'] = self.pixelDY 
+        self.app.rayTracer['pixelDY'] = self.pixelDY
         self.app.rayTracer['initPixelPos'] = self.initPixelPos

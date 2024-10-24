@@ -77,8 +77,8 @@ class Test(mglw.WindowConfig):
         '''
         Initialize the screen texture to draw to so that the compute shader can "render" to the screen indirectly
         '''
-        self.screen = self.ctx.texture(self.window_size, 2, dtype = 'f4')
-        self.screen.repeat_x, self.screen.repeat_y = False, False 
+        self.screen = self.ctx.texture(self.window_size, 4, dtype = 'f4')
+        self.screen.filter = (mgl.NEAREST, mgl.NEAREST)
         self.screen.bind_to_image(0)        
         self.screen.use(0)
 
