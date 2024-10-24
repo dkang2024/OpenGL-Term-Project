@@ -13,7 +13,6 @@ class Camera:
         self.app = app
         self.cameraPosition, self.cameraSpeed, self.fov, self.lookAt, self.vectorUp = cameraPosition, cameraSpeed, fov, lookAt, vectorUp 
         self.dirX, self.dirY, self.dirZ, self.movingDown = 0, 0, 0, 1
-        self.dx, self.dy = 0, 0
 
         self.calculateUnitVectors()
 
@@ -68,7 +67,8 @@ class Camera:
         '''
         Update mouse dx dy depending on mouse changes in position on the screen
         '''
-        self.dx, self.dy = self.calculateMousePos(dx, dy, self.app.window_size[0], self.app.window_size[1])
+        dx, dy = self.calculateMousePos(dx, dy, self.app.window_size[0], self.app.window_size[1])
+        self.calculateLookAt(dx, dy)
 
     @staticmethod 
     @njit(cache = True)
@@ -76,7 +76,7 @@ class Camera:
         '''
         Convert a normalized mouse delta on the screen into an angle for the camera unit vectors
         '''
-        return 180 * (mouseDelta - 0.5)
+        return 180 * mouseDelta
     
     @staticmethod 
     def calculateExtraDisplacement(distancePoint, angle, unitVector):
@@ -85,11 +85,11 @@ class Camera:
         '''
         return distancePoint * glm.tan(glm.radians(angle)) * unitVector
     
-    def calculateLookAt(self):
+    def calculateLookAt(self, dx, dy):
         '''
         Calculate where a camera looks at with respect to mouse position
         '''
-        alpha, beta = self.mouseToAngle(self.dx), self.mouseToAngle(self.dy)
+        alpha, beta = self.mouseToAngle(dx), self.mouseToAngle(dy)
         distancePoint = glm.distance(self.cameraPosition, self.lookAt)
         
         self.lookAt += self.calculateExtraDisplacement(distancePoint, alpha, self.i) + self.calculateExtraDisplacement(distancePoint, beta, self.j)

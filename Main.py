@@ -115,9 +115,7 @@ class Test(mglw.WindowConfig):
             self.camera.movingDown = 1
         
     def mouse_position_event(self, mouseX, mouseY, dx, dy):
-        #self.camera.updateMouse(dx, dy)
-        #self.camera.calculateLookAt()
-        pass  
+        self.camera.updateMouse(dx, -dy)
         
     def resize(self, screenWidth, screenHeight):
         '''

@@ -14,7 +14,7 @@ uniform vec3 initPixelPos;
 import Ray
 import Sphere 
 
-vec3 colorOfRay(vec3 rayDirection){
+vec3 rayColor(vec3 rayDirection){
     float rayDirY = normalize(rayDirection).y;
     float t = 0.5 * (rayDirY + 1.0);
 
@@ -46,7 +46,7 @@ void main(){
         pixel = vec4(0.9686, 0.0745, 0.0745, 1.0);
         
     } else {
-        pixel = vec4(colorOfRay(cameraRay.direction), 1.0);
+        pixel = vec4(rayColor(cameraRay.direction), 1.0);
     }
 
     imageStore(screen, pixelCoord, pixel);
