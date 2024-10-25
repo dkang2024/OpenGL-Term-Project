@@ -12,7 +12,7 @@ class viewerCamera:
     '''
     def __init__(self, app, cameraPosition, cameraSpeed, fov, mouseSensitivity, vectorUp = glm.vec3(0, 1, 0)):
         self.app = app
-        self.cameraPosition, self.cameraSpeed, self.fov= cameraPosition, cameraSpeed, fov
+        self.cameraPosition, self.cameraSpeed, self.fov = cameraPosition, cameraSpeed, fov
         self.dirX, self.dirY, self.dirZ, self.movingDown = 0, 0, 0, 1
         self.mouseSensitivity, self.vectorUp, self.yaw, self.pitch = mouseSensitivity, vectorUp, -90, 0
 
