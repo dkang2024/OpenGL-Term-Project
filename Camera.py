@@ -1,22 +1,20 @@
-from numba import njit
-import time 
-import glm 
+from Settings import *
 
 def nearZero(v):
     '''
     Checks whether all elements of the vector are near zero to deal with floating point inaccuracies
     '''
-    epsilon = 1e-7
-    return v.x < epsilon and v.y < epsilon and v.z < epsilon
+    return v.x < EPSILON and v.y < EPSILON and v.z < EPSILON
 
-class Camera:
+class viewerCamera:
     '''
-    Class for a moveable camera. I created all the code here without the help of any tutorials (I had to think up and create the functions / math myself). 
+    Class for a moveable camera. I created all the code here without the help of any tutorials (I had to think up and create the functions / math myself [had some knowledge about yaw and pitch and stuff like that though]). 
     '''
     def __init__(self, app, cameraPosition, cameraSpeed, fov, lookAt, vectorUp = glm.vec3(0, 1, 0)):
         self.app = app
         self.cameraPosition, self.cameraSpeed, self.fov, self.lookAt, self.vectorUp = cameraPosition, cameraSpeed, fov, lookAt, vectorUp 
         self.dirX, self.dirY, self.dirZ, self.movingDown = 0, 0, 0, 1
+        self.pitch, self.yaw = 0, 0
 
         self.calculateUnitVectors()
 
@@ -56,7 +54,6 @@ class Camera:
         deltaX, deltaY, deltaZ = self.dirX * self.i, self.dirY * self.j, self.dirZ * self.k 
         deltaTotal = self.cameraSpeed * (deltaX + deltaY + deltaZ) * frameTime
         self.cameraPosition += deltaTotal 
-        self.lookAt += deltaTotal
         self.calculateUnitVectors()
 
     @staticmethod 
@@ -67,12 +64,25 @@ class Camera:
         '''
         return dx / windowWidth, dy / windowHeight
     
+    @staticmethod 
+    @njit(cache = True)
+    def constrainAngle(angle, angleDelta):
+        '''
+        Constrain the angle (yaw / pitch) to be between 89 and -89 to avoid any shenanigans with the camera rotation. Return the angleDelta as 0 if it would cause the angle to be outside the constraint
+        '''
+        totalAngle = angle + angleDelta
+        if totalAngle > 89: 
+            return 89
+        elif totalAngle < -89:
+            return -89
+        return totalAngle
+    
     def updateMouse(self, dx, dy):
         '''
         Update mouse dx dy depending on mouse changes in position on the screen
         '''
         dx, dy = self.calculateMousePos(dx, dy, self.app.window_size[0], self.app.window_size[1])
-        self.calculateLookAt(dx, dy)
+        self.pitch, self.yaw = self.constrainAngle(self.pitch, self.mouseToAngle(dx)), self.constrainAngle(self.yaw, self.mouseToAngle(dy))
 
     @staticmethod 
     @njit(cache = True)
@@ -83,20 +93,17 @@ class Camera:
         return 180 * mouseDelta
     
     @staticmethod 
-    def calculateExtraDisplacement(distancePoint, angle, unitVector):
+    def calculateExtraDisplacement(angle, unitVector):
         '''
-        Calculate the extra displacement based on how the camera is rotated
+        Calculate the extra directional displacement of the camera
         '''
-        return distancePoint * glm.tan(glm.radians(angle)) * unitVector
+        return glm.tan(glm.radians(angle)) * unitVector
     
-    def calculateLookAt(self, dx, dy):
+    def calculateLookAt(self):
         '''
-        Calculate where a camera looks at with respect to mouse position
+        Calculate where the camera looks at 
         '''
-        alpha, beta = self.mouseToAngle(dx), self.mouseToAngle(dy)
-        distancePoint = glm.distance(self.cameraPosition, self.lookAt)
-        
-        self.lookAt += self.calculateExtraDisplacement(distancePoint, alpha, self.i) + self.calculateExtraDisplacement(distancePoint, beta, self.j)
+        self.lookAt = self.calculateExtraDisplacement(self.pitch, self.i) + self.calculateExtraDisplacement(self.yaw, self.j)
         self.calculateUnitVectors()
 
     def calculateFocalLength(self):
@@ -152,6 +159,7 @@ class Camera:
         '''
         Calculate the important camera render values
         ''' 
+        self.calculateLookAt()
         self.calculateFocalLength()
         self.calculateViewportHeight()
         self.calculateViewportWidth()

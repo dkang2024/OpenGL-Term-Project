@@ -1,8 +1,5 @@
+from Settings import *
 from Camera import *
-
-import moderngl_window as mglw
-import math 
-import moderngl as mgl 
 
 class screenNames:
     POSITION = 'vertexPosition'
@@ -24,7 +21,7 @@ class Test(mglw.WindowConfig):
         self.initScreen()
         self.rayTracer = self.ctx.compute_shader(self.loadRayTracer())
 
-        self.camera = Camera(self, glm.vec3(0, 0, 0), 1, 60, glm.vec3(0, 0, -1))
+        self.camera = viewerCamera(self, glm.vec3(0, 0, 0), 1, 60, glm.vec3(0, 0, -1))
         self.screenCoords = mglw.geometry.quad_fs(attr_names = screenNames, normals = False, name = 'Screen Coordinates')
 
     @staticmethod

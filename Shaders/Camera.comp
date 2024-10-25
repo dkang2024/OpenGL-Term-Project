@@ -1,6 +1,6 @@
 // Camera structure to make passing in important camera values cleaner 
 
-struct viewCamera{
+struct viewerCamera{
     vec3 position;
     vec3 pixelDX; 
     vec3 pixelDY; 

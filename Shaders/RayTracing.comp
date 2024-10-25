@@ -10,7 +10,7 @@ import Ray
 import Sphere 
 import Camera 
 
-uniform viewCamera camera;
+uniform viewerCamera camera;
 
 // Create a gradient from the top of the screen to the bottom of the screen based on the ray's y direction 
 vec3 gradientColor(vec3 rayDirection){
