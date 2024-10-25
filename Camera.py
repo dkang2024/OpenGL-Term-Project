@@ -74,10 +74,10 @@ class viewerCamera:
         '''
         Constrain the pitch to be between 89 and -89 to avoid any shenanigans with the camera rotation inverting the view (referenced website) 
         '''
-        if pitch > 89: 
-            return 89 
-        elif pitch < -89:
-            return -89 
+        if pitch > MAX_ANGLE: 
+            return MAX_ANGLE 
+        elif pitch < -MAX_ANGLE:
+            return -MAX_ANGLE
         return pitch
     
     def updateMouse(self, dx, dy):

@@ -6,3 +6,4 @@ import time
 import glm 
 
 EPSILON = 1e-7
+MAX_ANGLE = 89

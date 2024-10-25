@@ -21,7 +21,7 @@ class Test(mglw.WindowConfig):
         self.initScreen()
         self.rayTracer = self.ctx.compute_shader(self.loadRayTracer())
 
-        self.camera = viewerCamera(self, glm.vec3(0, 0, 0), 1, 60, 0.1)
+        self.camera = viewerCamera(self, glm.vec3(0, 0, 0), 1, 60, 0.2)
         self.screenCoords = mglw.geometry.quad_fs(attr_names = screenNames, normals = False, name = 'Screen Coordinates')
 
     @staticmethod
