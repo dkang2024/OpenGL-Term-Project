@@ -21,7 +21,7 @@ class Test(mglw.WindowConfig):
         self.initScreen()
         self.rayTracer = self.ctx.compute_shader(self.loadRayTracer())
 
-        self.camera = viewerCamera(self, glm.vec3(0, 0, 0), 1, 60, glm.vec3(0, 0, -1))
+        self.camera = viewerCamera(self, glm.vec3(0, 0, 0), 1, 60, 0.1)
         self.screenCoords = mglw.geometry.quad_fs(attr_names = screenNames, normals = False, name = 'Screen Coordinates')
 
     @staticmethod
@@ -97,7 +97,7 @@ class Test(mglw.WindowConfig):
             self.camera.dirX = 0
         
         if self.wnd.is_key_pressed(self.wnd.keys.SPACE): 
-            self.camera.dirY = self.camera.movingDown * 1
+            self.camera.dirY = self.camera.movingDown
         else:
             self.camera.dirY = 0
 
@@ -111,7 +111,7 @@ class Test(mglw.WindowConfig):
             self.camera.movingDown = 1
         
     def mouse_position_event(self, mouseX, mouseY, dx, dy):
-        self.camera.updateMouse(dx, -dy)
+        self.camera.updateMouse(dx, -dy) 
         
     def resize(self, screenWidth, screenHeight):
         '''
