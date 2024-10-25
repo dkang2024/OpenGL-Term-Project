@@ -20,12 +20,11 @@ class Test(mglw.WindowConfig):
         self.wnd.fullscreen_key = self.wnd.keys.F12
 
         self.ctx.gc_mode = 'auto'
-        self.camera = Camera(self, glm.vec3(0, 0, 0), 1, 60, glm.vec3(0, 0, -1))
-
         self.program = self.ctx.program(*self.loadWindow())
         self.initScreen()
         self.rayTracer = self.ctx.compute_shader(self.loadRayTracer())
 
+        self.camera = Camera(self, glm.vec3(0, 0, 0), 1, 60, glm.vec3(0, 0, -1))
         self.screenCoords = mglw.geometry.quad_fs(attr_names = screenNames, normals = False, name = 'Screen Coordinates')
 
     @staticmethod

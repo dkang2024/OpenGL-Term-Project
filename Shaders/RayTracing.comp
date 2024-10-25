@@ -1,20 +1,19 @@
 // Initialize the version
 #version 460 core
 
-// Set up invocation size and take in the screen texture to modify it per pixel
+// Set up invocation size and take in the screen texture to modify it per pixel. Note that the size volume is 32 (which is optimized for NVIDIA gpus rather than AMD gpus [which prefer a size of multiples of 64])
 layout(local_size_x = 8, local_size_y = 4, local_size_z = 1) in;
 layout(rgba32f) uniform image2D screen;
 
-uniform vec3 cameraPosition;
-uniform vec3 pixelDX;
-uniform vec3 pixelDY;
-uniform vec3 initPixelPos;
-
-// Import files here using the "import" statement that Python processes
+// Import files here using the "import" statement that Python processes with string processing and txt file processing
 import Ray
 import Sphere 
+import Camera 
 
-vec3 rayColor(vec3 rayDirection){
+uniform viewCamera camera;
+
+// Create a gradient from the top of the screen to the bottom of the screen based on the ray's y direction 
+vec3 gradientColor(vec3 rayDirection){
     float rayDirY = normalize(rayDirection).y;
     float t = 0.5 * (rayDirY + 1.0);
 
@@ -26,14 +25,14 @@ vec3 rayColor(vec3 rayDirection){
 
 // Construct a ray from a camera to the viewport depending on the pixel coordinate
 ray3 constructRay(ivec2 pixelCoord){
-    vec3 rayDir = initPixelPos + pixelCoord.x * pixelDX + pixelCoord.y * pixelDY - cameraPosition;
-    struct ray3 ray = {cameraPosition, rayDir};
+    vec3 rayDir = camera.initPixelPos + pixelCoord.x * camera.pixelDX + pixelCoord.y * camera.pixelDY - camera.position;
+    struct ray3 ray = {camera.position, rayDir};
     return ray;
 }
 
 // Main Function
 void main(){
-    ivec2 pixelCoord = ivec2(gl_GlobalInvocationID.xy);
+    ivec2 pixelCoord = ivec2(gl_GlobalInvocationID.xy); // Get the global invocation ID in order to determine the exact pixel location. 
     
     ray3 cameraRay = constructRay(pixelCoord); 
     vec4 pixel;
@@ -46,7 +45,7 @@ void main(){
         pixel = vec4(1.0, 0.0, 0.0, 1.0);
         
     } else {
-        pixel = vec4(rayColor(cameraRay.direction), 1.0);
+        pixel = vec4(gradientColor(cameraRay.direction), 1.0);
     }
 
     imageStore(screen, pixelCoord, pixel);

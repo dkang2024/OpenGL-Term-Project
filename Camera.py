@@ -159,13 +159,19 @@ class Camera:
         self.calculatePixelDelta()
         self.calculateFirstPixelPos()
 
+    def assignRenderValues(self):
+        '''
+        Assign each of the render values to the uniform input struct in the camera for the ray tracing compute shader
+        '''
+        self.app.rayTracer['camera.position'] = self.cameraPosition
+        self.app.rayTracer['camera.pixelDX'] = self.pixelDX 
+        self.app.rayTracer['camera.pixelDY'] = self.pixelDY 
+        self.app.rayTracer['camera.initPixelPos'] = self.initPixelPos
+
     def render(self, frameTime):
         '''
         To be called during the render. Calculates and passes along to the uniform important render values (pixelDX, pixelDY, and initPixelPos)
         '''
         self.moveCamera(frameTime)
         self.calculateRenderValues()
-        self.app.rayTracer['cameraPosition'] = self.cameraPosition
-        self.app.rayTracer['pixelDX'] = self.pixelDX
-        self.app.rayTracer['pixelDY'] = self.pixelDY
-        self.app.rayTracer['initPixelPos'] = self.initPixelPos
+        self.assignRenderValues()
