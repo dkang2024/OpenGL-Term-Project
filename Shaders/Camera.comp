@@ -1,4 +1,4 @@
-// Camera structure to make passing in important camera values cleaner 
+// Camera structure to make passing in important camera values cleaner, and initialize constants here
 
 struct viewerCamera{
     vec3 position;
@@ -6,3 +6,7 @@ struct viewerCamera{
     vec3 pixelDY; 
     vec3 initPixelPos;
 };
+
+// Maximum and minimum possible t values for a ray to count as intersecting an object
+const float rayMin = 0.001;
+const float rayMax = 1e10;

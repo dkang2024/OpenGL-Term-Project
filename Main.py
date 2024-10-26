@@ -9,12 +9,13 @@ class Test(mglw.WindowConfig):
     resizable = True 
     aspect_ratio = None 
     gl_version = (4, 6)
-    cursor = True  
+    cursor = False 
     vsync = False 
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.wnd.fullscreen_key = self.wnd.keys.F12
+        self.wnd.mouse_exclusivity = True 
 
         self.ctx.gc_mode = 'auto'
         self.program = self.ctx.program(*self.loadWindow())
@@ -80,7 +81,7 @@ class Test(mglw.WindowConfig):
 
     def cameraMovementKeys(self):
         '''
-        If statements to deal with setting camera movement directions. Utilizing the built in key_event function resulted in jank movement (it's much better suited to key presses rather than holds)
+        If statements to deal with setting camera movement directions. Utilizing the built in key_event function resulted in jank movement (it's much better suited to key presses rather than holds). It also made the camera pretty unresponsive. 
         '''
         if self.wnd.is_key_pressed(self.wnd.keys.W):
             self.camera.dirZ = -1 
@@ -109,10 +110,13 @@ class Test(mglw.WindowConfig):
             self.camera.movingDown = -1
         else:
             self.camera.movingDown = 1
+
+        if self.wnd.is_key_pressed(self.wnd.keys.F1):
+            self.wnd.mouse_exclusivity = not self.wnd.mouse_exclusivity
         
     def mouse_position_event(self, mouseX, mouseY, dx, dy):
         self.camera.updateMouse(dx, -dy) 
-        
+
     def resize(self, screenWidth, screenHeight):
         '''
         Resize the texture to fit the bigger screen and reset viewport. 
@@ -130,11 +134,11 @@ class Test(mglw.WindowConfig):
         self.camera.render(frameTime)
 
         self.rayTracer.run(math.ceil(self.window_size[0] / 8), math.ceil(self.window_size[1] / 4))
-        self.ctx.memory_barrier()
+        self.ctx.memory_barrier(mgl.SHADER_IMAGE_ACCESS_BARRIER_BIT)
         self.screenCoords.render(self.program)
-         
+        
         if frameTime != 0:
             self.wnd.title = f'FPS: {1 / frameTime: .2f}'
 
 if __name__ == '__main__':  
-    Test.run()
+    Test.run() 

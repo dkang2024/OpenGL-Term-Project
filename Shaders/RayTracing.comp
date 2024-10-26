@@ -30,6 +30,17 @@ ray3 constructRay(ivec2 pixelCoord){
     return ray;
 }
 
+bool checkSphereIntersection(float a, float h, float discriminant){
+    float t = simplifiedQuadFormula(a, h, discriminant, -1);
+    if (!(rayMin < t && t < rayMax)){
+        t = simplifiedQuadFormula(a, h, discriminant, 1);
+        if (!(rayMin < t && t < rayMax)){
+            return false; 
+        } 
+    }
+    return true;
+}
+
 // Main Function
 void main(){
     ivec2 pixelCoord = ivec2(gl_GlobalInvocationID.xy); // Get the global invocation ID in order to determine the exact pixel location. 
@@ -41,7 +52,8 @@ void main(){
     float a = dot(cameraRay.direction, cameraRay.direction);
     float h = dot(cameraRay.direction, rayToSphereCenter);
     float c = dot(rayToSphereCenter, rayToSphereCenter) - pow(0.5, 2);
-    if (simplifiedDiscriminant(a, c, h) >= 0){
+    float discriminant = simplifiedDiscriminant(a, c, h);
+    if (discriminant >= 0 && checkSphereIntersection(a, h, discriminant)){
         pixel = vec4(1.0, 0.0, 0.0, 1.0);
         
     } else {

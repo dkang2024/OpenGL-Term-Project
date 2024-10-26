@@ -8,7 +8,7 @@ def nearZero(v):
 
 class viewerCamera:
     '''
-    Class for a moveable camera. I implemented all the key movement functions myself because it was pretty obvious how to do those things. However, I didn't know the exact math necessary for camera mouse movement so I used https://learnopengl.com/Getting-started/Camera for a reference on the math necessary for camera mouse movement. Any functions that I referenced the website on are explicitly marked.
+    Class for a moveable pinhole camera. I implemented all the key movement functions myself because it was pretty obvious how to do those things. However, I didn't know the exact math necessary for camera mouse movement so I used https://learnopengl.com/Getting-started/Camera for a reference on the math necessary for camera mouse movement. Any functions that I referenced the website on are explicitly marked.
     '''
     def __init__(self, app, cameraPosition, cameraSpeed, fov, mouseSensitivity, vectorUp = glm.vec3(0, 1, 0)):
         self.app = app
@@ -23,10 +23,7 @@ class viewerCamera:
         '''
         Calculate the camera's unit vector in the +x direction (derived myself [thanks 259])
         '''
-        crossProduct = glm.cross(self.vectorUp, self.k)
-        if nearZero(crossProduct):
-            crossProduct = glm.cross(glm.vec3(0, 0, 1), self.k)
-        self.i = glm.normalize(crossProduct)
+        self.i = glm.normalize(glm.cross(self.vectorUp, self.k))
 
     def calculateJ(self):
         '''
@@ -51,7 +48,7 @@ class viewerCamera:
         self.calculateK()
         self.calculateI()
         self.calculateJ()
-        
+
     def moveCamera(self, frameTime):
         '''
         Move both the camera position and what it's looking at based on key movements (assuming no acceleration).
@@ -59,14 +56,16 @@ class viewerCamera:
         deltaX, deltaY, deltaZ = self.dirX * self.i, self.dirY * self.j, self.dirZ * self.k
         deltaTotal = self.cameraSpeed * (deltaX + deltaY + deltaZ) * frameTime
         self.cameraPosition += deltaTotal 
+
+        self.calculateLookAt()
     
     @staticmethod 
     @njit(cache = True)
-    def scaleWithSensitivity(delta, mouseSensitivity):
+    def scaleWithSensitivity(dx, mouseSensitivity):
         '''
-        Calculate normalized mouse delta depending on mouse position on the screen (referenced website)
+        Calculate scaled dx depending on mouse sensitivity (referenced website)
         '''
-        return delta * mouseSensitivity
+        return dx * mouseSensitivity
     
     @staticmethod 
     @njit(cache = True)
@@ -82,7 +81,7 @@ class viewerCamera:
     
     def updateMouse(self, dx, dy):
         '''
-        Update mouse dx dy depending on mouse changes in position on the screen (based on website)
+        Update mouse dx depending on mouse changes in position on the screen (based on website)
         '''
         self.yaw += self.scaleWithSensitivity(dx, self.mouseSensitivity)
         self.pitch += self.scaleWithSensitivity(dy, self.mouseSensitivity)
@@ -95,7 +94,7 @@ class viewerCamera:
         '''
         Calculate where the camera looks at 
         '''
-        self.lookAt = self.cameraPosition - self.k 
+        self.lookAt = self.cameraPosition - self.k
 
     @staticmethod
     @njit(cache = True)
