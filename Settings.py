@@ -1,7 +1,3 @@
-import os
-# Force pygame backend before importing moderngl_window
-os.environ['MODERNGL_WINDOW'] = 'pygame2'
-
 import moderngl_window as mglw
 import math 
 import moderngl as mgl 

@@ -1,5 +1,6 @@
 from Settings import *
 from Camera import *
+from Loader import *
 
 class screenNames:
     POSITION = 'vertexPosition'
@@ -16,60 +17,16 @@ class Test(mglw.WindowConfig):
         super().__init__(**kwargs)
         self.wnd.fullscreen_key = self.wnd.keys.F12
         self.wnd.mouse_exclusivity = True 
+        self.wnd.cursor = False 
 
         self.ctx.gc_mode = 'auto'
-        self.program = self.ctx.program(*self.loadWindow())
+        self.program = self.ctx.program(*loadWindow('Window', 'Window', 'Window'))
         self.initScreen()
-        self.rayTracer = self.ctx.compute_shader(self.loadRayTracer())
+        self.rayTracer = self.ctx.compute_shader(loadShader('RayTracer', 'RayTracing'))
 
         self.camera = viewerCamera(self, glm.vec3(0, 0, 0), 1, 60, 0.2)
         self.screenCoords = mglw.geometry.quad_fs(attr_names = screenNames, normals = False, name = 'Screen Coordinates')
-
-    @staticmethod
-    def loadWindow():
-        '''
-        Load the vertex and fragment shader
-        '''
-        with open('Shaders/Window.vert', 'r') as file:
-            vertexShader = file.read()
-        with open('Shaders/Window.frag', 'r') as file:
-            fragmentShader = file.read()
-        return vertexShader, fragmentShader
-
-    @staticmethod 
-    def removeComments(rayTracer):
-        '''
-        Remove the comments from the ray tracer to avoid any shenanigans with "import" statements in comments
-        '''
-        return [line for line in rayTracer if not line.startswith('//')]
-    
-    @staticmethod 
-    def addImports(rayTracer):
-        '''
-        Add the imports from the 'import' statements in the rayTracer into the string
-        '''
-        for i, line in enumerate(rayTracer):
-            if not line.startswith('import'):
-                continue 
-              
-            importFileName = line[len('import') + 1:].strip()
-            try: 
-                with open(f'Shaders/{importFileName}.comp', 'r') as file:
-                    rayTracer[i] = file.read().strip()
-            except:
-                raise RuntimeError('This file does not exist')
-
-    def loadRayTracer(self):
-        '''
-        Load the ray tracing compute shader along with the other compute shaders beforehand to allow cleaner abstractions
-        '''
-        with open('Shaders/RayTracing.comp', 'r') as file:
-            rayTracer = file.read().strip().split('\n')
-
-        rayTracer = self.removeComments(rayTracer)
-        self.addImports(rayTracer)
-        return '\n'.join(rayTracer) 
-        
+     
     def initScreen(self):
         '''
         Initialize the screen texture to draw to so that the compute shader can "render" to the screen indirectly
@@ -113,6 +70,7 @@ class Test(mglw.WindowConfig):
 
         if self.wnd.is_key_pressed(self.wnd.keys.F1):
             self.wnd.mouse_exclusivity = not self.wnd.mouse_exclusivity
+            self.wnd.cursor = not self.wnd.cursor
         
     def mouse_position_event(self, mouseX, mouseY, dx, dy):
         self.camera.updateMouse(dx, -dy) 
@@ -121,9 +79,10 @@ class Test(mglw.WindowConfig):
         '''
         Resize the texture to fit the bigger screen and reset viewport. 
         '''
-        self.window_size = (screenWidth, screenHeight)
-        self.initScreen()
-        self.ctx.viewport = (0, 0, screenWidth, screenHeight)
+        #self.window_size = (screenWidth, screenHeight)
+        #self.initScreen()
+        #self.ctx.viewport = (0, 0, screenWidth, screenHeight)
+        pass 
 
     def render(self, time, frameTime):
         '''
