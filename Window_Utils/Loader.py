@@ -1,6 +1,6 @@
 from Settings import *
 
-def loadWindow(folder, vertexFileName, fragmentFileName):
+def loadVertexAndFrag(folder, vertexFileName, fragmentFileName):
     '''
     Load the vertex and fragment shader
     '''
@@ -31,9 +31,9 @@ def addImports(folder, shader):
         except:
             raise RuntimeError('This file does not exist')
         
-def loadShader(folder, shader):
+def loadComputeShader(folder, shader):
     '''
-    Load whatever shader along with the other compute shaders beforehand to allow cleaner abstractions
+    Load whatever compute shader along with the other compute shaders "imported" in the file beforehand to allow cleaner abstractions
     '''
     with open(f'{folder}/{shader}.comp', 'r') as file:
         rayTracer = file.read().strip().split('\n')

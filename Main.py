@@ -1,6 +1,5 @@
 from Settings import *
-from Camera import *
-from Loader import *
+from Window_Utils import *
 
 class screenNames:
     POSITION = 'vertexPosition'
@@ -20,12 +19,13 @@ class Test(mglw.WindowConfig):
         self.wnd.cursor = False 
 
         self.ctx.gc_mode = 'auto'
-        self.program = self.ctx.program(*loadWindow('Window', 'Window', 'Window'))
+        self.program = self.ctx.program(*loadVertexAndFrag('Window', 'Window', 'Window'))
         self.initScreen()
-        self.rayTracer = self.ctx.compute_shader(loadShader('RayTracer', 'RayTracing'))
+        self.rayTracer = self.ctx.compute_shader(loadComputeShader('RayTracer', 'RayTracing'))
 
         self.camera = viewerCamera(self, glm.vec3(0, 0, 0), 1, 60, 0.2)
         self.screenCoords = mglw.geometry.quad_fs(attr_names = screenNames, normals = False, name = 'Screen Coordinates')
+        self.crosshair = crosshair(self, 0.1, 0.5, glm.vec3(0.5, 0.5, 0.5))
      
     def initScreen(self):
         '''
@@ -91,10 +91,12 @@ class Test(mglw.WindowConfig):
         self.ctx.clear()
         self.cameraMovementKeys()
         self.camera.render(frameTime)
-
+       
         self.rayTracer.run(math.ceil(self.window_size[0] / 8), math.ceil(self.window_size[1] / 4))
         self.ctx.memory_barrier(mgl.SHADER_IMAGE_ACCESS_BARRIER_BIT)
         self.screenCoords.render(self.program)
+
+        self.crosshair.render()
         
         if frameTime != 0:
             self.wnd.title = f'FPS: {1 / frameTime: .2f}'
