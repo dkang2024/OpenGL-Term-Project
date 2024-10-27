@@ -25,7 +25,7 @@ class Test(mglw.WindowConfig):
 
         self.camera = viewerCamera(self, glm.vec3(0, 0, 0), 1, 60, 0.2)
         self.screenCoords = mglw.geometry.quad_fs(attr_names = screenNames, normals = False, name = 'Screen Coordinates')
-        self.crosshair = crosshair(self, 0.1, 0.5, glm.vec3(0.5, 0.5, 0.5))
+        self.crosshair = windowCrosshair(self, 0.03, glm.vec3(1.0, 1.0, 1.0), self.window_size) #type: ignore
      
     def initScreen(self):
         '''
@@ -79,10 +79,10 @@ class Test(mglw.WindowConfig):
         '''
         Resize the texture to fit the bigger screen and reset viewport. 
         '''
-        #self.window_size = (screenWidth, screenHeight)
-        #self.initScreen()
-        #self.ctx.viewport = (0, 0, screenWidth, screenHeight)
-        pass 
+        self.window_size = (screenWidth, screenHeight)
+        self.crosshair.resizeCrosshair(self.window_size)
+        self.initScreen()
+        self.ctx.viewport = (0, 0, screenWidth, screenHeight)
 
     def render(self, time, frameTime):
         '''

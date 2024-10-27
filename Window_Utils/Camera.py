@@ -1,17 +1,11 @@
 from Settings import *
 
-def nearZero(v):
-    '''
-    Checks whether all elements of the vector are near zero to deal with floating point inaccuracies
-    '''
-    return v.x < EPSILON and v.y < EPSILON and v.z < EPSILON
-
 class viewerCamera:
     '''
     Class for a moveable pinhole camera. I implemented all the key movement functions myself because it was pretty obvious how to do those things. However, I didn't know the exact math necessary for camera mouse movement so I used https://learnopengl.com/Getting-started/Camera for a reference on the math necessary for camera mouse movement. Any functions that I referenced the website on are explicitly marked.
     '''
     def __init__(self, app, cameraPosition, cameraSpeed, fov, mouseSensitivity, vectorUp = glm.vec3(0, 1, 0)):
-        self.app = app
+        self.app, self.MAX_ANGLE = app, MAX_ANGLE
         self.cameraPosition, self.cameraSpeed, self.fov = cameraPosition, cameraSpeed, fov
         self.dirX, self.dirY, self.dirZ, self.movingDown = 0, 0, 0, 1
         self.mouseSensitivity, self.vectorUp, self.yaw, self.pitch = mouseSensitivity, vectorUp, -90, 0
@@ -69,7 +63,7 @@ class viewerCamera:
     
     @staticmethod 
     @njit(cache = True)
-    def constrainPitch(pitch):
+    def constrainPitch(pitch, MAX_ANGLE):
         '''
         Constrain the pitch to be between 89 and -89 to avoid any shenanigans with the camera rotation inverting the view (referenced website) 
         '''
@@ -85,7 +79,7 @@ class viewerCamera:
         '''
         self.yaw += self.scaleWithSensitivity(dx, self.mouseSensitivity)
         self.pitch += self.scaleWithSensitivity(dy, self.mouseSensitivity)
-        self.pitch = self.constrainPitch(self.pitch)
+        self.pitch = self.constrainPitch(self.pitch, self.MAX_ANGLE)
 
         self.calculateUnitVectors()
         self.calculateLookAt()

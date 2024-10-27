@@ -1,7 +1,7 @@
 #version 460 core 
 
-in vec3 in_position;
+in vec2 vertexPosition;
 
 void main(){
-    gl_Position = vec4(in_position, 1.0);
+    gl_Position = vec4(vertexPosition, 0.0, 1.0);
 }
