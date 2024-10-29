@@ -29,7 +29,6 @@ class Test(mglw.WindowConfig):
 
         self.world = sceneWorld(self.ctx, self.rayTracer)
         self.world.addHittable(sphere3(glm.vec3(0, 0, -1), 0.5, glm.vec3(1, 0, 0)))
-        self.world.createRenderArray()
         self.world.assignRender()
      
     def initScreen(self):

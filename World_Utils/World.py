@@ -32,6 +32,10 @@ class sceneWorld:
             self.recordSphere(i, hittable)
         
     def assignRender(self):
+        '''
+        Assign the render values to the compute shader in order to render all the hittables
+        '''
+        self.createRenderArray()
         self.rayTracer['numHittables'] = len(self.hittableList)
         
         self.ssbo = self.ctx.buffer(self.renderArray)
