@@ -1,5 +1,6 @@
 from Settings import *
 from Window_Utils import *
+from World_Utils import *
 
 class screenNames:
     POSITION = 'vertexPosition'
@@ -16,7 +17,6 @@ class Test(mglw.WindowConfig):
         super().__init__(**kwargs)
         self.wnd.fullscreen_key = self.wnd.keys.F12
         self.wnd.mouse_exclusivity = True 
-        self.wnd.cursor = False 
 
         self.ctx.gc_mode = 'auto'
         self.program = self.ctx.program(*loadVertexAndFrag('Window', 'Window', 'Window'))
@@ -26,6 +26,11 @@ class Test(mglw.WindowConfig):
         self.camera = viewerCamera(self, glm.vec3(0, 0, 0), 1, 60, 0.2)
         self.screenCoords = mglw.geometry.quad_fs(attr_names = screenNames, normals = False, name = 'Screen Coordinates')
         self.crosshair = windowCrosshair(self, 0.03, glm.vec3(1.0, 1.0, 1.0), self.window_size) #type: ignore
+
+        self.world = sceneWorld(self.ctx, self.rayTracer)
+        self.world.addHittable(sphere3(glm.vec3(0, 0, -1), 0.5, glm.vec3(1, 0, 0)))
+        self.world.createRenderArray()
+        self.world.assignRender()
      
     def initScreen(self):
         '''

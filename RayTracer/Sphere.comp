@@ -1,8 +1,8 @@
 // Sphere Structure
-
 struct sphere3{
     vec3 center;
     float radius;
+    vec3 color;
 };
 
 // Sphere ray intersection helper functions 
@@ -20,4 +20,15 @@ float simplifiedQuadFormula(float a, float h, float discriminant, float signValu
 // Find the sphere's normal vector (not always made to point against the ray [this will be done in hit record])
 vec3 findSphereNormalVector(ray3 ray, float t, vec3 center, float radius){
     return (rayIntersectPoint(ray, t) - center) / radius;
+}
+
+bool checkSphereIntersection(float a, float h, float discriminant){
+    float t = simplifiedQuadFormula(a, h, discriminant, -1);
+    if (!(rayMin < t && t < rayMax)){
+        t = simplifiedQuadFormula(a, h, discriminant, 1);
+        if (!(rayMin < t && t < rayMax)){
+            return false; 
+        } 
+    }
+    return true;
 }

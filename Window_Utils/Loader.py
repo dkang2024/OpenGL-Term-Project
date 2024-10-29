@@ -18,7 +18,7 @@ def removeComments(shader):
 
 def addImports(folder, shader):
     '''
-    Add the imports from the 'import' statements in the shader into the shader's string
+    Add the imports from the 'import' statements in the shader into the shader's string. 
     '''
     for i, line in enumerate(shader):
         if not line.startswith('import'):

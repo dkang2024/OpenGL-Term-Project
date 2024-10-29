@@ -7,9 +7,14 @@ layout(rgba32f) uniform image2D screen;
 
 // Import files here using the "import" statement that Python processes with string processing and txt file processing
 import Ray
-import Sphere 
 import Camera 
+import Sphere 
 
+layout(std430, binding = 0) readonly buffer worldScene {
+    sphere3 hittables[];
+};
+
+uniform int numHittables;
 uniform viewerCamera camera;
 
 // Create a gradient from the top of the screen to the bottom of the screen based on the ray's y direction 
@@ -24,40 +29,30 @@ vec3 gradientColor(vec3 rayDirection){
 }
 
 // Construct a ray from a camera to the viewport depending on the pixel coordinate
-ray3 constructRay(ivec2 pixelCoord){
+ray3 constructCameraRay(ivec2 pixelCoord){
     vec3 rayDir = camera.initPixelPos + pixelCoord.x * camera.pixelDX + pixelCoord.y * camera.pixelDY - camera.position;
     struct ray3 ray = {camera.position, rayDir};
     return ray;
-}
-
-bool checkSphereIntersection(float a, float h, float discriminant){
-    float t = simplifiedQuadFormula(a, h, discriminant, -1);
-    if (!(rayMin < t && t < rayMax)){
-        t = simplifiedQuadFormula(a, h, discriminant, 1);
-        if (!(rayMin < t && t < rayMax)){
-            return false; 
-        } 
-    }
-    return true;
 }
 
 // Main Function
 void main(){
     ivec2 pixelCoord = ivec2(gl_GlobalInvocationID.xy); // Get the global invocation ID in order to determine the exact pixel location. 
     
-    ray3 cameraRay = constructRay(pixelCoord); 
+    ray3 cameraRay = constructCameraRay(pixelCoord); 
     vec4 pixel;
-
-    vec3 rayToSphereCenter = vec3(0, 0, -1) - cameraRay.origin;
-    float a = dot(cameraRay.direction, cameraRay.direction);
-    float h = dot(cameraRay.direction, rayToSphereCenter);
-    float c = dot(rayToSphereCenter, rayToSphereCenter) - pow(0.5, 2);
-    float discriminant = simplifiedDiscriminant(a, c, h);
-    if (discriminant >= 0 && checkSphereIntersection(a, h, discriminant)){
-        pixel = vec4(1.0, 0.0, 0.0, 1.0);
-        
-    } else {
-        pixel = vec4(gradientColor(cameraRay.direction), 1.0);
+    
+    for (int i = 0; i < numHittables; i++){ 
+        vec3 rayToSphereCenter = hittables[i].center - cameraRay.origin;
+        float a = dot(cameraRay.direction, cameraRay.direction);
+        float h = dot(cameraRay.direction, rayToSphereCenter);
+        float c = dot(rayToSphereCenter, rayToSphereCenter) - pow(hittables[i].radius, 2);
+        float discriminant = simplifiedDiscriminant(a, c, h);
+        if (discriminant >= 0 && checkSphereIntersection(a, h, discriminant)){
+            pixel = vec4(hittables[i].color, 1.0);
+        } else {
+            pixel = vec4(gradientColor(cameraRay.direction), 1.0);
+        }
     }
 
     imageStore(screen, pixelCoord, pixel);

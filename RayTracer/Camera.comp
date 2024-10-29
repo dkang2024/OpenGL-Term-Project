@@ -1,5 +1,4 @@
 // Camera structure to make passing in important camera values cleaner, and initialize constants here
-
 struct viewerCamera{
     vec3 position;
     vec3 pixelDX; 
