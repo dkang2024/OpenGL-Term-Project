@@ -6,6 +6,6 @@ struct viewerCamera{
     vec3 initPixelPos;
 };
 
-// Maximum and minimum possible t values for a ray to count as intersecting an object
+// Maximum and minimum possible t values for a ray to count as intersecting an object. The min is to make sure that rays don't count when they're heading backward (like -t intersection point). The max is to ensure that the ray even should be visible on the screen. 
 const float rayMin = 0.001;
 const float rayMax = 1e10;

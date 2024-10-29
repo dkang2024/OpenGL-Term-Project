@@ -27,7 +27,7 @@ class windowCrosshair:
         '''
         Create the crosshair's VAO for rendering
         '''
-        xSize = self.size / windowSize[0] * windowSize[1] #Calculate by dividing by the aspect ratio
+        xSize = self.size / windowSize[0] * windowSize[1] #Calculate by dividing by the aspect ratio to account for window sizes being different in x and y direction
         vertices = np.array([
             (-xSize, 0),
             (xSize, 0),
@@ -39,6 +39,6 @@ class windowCrosshair:
 
     def render(self):
         '''
-        Render the crosshair on the screen
+        Render the crosshair on the screen using lines rather than triangles
         '''
         self.vao.render(mgl.LINES)

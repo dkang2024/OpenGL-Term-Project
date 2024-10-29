@@ -22,6 +22,7 @@ vec3 findSphereNormalVector(ray3 ray, float t, vec3 center, float radius){
     return (rayIntersectPoint(ray, t) - center) / radius;
 }
 
+// Check if the ray intersects with the sphere using the quadratic formula with math gotten from https://www.cs.colostate.edu/~cs410/yr2016fa/more_progress/cs410_F16_Lecture14.pdf. Automaticall deal with returning the lesser t by taking the negative sign first. 
 bool checkSphereIntersection(float a, float h, float discriminant){
     float t = simplifiedQuadFormula(a, h, discriminant, -1);
     if (!(rayMin < t && t < rayMax)){
@@ -31,4 +32,19 @@ bool checkSphereIntersection(float a, float h, float discriminant){
         } 
     }
     return true;
+}
+
+// Do all of the complete logic to check if a ray intersects with a sphere, including finding the discriminant and other values. The difference between this and checkSphereIntersection is that a, h, discriminant are calculated
+bool hitSphere(sphere3 sphere, ray3 ray){
+    vec3 rayToSphereCenter = sphere.center - ray.origin;
+    float a = dot(ray.direction, ray.direction);
+    float h = dot(ray.direction, rayToSphereCenter);
+    float c = dot(rayToSphereCenter, rayToSphereCenter) - pow(sphere.radius, 2);
+    float discriminant = simplifiedDiscriminant(a, c, h);
+
+    if (discriminant < 0){ // If the discriminant is less than zero, the t values for the intersection are imaginary and does doesn't intersect (don't even check the t for intersection)
+        return false;
+    }
+
+    return checkSphereIntersection(a, h, discriminant);
 }

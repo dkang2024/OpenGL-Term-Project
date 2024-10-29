@@ -81,7 +81,7 @@ class Test(mglw.WindowConfig):
 
     def resize(self, screenWidth, screenHeight):
         '''
-        Resize the texture to fit the bigger screen and reset viewport. 
+        Resize the texture to fit the bigger screen and reset viewport dimensions (prevents weird screen shenanigans)
         '''
         self.window_size = (screenWidth, screenHeight)
         self.crosshair.resizeCrosshair(self.window_size)
