@@ -21,7 +21,7 @@ class Test(mglw.WindowConfig):
         self.ctx.gc_mode = 'auto'
         self.program = self.ctx.program(*loadVertexAndFrag('Window', 'Window', 'Window'))
         self.initScreen()
-        self.rayTracer = self.ctx.compute_shader(loadComputeShader('RayTracer', 'RayTracing'))
+        self.rayTracer = self.ctx.compute_shader(loadComputeShader(self.ctx, 'RayTracer', 'RayTracing'))
 
         self.camera = viewerCamera(self, glm.vec3(0, 0, 0), 1, 60, 0.2)
         self.screenCoords = mglw.geometry.quad_fs(attr_names = screenNames, normals = False, name = 'Screen Coordinates')

@@ -10,34 +10,28 @@ def loadVertexAndFrag(folder, vertexFileName, fragmentFileName):
         fragmentShader = file.read()
     return vertexShader, fragmentShader
 
-def removeComments(shader):
+def addImports(ctx, folder, shader):
     '''
-    Remove the comments from the shader to avoid any shenanigans with "import" statements in comments
+    Add the imports from the '#include' statements in the shader into the context for easy use.
     '''
-    return [line for line in shader if not line.startswith('//')]
-
-def addImports(folder, shader):
-    '''
-    Add the imports from the 'import' statements in the shader into the shader's string. 
-    '''
-    for i, line in enumerate(shader):
-        if not line.startswith('import'):
+    for line in shader.splitlines():
+        if not line.startswith('#include'):
             continue 
             
-        importFileName = line[len('import') + 1:].strip()
+        importFileName = line[len('#include') + 1:].strip()[1:-1] #Get rid of the quotation marks
         try: 
             with open(f'{folder}/{importFileName}.comp', 'r') as file:
-                shader[i] = file.read().strip()
+                importShader = file.read().strip() #Text that is the shader that is imported
+            ctx.includes[importFileName] = importShader #Add this text for the shader that is imported to the context
         except:
             raise RuntimeError('This file does not exist')
         
-def loadComputeShader(folder, shader):
+def loadComputeShader(ctx, folder, shader):
     '''
-    Load whatever compute shader along with the other compute shaders "imported" in the file beforehand to allow cleaner abstractions
+    Load whatever compute shader along with the other compute shaders included in the file statement to allow for cleaner abstractions.
     '''
     with open(f'{folder}/{shader}.comp', 'r') as file:
-        rayTracer = file.read().strip().split('\n')
+        rayTracer = file.read().strip()
 
-    rayTracer = removeComments(rayTracer)
-    addImports(folder, rayTracer)
-    return '\n'.join(rayTracer) 
+    addImports(ctx, folder, rayTracer)
+    return rayTracer 
