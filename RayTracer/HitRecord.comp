@@ -3,13 +3,13 @@ struct hitRecord{
     vec3 pointHit;
     vec3 normalVector; 
     tInterval tValues;
-    vec3 rayColor;
+    vec4 rayColor;
     bool frontFace; 
 };
 
 // Creates the default hit record
 hitRecord initDefaultHitRecord(){
-    hitRecord newHitRecord = {initDefaultVec(), initDefaultVec(), initDefaultTInterval(), initDefaultVec(), false};
+    hitRecord newHitRecord = {initDefaultVec(), initDefaultVec(), initDefaultTInterval(), vec4(initDefaultVec(), 0.0), false};
     return newHitRecord;
 }
 

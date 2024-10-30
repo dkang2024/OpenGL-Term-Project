@@ -27,12 +27,11 @@ class sceneWorld:
         '''
         Create the render array from the current hittable list by passing in the specific values for the SSBO 
         '''
-        numCols = 7 # (c_x, c_y, c_z, R, r, g, b)
+        # (c_x, c_y, c_z, R, r, g, b, a). Use the alpha in order to prevent the necessity of padding
         sphereDType = np.dtype([
             ('center', 'f4', 3),
             ('radius', 'f4'),
-            ('color', 'f4', 3),
-            ('padding', 'f4', 1)
+            ('color', 'f4', 4)
         ])
 
         self.renderArray = np.empty(len(self.hittableList), sphereDType)

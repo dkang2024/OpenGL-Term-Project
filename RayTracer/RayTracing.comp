@@ -58,7 +58,7 @@ void main(){
     vec4 pixel;
   
     if (hit(cameraRay, rayHitRecord)){
-        pixel = vec4(rayHitRecord.rayColor, 1.0);
+        pixel = rayHitRecord.rayColor;
     } else {
         pixel = vec4(gradientColor(cameraRay.direction), 1.0);
     }
