@@ -3,6 +3,7 @@ struct sphere3{
     vec3 center;
     float radius;
     vec3 color;
+    float padding;
 };
 
 // Sphere ray intersection helper functions 

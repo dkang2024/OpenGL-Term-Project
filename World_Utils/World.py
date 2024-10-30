@@ -19,14 +19,23 @@ class sceneWorld:
         Record a sphere to the render array
         '''
         # (c_x, c_y, c_z, R, r, g, b)
-        self.renderArray[i] = (*sphere.center, sphere.radius, *sphere.color)
+        self.renderArray[i]['center'] = sphere.center
+        self.renderArray[i]['radius'] = sphere.radius 
+        self.renderArray[i]['color'] = sphere.color
 
     def createRenderArray(self):
         '''
         Create the render array from the current hittable list by passing in the specific values for the SSBO 
         '''
         numCols = 7 # (c_x, c_y, c_z, R, r, g, b)
-        self.renderArray = np.zeros((len(self.hittableList), numCols), 'f4')
+        sphereDType = np.dtype([
+            ('center', 'f4', 3),
+            ('radius', 'f4'),
+            ('color', 'f4', 3),
+            ('padding', 'f4', 1)
+        ])
+
+        self.renderArray = np.empty(len(self.hittableList), sphereDType)
 
         for i, hittable in enumerate(self.hittableList):
             self.recordSphere(i, hittable)

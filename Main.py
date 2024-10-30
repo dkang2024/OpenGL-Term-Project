@@ -31,7 +31,6 @@ class Test(mglw.WindowConfig):
         self.world.addHittable(sphere3(glm.vec3(0, 0, -1), 0.5, glm.vec3(1, 0, 0)))
         self.world.addHittable(sphere3(glm.vec3(0, -100.5, -1), 100, glm.vec3(0, 1, 0)))
         self.world.assignRender()
-        print(self.world.renderArray)
      
     def initScreen(self):
         '''
