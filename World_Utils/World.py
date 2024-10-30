@@ -40,7 +40,3 @@ class sceneWorld:
         
         self.ssbo = self.ctx.buffer(self.renderArray)
         self.ssbo.bind_to_storage_buffer()
-        
-
-
-

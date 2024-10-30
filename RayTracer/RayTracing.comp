@@ -2,7 +2,10 @@
 #version 460 core
 
 // Import files here using the "include" statement that Python processes with string processing and txt file processing
+#include "Vectors"
 #include "Ray"
+#include "Interval"
+#include "HitRecord"
 #include "Camera"
 #include "Sphere"
 
@@ -43,7 +46,7 @@ void main(){
     vec4 pixel;
     
     for (int i = 0; i < numHittables; i++){ 
-        if (hitSphere(hittables[i], cameraRay)){
+        if (hitSphere(hittables[i], cameraRay, initDefaultHitRecord())){
             pixel = vec4(hittables[i].color, 1.0);
         } else {
             pixel = vec4(gradientColor(cameraRay.direction), 1.0);

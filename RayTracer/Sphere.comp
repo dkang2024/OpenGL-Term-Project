@@ -23,19 +23,21 @@ vec3 findSphereNormalVector(ray3 ray, float t, vec3 center, float radius){
 }
 
 // Check if the ray intersects with the sphere using the quadratic formula with math gotten from https://www.cs.colostate.edu/~cs410/yr2016fa/more_progress/cs410_F16_Lecture14.pdf. Automaticall deal with returning the lesser t by taking the negative sign first. 
-bool checkSphereIntersection(float a, float h, float discriminant){
+bool checkSphereIntersection(float a, float h, float discriminant, hitRecord record){
     float t = simplifiedQuadFormula(a, h, discriminant, -1);
-    if (!(rayMin < t && t < rayMax)){
+    if (outOfBounds(record.tValues, t)){
         t = simplifiedQuadFormula(a, h, discriminant, 1);
-        if (!(rayMin < t && t < rayMax)){
+        if (outOfBounds(record.tValues, t)){
             return false; 
         } 
     }
+
+    record.tValues.t = t; 
     return true;
 }
 
 // Do all of the complete logic to check if a ray intersects with a sphere, including finding the discriminant and other values. The difference between this and checkSphereIntersection is that a, h, discriminant are calculated
-bool hitSphere(sphere3 sphere, ray3 ray){
+bool hitSphere(sphere3 sphere, ray3 ray, hitRecord record){
     vec3 rayToSphereCenter = sphere.center - ray.origin;
     float a = dot(ray.direction, ray.direction);
     float h = dot(ray.direction, rayToSphereCenter);
@@ -46,5 +48,14 @@ bool hitSphere(sphere3 sphere, ray3 ray){
         return false;
     }
 
-    return checkSphereIntersection(a, h, discriminant);
+    bool hitSphere = checkSphereIntersection(a, h, discriminant, record);
+    if (!hitSphere){
+        return false;
+    }
+
+    // Note that the ideas for the hit record and storing the intersection points and variables like this came from https://raytracing.github.io/books/RayTracingInOneWeekend.html#movingcameracodeintoitsownclass
+    record.pointHit = rayIntersectPoint(ray, record.tValues.t);
+    record.normalVector = (record.pointHit - sphere.center) / sphere.radius;
+    isFrontFace(record, ray);
+    return hitSphere;
 }

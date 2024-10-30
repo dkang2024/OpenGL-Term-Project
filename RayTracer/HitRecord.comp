@@ -1,0 +1,19 @@
+// Hit Record struct and functions. Idea for having this implemented in order to make the code a lot cleaner came from Ray Tracing in One Weekend: https://raytracing.github.io/books/RayTracingInOneWeekend.html#movingcameracodeintoitsownclass. 
+struct hitRecord{
+    vec3 pointHit;
+    vec3 normalVector; 
+    tInterval tValues;
+    bool frontFace; 
+};
+
+// Creates the default hit record
+hitRecord initDefaultHitRecord(){
+    hitRecord newHitRecord = {initDefaultVec(), initDefaultVec(), initDefaultTInterval(), false};
+    return newHitRecord;
+}
+
+// Set the normal vector to always point against the ray for convenience later on. I should get no credit for this because this was taken from https://raytracing.github.io/books/RayTracingInOneWeekend.html#movingcameracodeintoitsownclass. 
+void isFrontFace(hitRecord record, ray3 ray){
+    record.frontFace = dot(ray.direction, record.normalVector) < 0;
+    record.normalVector = record.frontFace ? record.normalVector : -record.normalVector;
+}
