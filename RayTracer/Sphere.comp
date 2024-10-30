@@ -57,9 +57,6 @@ bool hitSphere(sphere3 sphere, ray3 ray, inout hitRecord record){
     record.pointHit = rayIntersectPoint(ray, record.tValues.t);
     record.normalVector = findSphereNormalVector(ray, record.tValues.t, sphere.center, sphere.radius);
     isFrontFace(record, ray);
-    if (sphere.color == vec3(1, 0, 0)){
-        return false;
-    }
     record.rayColor = sphere.color;
     return didHit;
 }
