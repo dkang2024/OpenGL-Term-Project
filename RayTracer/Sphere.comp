@@ -23,7 +23,7 @@ vec3 findSphereNormalVector(ray3 ray, float t, vec3 center, float radius){
 }
 
 // Check if the ray intersects with the sphere using the quadratic formula with math gotten from https://www.cs.colostate.edu/~cs410/yr2016fa/more_progress/cs410_F16_Lecture14.pdf. Automaticall deal with returning the lesser t by taking the negative sign first. 
-bool checkSphereIntersection(float a, float h, float discriminant, hitRecord record){
+bool checkSphereIntersection(float a, float h, float discriminant, inout hitRecord record){
     float t = simplifiedQuadFormula(a, h, discriminant, -1);
     if (outOfBounds(record.tValues, t)){
         t = simplifiedQuadFormula(a, h, discriminant, 1);
@@ -37,25 +37,29 @@ bool checkSphereIntersection(float a, float h, float discriminant, hitRecord rec
 }
 
 // Do all of the complete logic to check if a ray intersects with a sphere, including finding the discriminant and other values. The difference between this and checkSphereIntersection is that a, h, discriminant are calculated
-bool hitSphere(sphere3 sphere, ray3 ray, hitRecord record){
+bool hitSphere(sphere3 sphere, ray3 ray, inout hitRecord record){
     vec3 rayToSphereCenter = sphere.center - ray.origin;
     float a = dot(ray.direction, ray.direction);
     float h = dot(ray.direction, rayToSphereCenter);
     float c = dot(rayToSphereCenter, rayToSphereCenter) - pow(sphere.radius, 2);
     float discriminant = simplifiedDiscriminant(a, c, h);
 
-    if (discriminant < 0){ // If the discriminant is less than zero, the t values for the intersection are imaginary and does doesn't intersect (don't even check the t for intersection)
+    if (discriminant < 0){ // If the discriminant is less than zero, the t values for the intersection are imaginary and does doesn't intersect (don't even check the t for intersection for efficiency's sake)
         return false;
     }
 
-    bool hitSphere = checkSphereIntersection(a, h, discriminant, record);
-    if (!hitSphere){
+    bool didHit = checkSphereIntersection(a, h, discriminant, record);
+    if (!didHit){
         return false;
     }
 
     // Note that the ideas for the hit record and storing the intersection points and variables like this came from https://raytracing.github.io/books/RayTracingInOneWeekend.html#movingcameracodeintoitsownclass
     record.pointHit = rayIntersectPoint(ray, record.tValues.t);
-    record.normalVector = (record.pointHit - sphere.center) / sphere.radius;
+    record.normalVector = findSphereNormalVector(ray, record.tValues.t, sphere.center, sphere.radius);
     isFrontFace(record, ray);
-    return hitSphere;
+    if (sphere.color == vec3(1, 0, 0)){
+        return false;
+    }
+    record.rayColor = sphere.color;
+    return didHit;
 }
