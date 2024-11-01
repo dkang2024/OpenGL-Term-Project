@@ -2,8 +2,8 @@
 #version 460 core
 
 // Import files here using the "include" statement that Python processes with string processing and txt file processing
-#include "Vectors"
 #include "Random"
+#include "Vectors"
 #include "Ray"
 #include "Interval"
 #include "HitRecord"

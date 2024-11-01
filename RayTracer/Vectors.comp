@@ -2,3 +2,47 @@
 vec3 initDefaultVec(){
     return vec3(0, 0, 0);
 }
+
+// Checks whether all elements of a vector are near zero for dealing with floating point inaccuracies
+bool nearZero(vec3 v){
+    float epsilon = 1e-5;
+    return v.x < epsilon && v.y < epsilon && v.z < epsilon;
+}
+
+// Functions / Structures for getting a random vector on the unit sphere (thanks 259)
+
+// Sphere component structure for storing r^2 and the specific sphere component 
+struct sphereVector{
+    vec3 randomVector;
+    float radiusSquared;
+};
+
+// Utilize vector calculus with the equation of the sphere to get a random value along an axis that fulfills the sphere equation
+void getRandomAxisValue(inout uvec4 state, inout sphereVector randVec, int id){
+    float radius = pow(randVec.radiusSquared, 0.5);
+    float randVectorValue = randRange(state, -radius, radius);
+    
+    if (id == 0){
+        randVec.randomVector.y = randVectorValue;
+    } else {
+        randVec.randomVector.z = randVectorValue;
+    }
+    
+    randVec.radiusSquared -= pow(randVectorValue, 2);
+}
+
+// Choose between a positive or negative value for x
+void chooseX(inout uvec4 state, inout sphereVector randVec){
+    randVec.randomVector.x = pow(randVec.radiusSquared, 0.5);
+    if (rand(state) >= 0.5){
+        randVec.randomVector.x *= -1;
+    }
+}
+
+// Return a random vector on the unit sphere
+vec3 randomVectorOnUnitSphere(inout uvec4 state){
+    sphereVector randVec = {initDefaultVec(), 1.0};
+    getRandomAxisValue(state, randVec, 0);
+    getRandomAxisValue(state, randVec, 1);
+    return randVec.randomVector;
+}

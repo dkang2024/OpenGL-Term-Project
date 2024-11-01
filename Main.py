@@ -29,8 +29,8 @@ class Test(mglw.WindowConfig):
         self.crosshair = windowCrosshair(self, 0.03, glm.vec3(1.0, 1.0, 1.0), self.window_size) #type: ignore
 
         self.world = sceneWorld(self.ctx, self.rayTracer)
-        self.world.addHittable(sphere3(glm.vec3(0, 0, -1), 0.5, glm.vec4(1, 0, 0, 1)))
-        self.world.addHittable(sphere3(glm.vec3(0, -100.5, -1), 100, glm.vec4(0, 1, 0, 1)))
+        self.world.addHittable(sphere3(glm.vec3(0, 0, -1), 0.5, glm.vec4(1, 0, 0, 1), 0, 1.0))
+        self.world.addHittable(sphere3(glm.vec3(0, -100.5, -1), 100, glm.vec4(0, 1, 0, 1), 0, 1.0))
         self.world.createRenderArray()
         self.world.assignRender()
            

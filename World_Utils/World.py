@@ -22,6 +22,8 @@ class sceneWorld:
         self.renderArray[i]['center'] = sphere.center
         self.renderArray[i]['radius'] = sphere.radius 
         self.renderArray[i]['color'] = sphere.color
+        self.renderArray[i]['materialID'] = sphere.materialID
+        self.renderArray[i]['materialParameter'] = sphere.materialParameter
 
     def createRenderArray(self):
         '''
@@ -31,7 +33,10 @@ class sceneWorld:
         sphereDType = np.dtype([
             ('center', 'f4', 3),
             ('radius', 'f4'),
-            ('color', 'f4', 4)
+            ('color', 'f4', 4),
+            ('materialID', 'i4'),
+            ('materialParameter', 'f4'),
+            ('padding', 'f4', 2)
         ])
 
         self.renderArray = np.empty(len(self.hittableList), sphereDType)
