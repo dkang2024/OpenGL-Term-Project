@@ -40,7 +40,7 @@ bool checkSphereIntersection(float a, float h, float discriminant, inout hitReco
 }
 
 // Do all of the complete logic to check if a ray intersects with a sphere, including finding the discriminant and other values. The difference between this and checkSphereIntersection is that a, h, discriminant are calculated
-bool hitSphere(sphere3 sphere, inout hitRecord record){
+bool hitSphere(sphere3 sphere, inout hitRecord record, inout uvec4 state){
     ray3 ray = record.initRay;
     vec3 rayToSphereCenter = sphere.center - ray.origin;
     float a = dot(ray.direction, ray.direction);
@@ -58,10 +58,9 @@ bool hitSphere(sphere3 sphere, inout hitRecord record){
     }
 
     // Note that the ideas for the hit record and storing the intersection points and variables like this came from https://raytracing.github.io/books/RayTracingInOneWeekend.html#movingcameracodeintoitsownclass. Heavily modified though :).
-    record.scatteredRay = ray3(rayIntersectPoint(ray, record.tValues.t), vec3(0, 0, 0));
-    record.didScatter = true;
+    scatter(sphere.materialID, rayIntersectPoint(ray, record.tValues.t), record, state);
     record.normalVector = findSphereNormalVector(ray, record.tValues.t, sphere.center, sphere.radius);
     isFrontFace(record, ray);
-    record.rayColor = sphere.color;
-    return didHit;
+    record.rayColor *= sphere.color;
+    return true;
 }

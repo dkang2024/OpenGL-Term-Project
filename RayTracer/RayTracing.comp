@@ -7,6 +7,7 @@
 #include "Ray"
 #include "Interval"
 #include "HitRecord"
+#include "Materials"
 #include "Camera"
 #include "Sphere"
 
@@ -20,6 +21,7 @@ layout(std430, binding = 0) buffer worldScene {
 };
 
 uniform int numHittables;
+uniform int maxBounces;
 uniform viewerCamera camera;
 
 // Create a gradient from the top of the screen to the bottom of the screen based on the ray's y direction 
@@ -41,14 +43,30 @@ ray3 constructCameraRay(ivec2 pixelCoord){
 }
 
 // Check if a ray hits any hittable and update a hit record to show the ray's color and reflect that change. 
-bool hit(inout hitRecord record){
+bool hit(inout hitRecord record, inout uvec4 state){
     bool didHit = false; 
     for (int i = 0; i < numHittables; i++){
-        if (hitSphere(hittables[i], record)){
+        if (hitSphere(hittables[i], record, state)){
             didHit = true; 
         }
     }
     return didHit;
+}
+
+// Get the pixel color while still reflecting the ray (bouncing it off of surfaces)
+vec4 pixelColor(inout hitRecord record, inout uvec4 state){
+    for (int i = 0; i < maxBounces; i++){
+        bool didHit = hit(record, state);
+
+        if (didHit && record.didScatter){
+            record.initRay = record.scatteredRay;
+        } else if (didHit && !record.didScatter){
+            break;
+        } else {
+            return record.rayColor * vec4(gradientColor(record.initRay.direction), 1.0);
+        }
+    }
+    return vec4(0.0, 0.0, 0.0, 1.0);
 }
 
 // Main Function
@@ -58,13 +76,7 @@ void main(){
     
     ray3 cameraRay = constructCameraRay(pixelCoord); 
     hitRecord rayHitRecord = initDefaultHitRecord(cameraRay);
-    vec4 pixel;
-  
-    if (hit(rayHitRecord)){
-        pixel = rayHitRecord.rayColor;
-    } else {
-        pixel = vec4(gradientColor(cameraRay.direction), 1.0);
-    }
+    vec4 pixel = pixelColor(rayHitRecord, state);
 
     imageStore(seeds, pixelCoord, state);
     imageStore(screen, pixelCoord, pixel);

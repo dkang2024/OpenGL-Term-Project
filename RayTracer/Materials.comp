@@ -1,1 +1,21 @@
-// Dealing with seperate structures for materials. 
+// Dealing with seperate structures for materials ID 0 = Lambertian material. 
+
+// Lambertian scattering for a material
+void lambertianScatter(vec3 pointHit, inout hitRecord record, inout uvec4 state){
+    ray3 scatteredRay = ray3(pointHit, record.normalVector + randomVectorOnUnitSphere(state));
+
+    if (nearZero(scatteredRay.direction)){
+        scatteredRay.direction = record.normalVector;
+    }
+
+    record.didScatter = true;
+    record.scatteredRay = scatteredRay;
+}
+
+// General scattering 
+void scatter(int materialID, vec3 pointHit, inout hitRecord record, inout uvec4 state){
+    if (materialID == 0){
+        lambertianScatter(pointHit, record, state);
+    }
+}
+
