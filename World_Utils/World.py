@@ -43,8 +43,7 @@ class sceneWorld:
         '''
         Assign the render values to the compute shader in order to render all the hittables
         '''
-        self.createRenderArray()
         self.rayTracer['numHittables'] = len(self.hittableList)
         
         self.ssbo = self.ctx.buffer(self.renderArray)
-        self.ssbo.bind_to_storage_buffer()
+        self.ssbo.bind_to_storage_buffer(0)

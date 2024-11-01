@@ -21,6 +21,7 @@ class Test(mglw.WindowConfig):
         self.ctx.gc_mode = 'auto'
         self.program = self.ctx.program(*loadVertexAndFrag('Window', 'Window', 'Window'))
         self.initScreen()
+        self.initRand()
         self.rayTracer = self.ctx.compute_shader(loadComputeShader(self.ctx, 'RayTracer', 'RayTracing'))
 
         self.camera = viewerCamera(self, glm.vec3(0, 0, 0), 1, 60, 0.2)
@@ -30,8 +31,9 @@ class Test(mglw.WindowConfig):
         self.world = sceneWorld(self.ctx, self.rayTracer)
         self.world.addHittable(sphere3(glm.vec3(0, 0, -1), 0.5, glm.vec4(1, 0, 0, 1)))
         self.world.addHittable(sphere3(glm.vec3(0, -100.5, -1), 100, glm.vec4(0, 1, 0, 1)))
+        self.world.createRenderArray()
         self.world.assignRender()
-     
+           
     def initScreen(self):
         '''
         Initialize the screen texture to draw to so that the compute shader can "render" to the screen indirectly
@@ -40,6 +42,16 @@ class Test(mglw.WindowConfig):
         self.screen.filter = (mgl.NEAREST, mgl.NEAREST)
         self.screen.bind_to_image(0)        
         self.screen.use(0)
+     
+    def initRand(self):
+        '''
+        Initialize the random number image in order to sample from to generate a seed for the random number generator in GLSL. 
+        '''
+        RandGen = np.random.default_rng()
+        self.seed = RandGen.integers(128, 100000, (*self.window_size, 4), dtype = 'u4')
+        self.seed = self.ctx.texture(self.window_size, 4, data = self.seed, dtype = 'u4')
+        self.seed.bind_to_image(1)
+        self.seed.use(1)
 
     def cameraMovementKeys(self):
         '''
@@ -87,6 +99,7 @@ class Test(mglw.WindowConfig):
         self.window_size = (screenWidth, screenHeight)
         self.crosshair.resizeCrosshair(self.window_size)
         self.initScreen()
+        self.initRand()
         self.ctx.viewport = (0, 0, screenWidth, screenHeight)
 
     def render(self, time, frameTime):
