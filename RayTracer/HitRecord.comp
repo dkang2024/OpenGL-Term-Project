@@ -1,6 +1,8 @@
-// Hit Record struct and functions. Idea for having this implemented in order to make the code a lot cleaner came from Ray Tracing in One Weekend: https://raytracing.github.io/books/RayTracingInOneWeekend.html#movingcameracodeintoitsownclass. 
+// Hit Record struct and functions. Idea for having this implemented in order to make the code a lot cleaner came from Ray Tracing in One Weekend: https://raytracing.github.io/books/RayTracingInOneWeekend.html#movingcameracodeintoitsownclass. I made significant modifications to this structure to accomodate my non-iterative implementation.  
 struct hitRecord{
-    vec3 pointHit;
+    ray3 initRay;
+    bool didScatter;
+    ray3 scatteredRay;
     vec3 normalVector; 
     tInterval tValues;
     vec4 rayColor;
@@ -8,8 +10,8 @@ struct hitRecord{
 };
 
 // Creates the default hit record
-hitRecord initDefaultHitRecord(){
-    hitRecord newHitRecord = {initDefaultVec(), initDefaultVec(), initDefaultTInterval(), vec4(initDefaultVec(), 0.0), false};
+hitRecord initDefaultHitRecord(ray3 cameraRay){
+    hitRecord newHitRecord = {cameraRay, false, initDefaultRay(), initDefaultVec(), initDefaultTInterval(), vec4(initDefaultVec(), 0.0), false};
     return newHitRecord;
 }
 

@@ -41,10 +41,10 @@ ray3 constructCameraRay(ivec2 pixelCoord){
 }
 
 // Check if a ray hits any hittable and update a hit record to show the ray's color and reflect that change. 
-bool hit(ray3 ray, inout hitRecord record){
+bool hit(inout hitRecord record){
     bool didHit = false; 
     for (int i = 0; i < numHittables; i++){
-        if (hitSphere(hittables[i], ray, record)){
+        if (hitSphere(hittables[i], record)){
             didHit = true; 
         }
     }
@@ -57,10 +57,10 @@ void main(){
     uvec4 state = imageLoad(seeds, pixelCoord);
     
     ray3 cameraRay = constructCameraRay(pixelCoord); 
-    hitRecord rayHitRecord = initDefaultHitRecord();
+    hitRecord rayHitRecord = initDefaultHitRecord(cameraRay);
     vec4 pixel;
   
-    if (hit(cameraRay, rayHitRecord)){
+    if (hit(rayHitRecord)){
         pixel = rayHitRecord.rayColor;
     } else {
         pixel = vec4(gradientColor(cameraRay.direction), 1.0);

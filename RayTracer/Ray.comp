@@ -8,3 +8,8 @@ struct ray3{
 vec3 rayIntersectPoint(ray3 ray, float t){
     return ray.origin + ray.direction * t;
 }
+
+// Initialize a default ray 
+ray3 initDefaultRay(){
+    return ray3(initDefaultVec(), initDefaultVec())
+}
