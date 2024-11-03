@@ -22,6 +22,7 @@ layout(std430, binding = 0) buffer worldScene {
 
 uniform int numHittables;
 uniform int maxBounces;
+uniform int samplesPerPixel;
 uniform viewerCamera camera;
 
 // Create a gradient from the top of the screen to the bottom of the screen based on the ray's y direction 
@@ -35,9 +36,16 @@ vec3 gradientColor(vec3 rayDirection){
     return mix(colorTop, colorBottom, t);
 }
 
+// Sample within the pixel's square from -0.5 to 0.5 in order to do some antialiasing
+vec2 samplePixel(inout uvec4 state){
+    vec2 sampledVector = vec2(randRange(state, -0.5, 0.5), randRange(state, -0.5, 0.5));
+    return sampledVector;
+}
+
 // Construct a ray from a camera to the viewport depending on the pixel coordinate
-ray3 constructCameraRay(ivec2 pixelCoord){
-    vec3 rayDir = camera.initPixelPos + pixelCoord.x * camera.pixelDX + pixelCoord.y * camera.pixelDY - camera.position;
+ray3 constructCameraRay(ivec2 pixelCoord, inout uvec4 state){
+    vec2 sampledVector = samplePixel(state);
+    vec3 rayDir = camera.initPixelPos + (pixelCoord.x + sampledVector.x) * camera.pixelDX + (pixelCoord.y + sampledVector.y) * camera.pixelDY - camera.position;
     struct ray3 ray = {camera.position, rayDir};
     return ray;
 }
@@ -54,7 +62,10 @@ bool hit(inout hitRecord record, inout uvec4 state){
 }
 
 // Get the pixel color while still reflecting the ray (bouncing it off of surfaces)
-vec3 pixelColor(inout hitRecord record, inout uvec4 state){
+vec3 pixelColor(ivec2 pixelCoord, inout uvec4 state){
+    ray3 cameraRay = constructCameraRay(pixelCoord, state);
+    hitRecord record = initDefaultHitRecord(cameraRay);
+
     for (int i = 0; i < maxBounces; i++){
         bool didHit = hit(record, state);
 
@@ -69,14 +80,21 @@ vec3 pixelColor(inout hitRecord record, inout uvec4 state){
     return vec3(0.0, 0.0, 0.0);
 }
 
+// Implement basic antialiasing using a random point in the pixel to shoot rays through and averaging color
+vec4 antialiasing(ivec2 pixelCoord, inout uvec4 state){
+    vec3 pixel = initDefaultVec();
+    for (int i = 0; i < samplesPerPixel; i++){
+        pixel += pixelColor(pixelCoord, state);
+    }
+    return vec4(pixel / samplesPerPixel, 1.0);
+}
+
 // Main Function
 void main(){
     ivec2 pixelCoord = ivec2(gl_GlobalInvocationID.xy); // Get the global invocation ID in order to determine the exact pixel location. 
     uvec4 state = imageLoad(seeds, pixelCoord);
     
-    ray3 cameraRay = constructCameraRay(pixelCoord); 
-    hitRecord rayHitRecord = initDefaultHitRecord(cameraRay);
-    vec4 pixel = vec4(pixelColor(rayHitRecord, state), 1.0);
+    vec4 pixel = antialiasing(pixelCoord, state);
 
     imageStore(seeds, pixelCoord, state);
     imageStore(screen, pixelCoord, pixel);
