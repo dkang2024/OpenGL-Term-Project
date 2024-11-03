@@ -54,7 +54,7 @@ bool hit(inout hitRecord record, inout uvec4 state){
 }
 
 // Get the pixel color while still reflecting the ray (bouncing it off of surfaces)
-vec4 pixelColor(inout hitRecord record, inout uvec4 state){
+vec3 pixelColor(inout hitRecord record, inout uvec4 state){
     for (int i = 0; i < maxBounces; i++){
         bool didHit = hit(record, state);
 
@@ -63,10 +63,10 @@ vec4 pixelColor(inout hitRecord record, inout uvec4 state){
         } else if (didHit && !record.didScatter){
             break;
         } else {
-            return record.rayColor * vec4(gradientColor(record.initRay.direction), 1.0);
+            return record.rayColor * gradientColor(record.initRay.direction);
         }
     }
-    return vec4(0.0, 0.0, 0.0, 1.0);
+    return vec3(0.0, 0.0, 0.0);
 }
 
 // Main Function
@@ -76,7 +76,7 @@ void main(){
     
     ray3 cameraRay = constructCameraRay(pixelCoord); 
     hitRecord rayHitRecord = initDefaultHitRecord(cameraRay);
-    vec4 pixel = pixelColor(rayHitRecord, state);
+    vec4 pixel = vec4(pixelColor(rayHitRecord, state), 1.0);
 
     imageStore(seeds, pixelCoord, state);
     imageStore(screen, pixelCoord, pixel);

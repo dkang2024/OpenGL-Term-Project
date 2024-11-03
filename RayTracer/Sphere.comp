@@ -1,11 +1,11 @@
 // Sphere Structure
 struct sphere3{
-    vec3 center;
-    float radius;
+    vec4 center;
     vec4 color;
+    float radius;
     int materialID;
     float materialParameter;
-    vec2 padding;
+    float padding;
 };
 
 // Sphere ray intersection helper functions 
@@ -42,7 +42,7 @@ bool checkSphereIntersection(float a, float h, float discriminant, inout hitReco
 // Do all of the complete logic to check if a ray intersects with a sphere, including finding the discriminant and other values. The difference between this and checkSphereIntersection is that a, h, discriminant are calculated
 bool hitSphere(sphere3 sphere, inout hitRecord record, inout uvec4 state){
     ray3 ray = record.initRay;
-    vec3 rayToSphereCenter = sphere.center - ray.origin;
+    vec3 rayToSphereCenter = sphere.center.xyz - ray.origin;
     float a = dot(ray.direction, ray.direction);
     float h = dot(ray.direction, rayToSphereCenter);
     float c = dot(rayToSphereCenter, rayToSphereCenter) - pow(sphere.radius, 2);
@@ -59,8 +59,8 @@ bool hitSphere(sphere3 sphere, inout hitRecord record, inout uvec4 state){
 
     // Note that the ideas for the hit record and storing the intersection points and variables like this came from https://raytracing.github.io/books/RayTracingInOneWeekend.html#movingcameracodeintoitsownclass. Heavily modified though :).
     scatter(sphere.materialID, rayIntersectPoint(ray, record.tValues.t), record, state);
-    record.normalVector = findSphereNormalVector(ray, record.tValues.t, sphere.center, sphere.radius);
+    record.normalVector = findSphereNormalVector(ray, record.tValues.t, sphere.center.xyz, sphere.radius);
     isFrontFace(record, ray);
-    record.rayColor *= sphere.color;
+    record.rayColor *= sphere.color.rgb;
     return true;
 }

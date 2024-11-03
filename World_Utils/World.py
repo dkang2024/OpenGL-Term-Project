@@ -19,9 +19,9 @@ class sceneWorld:
         Record a sphere to the render array
         '''
         # (c_x, c_y, c_z, R, r, g, b)
-        self.renderArray[i]['center'] = sphere.center
+        self.renderArray[i]['center'] = glm.vec4(sphere.center, 0)
+        self.renderArray[i]['color'] = glm.vec4(sphere.color, 0)
         self.renderArray[i]['radius'] = sphere.radius 
-        self.renderArray[i]['color'] = sphere.color
         self.renderArray[i]['materialID'] = sphere.materialID
         self.renderArray[i]['materialParameter'] = sphere.materialParameter
 
@@ -29,14 +29,13 @@ class sceneWorld:
         '''
         Create the render array from the current hittable list by passing in the specific values for the SSBO 
         '''
-        # (c_x, c_y, c_z, R, r, g, b, a). Use the alpha in order to prevent the necessity of padding
-        sphereDType = np.dtype([
-            ('center', 'f4', 3),
-            ('radius', 'f4'),
-            ('color', 'f4', 4),
-            ('materialID', 'i4'),
-            ('materialParameter', 'f4'),
-            ('padding', 'f4', 2)
+        sphereDType = np.dtype([ #Multiple of 16 bytes
+            ('center', 'f4', 4), # 16 bytes
+            ('color', 'f4', 4), # 16 bytes
+            ('radius', 'f4'), # 4 bytes
+            ('materialID', 'i4'), # 4 bytes
+            ('materialParameter', 'f4'), # 4 bytes
+            ('padding', 'f4') # 8 bytes
         ])
 
         self.renderArray = np.empty(len(self.hittableList), sphereDType)
@@ -50,5 +49,5 @@ class sceneWorld:
         '''
         self.rayTracer['numHittables'] = len(self.hittableList)
         
-        self.ssbo = self.ctx.buffer(self.renderArray)
+        self.ssbo = self.ctx.buffer(self.renderArray, dynamic = True)
         self.ssbo.bind_to_storage_buffer(0)

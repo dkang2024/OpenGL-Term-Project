@@ -5,13 +5,13 @@ struct hitRecord{
     ray3 scatteredRay;
     vec3 normalVector; 
     tInterval tValues;
-    vec4 rayColor;
+    vec3 rayColor;
     bool frontFace; 
 };
 
 // Creates the default hit record
 hitRecord initDefaultHitRecord(ray3 cameraRay){
-    hitRecord newHitRecord = {cameraRay, false, initDefaultRay(), initDefaultVec(), initDefaultTInterval(), vec4(1.0, 1.0, 1.0, 1.0), false};
+    hitRecord newHitRecord = {cameraRay, false, initDefaultRay(), initDefaultVec(), initDefaultTInterval(), vec3(1.0, 1.0, 1.0), false};
     return newHitRecord;
 }
 
