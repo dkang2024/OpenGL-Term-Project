@@ -21,8 +21,8 @@ float simplifiedQuadFormula(float a, float h, float discriminant, float signValu
 }
 
 // Find the sphere's normal vector (not always made to point against the ray [this will be done in hit record])
-vec3 findSphereNormalVector(ray3 ray, float t, vec3 center, float radius){
-    return (rayIntersectPoint(ray, t) - center) / radius;
+vec3 findSphereNormalVector(hitRecord record, sphere3 sphere){
+    return (record.pointHit - sphere.center.xyz) / sphere.radius;
 }
 
 // Check if the ray intersects with the sphere using the quadratic formula with math gotten from https://www.cs.colostate.edu/~cs410/yr2016fa/more_progress/cs410_F16_Lecture14.pdf. Automaticall deal with returning the lesser t by taking the negative sign first. 
@@ -36,14 +36,15 @@ bool checkSphereIntersection(float a, float h, float discriminant, inout hitReco
     }
 
     record.tValues.t = t; 
+    record.pointHit = rayIntersectPoint(record.initRay, t);
     return true;
 }
 
 // Do all of the complete logic to check if a ray intersects with a sphere, including finding the discriminant and other values. The difference between this and checkSphereIntersection is that a, h, discriminant are calculated
 bool hitSphere(sphere3 sphere, inout hitRecord record, inout uvec4 state){
-    vec3 rayToSphereCenter = sphere.center.xyz - record.ray.origin;
-    float a = dot(record.ray.direction, record.ray.direction);
-    float h = dot(record.ray.direction, rayToSphereCenter);
+    vec3 rayToSphereCenter = sphere.center.xyz - record.initRay.origin;
+    float a = dot(record.initRay.direction, record.initRay.direction);
+    float h = dot(record.initRay.direction, rayToSphereCenter);
     float c = dot(rayToSphereCenter, rayToSphereCenter) - pow(sphere.radius, 2);
     float discriminant = simplifiedDiscriminant(a, c, h);
 
@@ -57,9 +58,9 @@ bool hitSphere(sphere3 sphere, inout hitRecord record, inout uvec4 state){
     }
 
     // Note that the ideas for the hit record and storing the intersection points and variables like this came from https://raytracing.github.io/books/RayTracingInOneWeekend.html#movingcameracodeintoitsownclass. Heavily modified though :).
-    record.normalVector = findSphereNormalVector(record.ray, record.tValues.t, sphere.center.xyz, sphere.radius);
-    isFrontFace(record, record.ray);
-    scatter(sphere.materialID, rayIntersectPoint(record.ray, record.tValues.t), record, state);
-    record.rayColor *= sphere.color.rgb;
+    record.normalVector = findSphereNormalVector(record, sphere);
+    isFrontFace(record);
+    scatter(sphere.materialID, record, state);
+    record.rayColor = sphere.color.rgb;
     return true;
 }

@@ -19,13 +19,13 @@ struct sphereVector{
 
 // Utilize vector calculus with the equation of the sphere to get a random value along an axis that fulfills the sphere equation
 void getRandomAxisValue(inout uvec4 state, inout sphereVector randVec, int id){
-    float radius = pow(randVec.radiusSquared, 0.5);
+    float radius = sqrt(randVec.radiusSquared);
     float randVectorValue = randRange(state, -radius, radius);
     
     if (id == 0){
-        randVec.randomVector.y = randVectorValue;
-    } else {
         randVec.randomVector.z = randVectorValue;
+    } else {
+        randVec.randomVector.y = randVectorValue;
     }
     
     randVec.radiusSquared -= pow(randVectorValue, 2);
@@ -33,7 +33,7 @@ void getRandomAxisValue(inout uvec4 state, inout sphereVector randVec, int id){
 
 // Choose between a positive or negative value for x
 void chooseX(inout uvec4 state, inout sphereVector randVec){
-    randVec.randomVector.x = pow(randVec.radiusSquared, 0.5);
+    randVec.randomVector.x = sqrt(randVec.radiusSquared);
     if (rand(state) >= 0.5){
         randVec.randomVector.x *= -1;
     }
@@ -44,5 +44,6 @@ vec3 randomVectorOnUnitSphere(inout uvec4 state){
     sphereVector randVec = {initDefaultVec(), 1.0};
     getRandomAxisValue(state, randVec, 0);
     getRandomAxisValue(state, randVec, 1);
+    chooseX(state, randVec);
     return randVec.randomVector;
 }
