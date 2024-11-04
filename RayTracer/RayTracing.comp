@@ -69,12 +69,10 @@ vec3 pixelColor(ivec2 pixelCoord, inout uvec4 state){
     for (int i = 0; i < maxBounces; i++){
         bool didHit = hit(record, state);
 
-        if (didHit && record.didScatter){
-            record.initRay = record.scatteredRay;
-        } else if (didHit && !record.didScatter){
+        if (didHit && !record.didScatter){
             break;
-        } else {
-            return record.rayColor * gradientColor(record.initRay.direction);
+        } else if (!didHit){
+            return record.rayColor * gradientColor(record.ray.direction);
         }
     }
     return vec3(0.0, 0.0, 0.0);
@@ -93,7 +91,6 @@ vec4 antialiasing(ivec2 pixelCoord, inout uvec4 state){
 void main(){
     ivec2 pixelCoord = ivec2(gl_GlobalInvocationID.xy); // Get the global invocation ID in order to determine the exact pixel location. 
     uvec4 state = imageLoad(seeds, pixelCoord);
-    
     vec4 pixel = antialiasing(pixelCoord, state);
 
     imageStore(seeds, pixelCoord, state);

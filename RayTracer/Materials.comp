@@ -9,7 +9,7 @@ void lambertianScatter(vec3 pointHit, inout hitRecord record, inout uvec4 state)
     }
 
     record.didScatter = true;
-    record.scatteredRay = scatteredRay;
+    record.ray = scatteredRay;
 }
 
 // General scattering 
