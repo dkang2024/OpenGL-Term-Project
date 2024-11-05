@@ -25,7 +25,7 @@ vec3 findSphereNormalVector(hitRecord record, sphere3 sphere){
     return (record.pointHit - sphere.center.xyz) / sphere.radius;
 }
 
-// Check if the ray intersects with the sphere using the quadratic formula with math gotten from https://www.cs.colostate.edu/~cs410/yr2016fa/more_progress/cs410_F16_Lecture14.pdf. Automaticall deal with returning the lesser t by taking the negative sign first. 
+// Check if the ray intersects with the sphere using the quadratic formula with math gotten from https://www.cs.colostate.edu/~cs410/yr2016fa/more_progress/cs410_F16_Lecture14.pdf. Automatically deal with returning the lesser t by taking the negative sign first. 
 bool checkSphereIntersection(float a, float h, float discriminant, ray3 ray, inout hitRecord record){
     float t = simplifiedQuadFormula(a, h, discriminant, -1);
     if (outOfBounds(record.tValues, t)){

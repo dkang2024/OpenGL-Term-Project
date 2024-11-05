@@ -1,12 +1,8 @@
 // Dealing with seperate structures for materials ID 0 = Lambertian material. 
 
-// Lambertian scattering for a material
+// Lambertian scattering for a material (thanks to https://raytracing.github.io/books/RayTracingInOneWeekend.html#movingcameracodeintoitsownclass for giving me the math necessary for this)
 void lambertianScatter(inout hitRecord record, inout uvec4 state){
     ray3 scatteredRay = ray3(record.pointHit, record.normalVector + randomVectorOnUnitSphere(state));
-
-    if (nearZero(scatteredRay.direction)){
-        scatteredRay.direction = record.normalVector;
-    }
 
     record.didScatter = true;
     record.scatteredRay = scatteredRay;

@@ -16,5 +16,5 @@ tInterval initDefaultTInterval(){
 
 // Check if the t value that the ray intersection test returns is out of bounds of the tInterval
 bool outOfBounds(tInterval interval, float t){
-    return interval.tMin >= t || t >= interval.t;
+    return t < interval.tMin || interval.t < t;
 }

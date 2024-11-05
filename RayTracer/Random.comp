@@ -1,5 +1,7 @@
 // Random number generation with https://developer.nvidia.com/gpugems/gpugems3/part-vi-gpu-computing/chapter-37-efficient-random-number-generation-and-application's algorithm.
 
+#define PI 3.14159265358979323846
+
 uint TausStep(uint z, int S1, int S2, int S3, uint M){
     uint b = (((z << S1) ^ z) >> S2);
     return (((z & M) << S3) ^ b);    
@@ -16,6 +18,14 @@ float rand(inout uvec4 state){
     state.w = LCGStep(state.w, 1664525, 1013904223);
 
     return 2.3283064365387e-10 * (state.x ^ state.y ^ state.z ^ state.w);
+}
+
+vec2 boxMuller(inout uvec4 state){
+    float u0 = rand(state);
+    float u1 = rand(state);
+    float r = sqrt(-2 * log(u0));
+    float theta = 2 * PI * u1;
+    return vec2(r * sin(theta), r * cos(theta));
 }
 
 // Return a random number between the given range
