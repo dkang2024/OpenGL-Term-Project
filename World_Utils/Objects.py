@@ -1,6 +1,13 @@
+from Settings import *
+
 class sphere3:
     '''
-    Class for storing basic necessary attributes about a sphere to render
+    Class for storing basic necessary attributes about a sphere to render and recording them to the SSBO
     '''
-    def __init__(self, center, radius, color, materialID, materialParameter):
-        self.center, self.radius, self.color, self.materialID, self.materialParameter = center, radius, color, materialID, materialParameter 
+    def __init__(self, center, radius, material):
+        self.center, self.radius, self.material = center, radius, material
+
+    def record(self, renderArray, i):
+        renderArray[i]['center'] = glm.vec4(self.center, 0)
+        renderArray[i]['radius'] = self.radius 
+        self.material.record(renderArray, i)
