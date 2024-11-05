@@ -60,7 +60,7 @@ bool hitSphere(sphere3 sphere, ray3 ray, inout hitRecord record, inout uvec4 sta
     // Note that the ideas for the hit record and storing the intersection points and variables like this came from https://raytracing.github.io/books/RayTracingInOneWeekend.html#movingcameracodeintoitsownclass. Heavily modified though :).
     record.normalVector = findSphereNormalVector(record, sphere);
     isFrontFace(ray, record);
-    scatter(sphere.materialID, record, state);
+    scatter(sphere.materialID, sphere.materialParameter, ray, record, state);
     record.rayColor = sphere.color.rgb;
     return true;
 }

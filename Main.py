@@ -24,18 +24,24 @@ class Test(mglw.WindowConfig):
         self.initRand()
 
         self.rayTracer = self.ctx.compute_shader(loadComputeShader(self.ctx, 'RayTracer', 'RayTracing'))
-        self.rayTracer['maxBounces'] = 4
-        self.rayTracer['samplesPerPixel'] = 2
+        self.rayTracer['maxBounces'] = 10
+        self.rayTracer['samplesPerPixel'] = 50
 
         self.camera = viewerCamera(self, glm.vec3(0, 0, 0), 1, 60, 0.2)
         self.screenCoords = mglw.geometry.quad_fs(attr_names = screenNames, normals = False, name = 'Screen Coordinates')
         self.crosshair = windowCrosshair(self, 0.03, glm.vec3(1.0, 1.0, 1.0), self.window_size) #type: ignore
 
         self.world = sceneWorld(self.ctx, self.rayTracer)
+
         materialGround = lambertianMaterial(glm.vec3(0.8, 0.8, 0))
         materialCenter = lambertianMaterial(glm.vec3(0.1, 0.2, 0.5))
-        self.world.addHittable(sphere3(glm.vec3(0, 0, -1), 0.5, materialCenter))
+        materialLeft = reflectiveMaterial(glm.vec3(0.8, 0.8, 0.8), 0.3)
+        materialRight = reflectiveMaterial(glm.vec3(0.8, 0.6, 0.2), 1.0)
+        
         self.world.addHittable(sphere3(glm.vec3(0, -100.5, -1), 100, materialGround))
+        self.world.addHittable(sphere3(glm.vec3(0, 0, -1), 0.5, materialCenter))
+        self.world.addHittable(sphere3(glm.vec3(-1, 0, -1), 0.5, materialLeft))
+        self.world.addHittable(sphere3(glm.vec3(1, 0, -1), 0.5, materialRight))
 
         self.world.createRenderArray()
         self.world.assignRender()

@@ -17,3 +17,5 @@ vec3 randomVectorOnUnitSphere(inout uvec4 state){
     }
     return normalize(randVec);
 }
+
+// Refract a ray with math given by https://raytracing.github.io/books/RayTracingInOneWeekend.html 

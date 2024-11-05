@@ -1,6 +1,6 @@
 // Dealing with seperate structures for materials ID 0 = Lambertian material. 
 
-// Lambertian scattering for a material (thanks to https://raytracing.github.io/books/RayTracingInOneWeekend.html#movingcameracodeintoitsownclass for giving me the math necessary for this)
+// Lambertian scattering for a material (thanks to https://raytracing.github.io/books/RayTracingInOneWeekend for giving me the math necessary for this)
 void lambertianScatter(inout hitRecord record, inout uvec4 state){
     ray3 scatteredRay = ray3(record.pointHit, record.normalVector + randomVectorOnUnitSphere(state));
 
@@ -8,10 +8,26 @@ void lambertianScatter(inout hitRecord record, inout uvec4 state){
     record.scatteredRay = scatteredRay;
 }
 
+// Scattering for reflective objects with the math given by https://raytracing.github.io/books/RayTracingInOneWeekend
+void reflectiveScatter(float fuzz, ray3 ray, inout hitRecord record, inout uvec4 state){
+    vec3 reflectDir = reflect(ray.direction, record.normalVector);
+    reflectDir = normalize(reflectDir) + fuzz * randomVectorOnUnitSphere(state);
+    ray3 scatteredRay = ray3(record.pointHit, reflectDir);
+
+    if (dot(reflectDir, record.normalVector) > 0){
+        record.didScatter = true;
+    } else {
+        record.didScatter = false;
+    }
+    record.scatteredRay = scatteredRay;
+}
+
 // General scattering 
-void scatter(int materialID, inout hitRecord record, inout uvec4 state){
+void scatter(int materialID, float materialParameter, ray3 ray, inout hitRecord record, inout uvec4 state){
     if (materialID == 0){
         lambertianScatter(record, state);
+    } else if (materialID == 1){
+        reflectiveScatter(materialParameter, ray, record, state);
     }
 }
 
