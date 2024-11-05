@@ -18,4 +18,9 @@ vec3 randomVectorOnUnitSphere(inout uvec4 state){
     return normalize(randVec);
 }
 
-// Refract a ray with math given by https://raytracing.github.io/books/RayTracingInOneWeekend.html 
+// Use Schlick's approximation to get the reflectance. Introduced the math throguh https://raytracing.github.io/books/RayTracingInOneWeekend.html. 
+float reflectance(float cosTheta, float etaRatio){
+    float r0 = (1 - etaRatio) / (1 + etaRatio);
+    r0 = pow(r0, 2);
+    return r0 + (1 - r0) * pow(1 - cosTheta, 5);
+}

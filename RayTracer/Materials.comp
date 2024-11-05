@@ -22,12 +22,35 @@ void reflectiveScatter(float fuzz, ray3 ray, inout hitRecord record, inout uvec4
     record.scatteredRay = scatteredRay;
 }
 
+// Scattering for objects where both refraction and reflection is possible. Math given by https://raytracing.github.io/books/RayTracingInOneWeekend.html 
+void dielectricScatter(float etaRatio, ray3 ray, inout hitRecord record, inout uvec4 state){
+    if (record.frontFace){
+        etaRatio = 1 / etaRatio;
+    } 
+
+    vec3 unitDirection = normalize(ray.direction);
+    float cosTheta = min(dot(-unitDirection, record.normalVector), 1);
+    float sinTheta = sqrt(1 - pow(cosTheta, 2));
+
+    vec3 rayDir; 
+    if (etaRatio * sinTheta > 1 || reflectance(cosTheta, etaRatio) > rand(state)){
+        rayDir = reflect(unitDirection, record.normalVector);
+    } else {
+        rayDir = refract(unitDirection, record.normalVector, etaRatio);
+    }
+    
+    record.didScatter = true; 
+    record.scatteredRay = ray3(record.pointHit, rayDir);
+}
+
 // General scattering 
 void scatter(int materialID, float materialParameter, ray3 ray, inout hitRecord record, inout uvec4 state){
     if (materialID == 0){
         lambertianScatter(record, state);
     } else if (materialID == 1){
         reflectiveScatter(materialParameter, ray, record, state);
+    } else if (materialID == 2){
+        dielectricScatter(materialParameter, ray, record, state);
     }
 }
 

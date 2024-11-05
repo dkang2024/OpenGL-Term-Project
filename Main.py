@@ -24,8 +24,8 @@ class Test(mglw.WindowConfig):
         self.initRand()
 
         self.rayTracer = self.ctx.compute_shader(loadComputeShader(self.ctx, 'RayTracer', 'RayTracing'))
-        self.rayTracer['maxBounces'] = 10
-        self.rayTracer['samplesPerPixel'] = 50
+        self.rayTracer['maxBounces'] = 4
+        self.rayTracer['samplesPerPixel'] = 2
 
         self.camera = viewerCamera(self, glm.vec3(0, 0, 0), 1, 60, 0.2)
         self.screenCoords = mglw.geometry.quad_fs(attr_names = screenNames, normals = False, name = 'Screen Coordinates')
@@ -35,7 +35,7 @@ class Test(mglw.WindowConfig):
 
         materialGround = lambertianMaterial(glm.vec3(0.8, 0.8, 0))
         materialCenter = lambertianMaterial(glm.vec3(0.1, 0.2, 0.5))
-        materialLeft = reflectiveMaterial(glm.vec3(0.8, 0.8, 0.8), 0.3)
+        materialLeft = dielectricMaterial(1 / 1.5)
         materialRight = reflectiveMaterial(glm.vec3(0.8, 0.6, 0.2), 1.0)
         
         self.world.addHittable(sphere3(glm.vec3(0, -100.5, -1), 100, materialGround))
