@@ -1,6 +1,6 @@
 from Settings import *
 
-class sceneWorld:
+class World:
     '''
     Create the scene with a list of hittables that are passed as a Shader Storage Buffer Object (SSBO) to the ray tracing compute shader
     '''

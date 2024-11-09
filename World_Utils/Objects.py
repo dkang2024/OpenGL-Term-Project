@@ -1,6 +1,6 @@
 from Settings import *
 
-class sphere3:
+class Sphere:
     '''
     Class for storing basic necessary attributes about a sphere to render and recording them to the SSBO
     '''

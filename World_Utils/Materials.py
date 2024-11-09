@@ -1,6 +1,6 @@
 from Settings import *
 
-class lambertianMaterial:
+class LambertianMaterial:
     '''
     Class for storing all the attributes with a lambertian material and uploading the attributes to the render array
     '''
@@ -11,7 +11,7 @@ class lambertianMaterial:
         renderArray[i]['color'] = glm.vec4(self.color, 0)
         renderArray[i]['materialID'] = 0
 
-class reflectiveMaterial:
+class ReflectiveMaterial:
     '''
     Class for storing all the attributes with a reflective material and uploading the attributes to the render array
     '''
@@ -23,7 +23,7 @@ class reflectiveMaterial:
         renderArray[i]['materialID'] = 1
         renderArray[i]['materialParameter'] = self.fuzz
 
-class dielectricMaterial:
+class DielectricMaterial:
     '''
     Class for storing all the attributes with a dielectric material and uploading the attributes to the render array
     '''
