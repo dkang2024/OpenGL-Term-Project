@@ -1,0 +1,8 @@
+// Apply a texture color to return the color of the pixel
+vec3 applyTexture(vec3 objectColor, int objectTextureID, vec2 uv){
+    if (objectTextureID == 0){
+        return objectColor;
+    } else if (objectTextureID == 1){
+        return texture(brickWall, uv).rgb;
+    }
+}

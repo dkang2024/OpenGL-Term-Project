@@ -1,6 +1,7 @@
 from Settings import *
 from Window_Utils import *
 from World_Utils import *
+from World_Utils.Textures import Texture #Just because Pylance doesn't like working
 
 class screenNames:
     POSITION = 'vertexPosition'
@@ -18,6 +19,8 @@ class Test(mglw.WindowConfig):
         self.wnd.fullscreen_key = self.wnd.keys.F12
         self.wnd.mouse_exclusivity = True 
 
+        self.loadTextures()
+
         self.ctx.gc_mode = 'auto'
         self.program = self.ctx.program(*loadVertexAndFrag('Window', 'Window', 'Window'))
         self.initScreen()
@@ -33,10 +36,10 @@ class Test(mglw.WindowConfig):
 
         self.world = World(self.ctx, self.rayTracer)
 
-        materialGround = LambertianMaterial(glm.vec3(0.8, 0.8, 0))
-        materialCenter = LambertianMaterial(glm.vec3(0.1, 0.2, 0.5))
+        materialGround = LambertianMaterial(Texture(glm.vec3(0.8, 0.8, 0)))
+        materialCenter = LambertianMaterial(Texture(glm.vec3(0.1, 0.2, 0.5)))
         materialLeft = DielectricMaterial(1 / 1.5)
-        materialRight = ReflectiveMaterial(glm.vec3(0.8, 0.6, 0.2), 1.0)
+        materialRight = ReflectiveMaterial(Texture(glm.vec3(0.8, 0.6, 0.2)), 1.0)
         
         self.world.addHittable(Sphere(glm.vec3(0, -100.5, -1), 100, materialGround))
         self.world.addHittable(Sphere(glm.vec3(0, 0, -1), 0.5, materialCenter))
@@ -45,6 +48,15 @@ class Test(mglw.WindowConfig):
 
         self.world.createRenderArray()
         self.world.assignRender()
+
+    def loadTextures(self):
+        '''
+        Register the texture directory to moderngl window and load all the textures
+        '''
+        mglw.resources.register_texture_dir(os.path.abspath('Textures'))
+        
+        self.brickWall = self.load_texture_2d('Brick Wall.jpg')
+        self.brickWall.use(1)
            
     def initScreen(self):
         '''
@@ -53,7 +65,7 @@ class Test(mglw.WindowConfig):
         self.screen = self.ctx.texture(self.window_size, 4, dtype = 'f4')
         self.screen.filter = (mgl.NEAREST, mgl.NEAREST)
         self.screen.bind_to_image(0)        
-        self.screen.use(0)
+        self.screen.use(0)       
      
     def initRand(self):
         '''
@@ -63,7 +75,6 @@ class Test(mglw.WindowConfig):
         self.seed = RandGen.integers(128, 100000, (*self.window_size, 4), dtype = 'u4')
         self.seed = self.ctx.texture(self.window_size, 4, data = self.seed, dtype = 'u4')
         self.seed.bind_to_image(1)
-        self.seed.use(1)
 
     def cameraMovementKeys(self):
         '''

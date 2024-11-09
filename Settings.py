@@ -7,5 +7,6 @@ import pyglet
 from pyglet import shapes 
 import time 
 import glm 
+import os 
 
 MAX_ANGLE = 89

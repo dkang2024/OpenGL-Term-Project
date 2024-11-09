@@ -24,7 +24,7 @@ class World:
             ('radius', 'f4'), # 4 bytes
             ('materialID', 'i4'), # 4 bytes
             ('materialParameter', 'f4'), # 4 bytes
-            ('padding', 'f4') # 4 bytes
+            ('textureID', 'i4') # 4 bytes
         ])
 
         self.renderArray = np.empty(len(self.hittableList), sphereDType)

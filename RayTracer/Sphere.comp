@@ -5,7 +5,7 @@ struct sphere3{
     float radius;
     int materialID;
     float materialParameter;
-    float padding;
+    int textureID;
 };
 
 // Sphere ray intersection helper functions 
@@ -61,6 +61,7 @@ bool hitSphere(sphere3 sphere, ray3 ray, inout hitRecord record, inout uvec4 sta
     record.normalVector = findSphereNormalVector(record, sphere);
     isFrontFace(ray, record);
     scatter(sphere.materialID, sphere.materialParameter, ray, record, state);
-    record.rayColor = sphere.color.rgb;
+
+    record.rayColor = applyTexture(sphere.color.rgb, sphere.textureID, vec2(0));
     return true;
 }

@@ -1,6 +1,8 @@
 // Initialize the version
 #version 460 core
 
+layout(binding = 1) uniform sampler2D brickWall;
+
 // Import files here using the "include" statement that Python processes with string processing and txt file processing
 #include "Random"
 #include "Vectors"
@@ -9,6 +11,7 @@
 #include "HitRecord"
 #include "Materials"
 #include "Camera"
+#include "Textures"
 #include "Sphere"
 
 // Set up invocation size and take in the screen texture to modify it per pixel. Note that the size volume is 32 (which is optimized for NVIDIA gpus rather than AMD gpus [which prefer a size of multiples of 64])
