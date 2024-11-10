@@ -38,7 +38,7 @@ class Test(mglw.WindowConfig):
         materialGround = LambertianMaterial(Texture(glm.vec3(0.8, 0.8, 0)))
         materialCenter = LambertianMaterial(Texture('Earth')) #glm.vec3(0.1, 0.2, 0.5)
         materialLeft = DielectricMaterial(1 / 1.5)
-        materialRight = ReflectiveMaterial(Texture(glm.vec3(0.8, 0.6, 0.2)), 1.0)
+        materialRight = ReflectiveMaterial(glm.vec3(0.8, 0.6, 0.2), 0.1)
         
         self.world.addHittable(Sphere(glm.vec3(0, -100.5, -1), 100, materialGround))
         self.world.addHittable(Sphere(glm.vec3(0, 0, -1), 0.5, materialCenter))

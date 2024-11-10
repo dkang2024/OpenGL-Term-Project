@@ -15,11 +15,12 @@ class ReflectiveMaterial:
     '''
     Class for storing all the attributes with a reflective material and uploading the attributes to the render array
     '''
-    def __init__(self, texture, fuzz):
-        self.texture, self.fuzz = texture, fuzz 
+    def __init__(self, color, fuzz):
+        self.color, self.fuzz = color, fuzz 
 
     def record(self, renderArray, i):
-        self.texture.record(renderArray, i)
+        renderArray[i]['color'] = glm.vec4(self.color, 0)
+        renderArray[i]['textureID'] = 0
         renderArray[i]['materialID'] = 1
         renderArray[i]['materialParameter'] = self.fuzz
 
@@ -31,7 +32,7 @@ class DielectricMaterial:
         self.refractionIndex = refractionIndex 
     
     def record(self, renderArray, i):
-        renderArray[i]['color'] = glm.vec4(1, 1, 1, -1)
+        renderArray[i]['color'] = glm.vec4(1, 1, 1, 0)
         renderArray[i]['textureID'] = 0
         renderArray[i]['materialID'] = 2 
         renderArray[i]['materialParameter'] = self.refractionIndex
