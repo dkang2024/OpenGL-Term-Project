@@ -52,9 +52,9 @@ class World:
         Assign the render values to the compute shader in order to render all the hittables
         '''
         self.rayTracer['numSpheres'] = len(self.sphereList)
-        self.spheres = self.ctx.buffer(self.sphereArray, dynamic = True)
+        self.spheres = self.ctx.buffer(self.sphereArray)
         self.spheres.bind_to_storage_buffer(0)
 
-        self.rayTracer['numQuads'] = len(self.quadList)
-        self.quads = self.ctx.buffer(self.quadArray, dynamic = True)
+        self.rayTracer['numQuads'] = 0
+        self.quads = self.ctx.buffer(self.quadArray)
         self.quads.bind_to_storage_buffer(1)

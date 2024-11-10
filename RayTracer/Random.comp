@@ -1,4 +1,4 @@
-// Random number generation with https://developer.nvidia.com/gpugems/gpugems3/part-vi-gpu-computing/chapter-37-efficient-random-number-generation-and-application's algorithm.
+// Random number generation with https://developer.nvidia.com/gpugems/gpugems3/part-vi-gpu-computing/chapter-37-efficient-random-number-generation-and-application's algorithm. Note that I don't understand the math / stats with this (I basically copy pasted and adapted to opengl)
 
 #define PI 3.14159265358979323846
 

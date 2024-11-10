@@ -1,4 +1,4 @@
-// Quad Struct
+// Quad Struct. Idea for quads from https://raytracing.github.io/books/RayTracingTheNextWeek.html 
 struct quad3{
     vec4 point;
     vec4 color;
@@ -9,11 +9,27 @@ struct quad3{
     int textureID;
 };
 
-// Ray-plane intersection with equations derived from 259 
-bool checkPlaneIntersection(quad3 quad, ray3 ray, inout hitRecord record){
-    return false; 
-}
-
+// Ray-plane intersection with equations derived from 259 and with some math assistance from https://raytracing.github.io/books/RayTracingTheNextWeek.html 
 bool hitQuad(quad3 quad, ray3 ray, inout hitRecord record, inout uvec4 state){
-    return false;
+    vec3 normalVector = quad.normalVector.xyz;
+    float denominator = dot(normalVector, ray.direction);
+    float epsilon = 1e-5;
+    
+    if (denominator < epsilon){
+        return false; // No hit for nearly parallel rays
+    }
+    
+    float t = (quad.D - dot(normalVector, ray.origin)) / denominator;
+    if (outOfBounds(record.tValues, t)){
+        return false;
+    }
+
+    record.pointHit = rayIntersectPoint(ray, t);
+    record.tValues.t = t; 
+    record.normalVector = normalVector;
+    isFrontFace(ray, record);
+    scatter(quad.materialID, quad.materialParameter, ray, record, state);
+    record.rayColor = quad.color.rgb;
+
+    return true;
 }

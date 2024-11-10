@@ -96,13 +96,18 @@ vec3 pixelColor(ivec2 pixelCoord, inout uvec4 state){
     return vec3(0.0, 0.0, 0.0);
 }
 
+// Gamut correction
+vec3 gamutCorrect(vec3 pixel){
+    return sqrt(pixel);
+}
+
 // Implement basic antialiasing using a random point in the pixel to shoot rays through and averaging color
 vec4 antialiasing(ivec2 pixelCoord, inout uvec4 state){
     vec3 pixel = initDefaultVec();
     for (int i = 0; i < samplesPerPixel; i++){
         pixel += pixelColor(pixelCoord, state);
     }
-    return vec4(sqrt(pixel / samplesPerPixel), 1.0);
+    return vec4(gamutCorrect(pixel / samplesPerPixel), 1.0);
 }
 
 // Main Function
