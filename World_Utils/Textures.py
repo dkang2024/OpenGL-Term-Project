@@ -18,7 +18,10 @@ class Texture:
         Convert a texture string to a texture index 
         '''
         if texture == 'Brick Wall':
-            return 1
+            return 1 
+        elif texture == 'Earth':
+            return 2
+        raise RuntimeError('This texture does not exist!')
         
     def record(self, renderArray, i):
         '''

@@ -21,8 +21,9 @@ float simplifiedQuadFormula(float a, float h, float discriminant, float signValu
 }
 
 // Find the sphere's normal vector (not always made to point against the ray [this will be done in hit record])
-vec3 findSphereNormalVector(hitRecord record, sphere3 sphere){
-    return (record.pointHit - sphere.center.xyz) / sphere.radius;
+vec3 findSphereNormalVector(inout hitRecord record, sphere3 sphere){
+    record.normalVector = (record.pointHit - sphere.center.xyz) / sphere.radius;
+    return record.normalVector;
 }
 
 // Check if the ray intersects with the sphere using the quadratic formula with math gotten from https://www.cs.colostate.edu/~cs410/yr2016fa/more_progress/cs410_F16_Lecture14.pdf. Automatically deal with returning the lesser t by taking the negative sign first. 
@@ -38,6 +39,13 @@ bool checkSphereIntersection(float a, float h, float discriminant, ray3 ray, ino
     record.tValues.t = t; 
     record.pointHit = rayIntersectPoint(ray, t);
     return true;
+}
+
+// Return the sphere's texture coordinates using math from https://en.wikipedia.org/wiki/UV_mapping
+vec2 sphereUV(vec3 outVec){
+    float u = 0.5 + atan(outVec.z, outVec.x) / (2 * PI);
+    float v = 0.5 + asin(outVec.y) / PI;
+    return vec2(u, v);
 }
 
 // Do all of the complete logic to check if a ray intersects with a sphere, including finding the discriminant and other values. The difference between this and checkSphereIntersection is that a, h, discriminant are calculated
@@ -58,10 +66,10 @@ bool hitSphere(sphere3 sphere, ray3 ray, inout hitRecord record, inout uvec4 sta
     }
 
     // Note that the ideas for the hit record and storing the intersection points and variables like this came from https://raytracing.github.io/books/RayTracingInOneWeekend.html#movingcameracodeintoitsownclass. Heavily modified though :).
-    record.normalVector = findSphereNormalVector(record, sphere);
+    vec3 outwardNormalVector = findSphereNormalVector(record, sphere);
     isFrontFace(ray, record);
     scatter(sphere.materialID, sphere.materialParameter, ray, record, state);
 
-    record.rayColor = applyTexture(sphere.color.rgb, sphere.textureID, vec2(0));
+    record.rayColor = applyTexture(sphere.color.rgb, sphere.textureID, sphereUV(outwardNormalVector));
     return true;
 }

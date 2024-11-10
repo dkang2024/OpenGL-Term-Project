@@ -33,11 +33,10 @@ class Test(mglw.WindowConfig):
         self.camera = viewerCamera(self, glm.vec3(0, 0, 0), 1, 60, 0.2)
         self.screenCoords = mglw.geometry.quad_fs(attr_names = screenNames, normals = False, name = 'Screen Coordinates')
         self.crosshair = windowCrosshair(self, 0.03, glm.vec3(1.0, 1.0, 1.0), self.window_size) #type: ignore
-
         self.world = World(self.ctx, self.rayTracer)
 
         materialGround = LambertianMaterial(Texture(glm.vec3(0.8, 0.8, 0)))
-        materialCenter = LambertianMaterial(Texture(glm.vec3(0.1, 0.2, 0.5)))
+        materialCenter = LambertianMaterial(Texture('Earth')) #glm.vec3(0.1, 0.2, 0.5)
         materialLeft = DielectricMaterial(1 / 1.5)
         materialRight = ReflectiveMaterial(Texture(glm.vec3(0.8, 0.6, 0.2)), 1.0)
         
@@ -49,14 +48,22 @@ class Test(mglw.WindowConfig):
         self.world.createRenderArray()
         self.world.assignRender()
 
+    def loadTexture(self, name):
+        '''
+        Load a specific texture into the ray tracer
+        '''
+        texture = self.load_texture_2d(name)
+        texture.use(self.textureBind)
+        self.textureBind += 1
+
     def loadTextures(self):
         '''
         Register the texture directory to moderngl window and load all the textures
         '''
+        self.textureBind = 1
         mglw.resources.register_texture_dir(os.path.abspath('Textures'))
-        
-        self.brickWall = self.load_texture_2d('Brick Wall.jpg')
-        self.brickWall.use(1)
+        self.loadTexture('Brick Wall.jpg')
+        self.loadTexture('Earth.jpg')
            
     def initScreen(self):
         '''

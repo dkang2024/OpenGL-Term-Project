@@ -4,5 +4,7 @@ vec3 applyTexture(vec3 objectColor, int objectTextureID, vec2 uv){
         return objectColor;
     } else if (objectTextureID == 1){
         return texture(brickWall, uv).rgb;
+    } else if (objectTextureID == 2){
+        return texture(earth, uv).rgb;
     }
 }
