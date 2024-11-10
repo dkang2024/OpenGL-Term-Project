@@ -11,3 +11,31 @@ class Sphere:
         renderArray[i]['center'] = glm.vec4(self.center, 0)
         renderArray[i]['radius'] = self.radius 
         self.material.record(renderArray, i)
+
+class Quad:
+    '''
+    Class for creating and recording a quad and then rendering it to the SSBO
+    '''
+    def __init__(self, point, side1, side2, material):
+        self.point, self.side1, self.side2, self.material = point, side1, side2, material
+
+        self.normalVector = self.calculateNormalVector()
+        self.D = self.calculateD()
+    
+    def calculateNormalVector(self):
+        '''
+        Solve for the plane's normal vector (thanks 259)
+        '''
+        return glm.normalize(glm.cross(self.side1, self.side2))
+
+    def calculateD(self):
+        '''
+        Calculate the plane's D value (or the value that's a constant in the equation of a plane [thanks 259])
+        '''
+        return glm.dot(self.normalVector, self.point)
+    
+    def record(self, renderArray, i):
+        renderArray[i]['point'] = glm.vec4(self.point, 0)
+        renderArray[i]['normalVector'] = glm.vec4(self.normalVector, 0)
+        renderArray[i]['D'] = self.D 
+        self.material.record(renderArray, i)

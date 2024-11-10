@@ -40,6 +40,7 @@ class Test(mglw.WindowConfig):
         materialLeft = DielectricMaterial(1 / 1.5)
         materialRight = ReflectiveMaterial(glm.vec3(0.8, 0.6, 0.2), 0.1)
         
+        self.world.addHittable(Quad(glm.vec3(0, 0, 0), glm.vec3(1, 0, 0), glm.vec3(0, 1, 0), materialGround))
         self.world.addHittable(Sphere(glm.vec3(0, -100.5, -1), 100, materialGround))
         self.world.addHittable(Sphere(glm.vec3(0, 0, -1), 0.5, materialCenter))
         self.world.addHittable(Sphere(glm.vec3(-1, 0, -1), 0.5, materialLeft))

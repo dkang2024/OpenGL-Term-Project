@@ -1,0 +1,19 @@
+// Quad Struct
+struct quad3{
+    vec4 point;
+    vec4 color;
+    vec4 normalVector;
+    float D; 
+    int materialID;
+    float materialParameter;
+    int textureID;
+};
+
+// Ray-plane intersection with equations derived from 259 
+bool checkPlaneIntersection(quad3 quad, ray3 ray, inout hitRecord record){
+    return false; 
+}
+
+bool hitQuad(quad3 quad, ray3 ray, inout hitRecord record, inout uvec4 state){
+    return false;
+}
