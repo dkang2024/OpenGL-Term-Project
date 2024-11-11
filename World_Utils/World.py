@@ -17,6 +17,16 @@ class World:
             self.sphereList.append(hittable)
         else:
             self.quadList.append(hittable)
+
+    @staticmethod
+    def recordToRender(objectList, dType):
+        '''
+        Record the object list in an array with a dtype specified
+        '''
+        objectArray = np.empty(len(objectList), dType)
+        for i, hittable in enumerate(objectList):
+            hittable.record(objectArray, i)
+        return objectArray
         
     def createRenderArray(self):
         '''
@@ -30,22 +40,21 @@ class World:
             ('materialParameter', 'f4'), # 4 bytes
             ('textureID', 'i4') # 4 bytes
         ])
-        self.sphereArray = np.empty(len(self.sphereList), sphereDType)
-        for i, sphere in enumerate(self.sphereList):
-            sphere.record(self.sphereArray, i)
-       
+        self.sphereArray = self.recordToRender(self.sphereList, sphereDType)
+        
         quadDType = np.dtype([
             ('point', 'f4', 4),
+            ('side1', 'f4', 4),
+            ('side2', 'f4', 4),
             ('color', 'f4', 4),
             ('normalVector', 'f4', 4),
+            ('W', 'f4', 4),
             ('D', 'f4'), 
             ('materialID', 'i4'),
             ('materialParameter', 'f4'),
             ('textureID', 'i4')
         ])
-        self.quadArray = np.empty(len(self.quadList), quadDType)
-        for i, quad in enumerate(self.quadList):
-            quad.record(self.quadArray, i)
+        self.quadArray = self.recordToRender(self.quadList, quadDType)
 
     def assignRender(self):
         '''
@@ -55,6 +64,7 @@ class World:
         self.spheres = self.ctx.buffer(self.sphereArray)
         self.spheres.bind_to_storage_buffer(0)
 
-        self.rayTracer['numQuads'] = 0
+        self.rayTracer['numQuads'] = len(self.quadList)
         self.quads = self.ctx.buffer(self.quadArray)
         self.quads.bind_to_storage_buffer(1)
+        self.rayTracer['numQuads'] = 0

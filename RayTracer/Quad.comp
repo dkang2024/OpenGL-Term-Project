@@ -1,13 +1,24 @@
 // Quad Struct. Idea for quads from https://raytracing.github.io/books/RayTracingTheNextWeek.html 
 struct quad3{
     vec4 point;
+    vec4 side1;
+    vec4 side2;
     vec4 color;
     vec4 normalVector;
+    vec4 W;
     float D; 
     int materialID;
     float materialParameter;
     int textureID;
 };
+
+// Inspired by the function from https://raytracing.github.io/books/RayTracingTheNextWeek.html#quadrilaterals/orientingpointsontheplane
+bool isExterior(float alpha, float beta){
+    if (outsideUnitInterval(alpha) || outsideUnitInterval(beta)){
+        return true;
+    }
+    return false;
+}
 
 // Ray-plane intersection with equations derived from 259 and with some math assistance from https://raytracing.github.io/books/RayTracingTheNextWeek.html 
 bool hitQuad(quad3 quad, ray3 ray, inout hitRecord record, inout uvec4 state){
@@ -15,7 +26,7 @@ bool hitQuad(quad3 quad, ray3 ray, inout hitRecord record, inout uvec4 state){
     float denominator = dot(normalVector, ray.direction);
     float epsilon = 1e-5;
     
-    if (denominator < epsilon){
+    if (abs(denominator) < epsilon){
         return false; // No hit for nearly parallel rays
     }
     
@@ -25,11 +36,19 @@ bool hitQuad(quad3 quad, ray3 ray, inout hitRecord record, inout uvec4 state){
     }
 
     record.pointHit = rayIntersectPoint(ray, t);
+    vec3 hitVector = record.pointHit - quad.point.xyz;
+    float alpha = dot(quad.W.xyz, cross(hitVector, quad.side2.xyz));
+    float beta = dot(quad.W.xyz, cross(quad.side1.xyz, hitVector));
+
+    if (isExterior(alpha, beta)){
+        return false;
+    }
+
     record.tValues.t = t; 
     record.normalVector = normalVector;
     isFrontFace(ray, record);
     scatter(quad.materialID, quad.materialParameter, ray, record, state);
-    record.rayColor = quad.color.rgb;
+    record.rayColor = applyTexture(quad.color.rgb, quad.textureID, vec2(alpha, beta));
 
     return true;
 }

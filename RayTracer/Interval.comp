@@ -18,3 +18,8 @@ tInterval initDefaultTInterval(){
 bool outOfBounds(tInterval interval, float t){
     return t < interval.tMin || interval.t < t;
 }
+
+// Check if a value is outside the unit interval
+bool outsideUnitInterval(float value){
+    return value < 0 || value > 1;
+}

@@ -1,6 +1,7 @@
 from Settings import *
 
-class viewerCamera:
+@ti.data_oriented
+class Camera:
     '''
     Class for a moveable pinhole camera. I implemented all the key movement functions myself because it was pretty obvious how to do those things. However, I didn't know the exact math necessary for camera mouse movement so I used https://learnopengl.com/Getting-started/Camera for a reference on the math necessary for camera mouse movement. Any functions that I referenced the website on are explicitly marked.
     '''
@@ -53,25 +54,26 @@ class viewerCamera:
 
         self.calculateLookAt()
     
-    @staticmethod 
-    @njit(cache = True)
-    def scaleWithSensitivity(dx, mouseSensitivity):
+    @staticmethod
+    @ti.kernel
+    def scaleWithSensitivity(dx: float, mouseSensitivity: float) -> float:
         '''
         Calculate scaled dx depending on mouse sensitivity (referenced website)
         '''
         return dx * mouseSensitivity
     
-    @staticmethod 
-    @njit(cache = True)
-    def constrainPitch(pitch, MAX_ANGLE):
+    @staticmethod
+    @ti.kernel
+    def constrainPitch(pitch: float, MAX_ANGLE: int) -> float:
         '''
         Constrain the pitch to be between 89 and -89 to avoid any shenanigans with the camera rotation inverting the view (referenced website) 
         '''
-        if pitch > MAX_ANGLE: 
-            return MAX_ANGLE 
-        elif pitch < -MAX_ANGLE:
-            return -MAX_ANGLE
-        return pitch
+        newPitch = pitch
+        if newPitch > MAX_ANGLE: 
+            newPitch = MAX_ANGLE 
+        elif newPitch < -MAX_ANGLE:
+            newPitch = -MAX_ANGLE
+        return newPitch
     
     def updateMouse(self, dx, dy):
         '''
@@ -91,8 +93,8 @@ class viewerCamera:
         self.lookAt = self.cameraPosition - self.k
 
     @staticmethod
-    @njit(cache = True)
-    def numbaCalculateViewportWidth(viewportHeight, imageWidth, imageHeight):
+    @ti.kernel
+    def taichiCalculateViewportWidth(viewportHeight: float, imageWidth: float, imageHeight: float) -> float:
         '''
         Calculate the viewport width by multiplying the viewport height by the same ratio of the imageWidth / imageHeight 
         '''
@@ -102,7 +104,7 @@ class viewerCamera:
         '''
         Calculate the viewport width
         '''
-        self.viewportWidth = self.numbaCalculateViewportWidth(self.viewportHeight, self.app.window_size[0], self.app.window_size[1])
+        self.viewportWidth = self.taichiCalculateViewportWidth(self.viewportHeight, self.app.window_size[0], self.app.window_size[1])
 
     def calculateViewportHeight(self):
         '''

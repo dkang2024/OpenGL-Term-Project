@@ -1,6 +1,6 @@
 from Loader import *
 
-class windowCrosshair:
+class Crosshair:
     '''
     Class for drawing a crosshair on the screen 
     '''
