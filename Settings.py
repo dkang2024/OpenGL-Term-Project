@@ -3,7 +3,6 @@ import math
 import moderngl as mgl 
 import numpy as np
 import taichi as ti
-from numba import njit
 import pyglet
 from pyglet import shapes 
 import time 
