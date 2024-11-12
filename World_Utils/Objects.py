@@ -19,15 +19,22 @@ class Quad:
     def __init__(self, point, side1, side2, material):
         self.point, self.side1, self.side2, self.material = point, side1, side2, material
 
+        self.n = self.calculateN()
         self.normalVector = self.calculateNormalVector()
         self.D = self.calculateD()
         self.W = self.calculateW()
     
+    def calculateN(self):
+        '''
+        Solve for the plane's normal vector (without normalizing it to a unit vector) (thanks 259)
+        '''
+        return glm.cross(self.side1, self.side2)
+
     def calculateNormalVector(self):
         '''
         Solve for the plane's normal vector (thanks 259)
         '''
-        return glm.normalize(glm.cross(self.side1, self.side2))
+        return glm.normalize(self.n)
 
     def calculateD(self):
         '''
@@ -39,7 +46,7 @@ class Quad:
         '''
         Calculate the mathematically useful w value for orienting points on a plane. https://raytracing.github.io/books/RayTracingTheNextWeek.html
         '''
-        return self.normalVector / glm.dot(self.normalVector, self.normalVector)
+        return self.n / glm.dot(self.n, self.n)
     
     def record(self, renderArray, i):
         renderArray[i]['point'] = glm.vec4(self.point, 0)

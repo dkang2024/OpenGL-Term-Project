@@ -28,7 +28,7 @@ class Test(mglw.WindowConfig):
 
         self.rayTracer = self.ctx.compute_shader(loadComputeShader(self.ctx, 'RayTracer', 'RayTracing'))
         self.rayTracer['maxBounces'] = 4
-        self.rayTracer['samplesPerPixel'] = 1
+        self.rayTracer['samplesPerPixel'] = 2
 
         self.camera = Camera(self, glm.vec3(0, 0, 0), 1, 60, 0.2)
         self.screenCoords = mglw.geometry.quad_fs(attr_names = screenNames, normals = False, name = 'Screen Coordinates')
@@ -39,14 +39,13 @@ class Test(mglw.WindowConfig):
         materialCenter = LambertianMaterial(Texture('Earth')) #glm.vec3(0.1, 0.2, 0.5)
         materialLeft = DielectricMaterial(1 / 1.5)
         materialRight = ReflectiveMaterial(glm.vec3(0.8, 0.6, 0.2), 0.1)
-        materialLight = PointLight(glm.vec3(4))
+        materialLight = PointLight(glm.vec3(2))
         
-        self.world.addHittable(Quad(glm.vec3(0, 0, 0), glm.vec3(1, 0, 0), glm.vec3(0, 1, 0), materialCenter))
+        self.world.addHittable(Quad(glm.vec3(0, -0.5, 0), glm.vec3(1, 0, 0), glm.vec3(0, 1, 0), materialCenter))
         self.world.addHittable(Sphere(glm.vec3(0, -100.5, -1), 100, materialGround))
         self.world.addHittable(Sphere(glm.vec3(0, 0, -1), 0.5, materialCenter))
         self.world.addHittable(Sphere(glm.vec3(-1, 0, -1), 0.5, materialLeft))
         self.world.addHittable(Sphere(glm.vec3(1, 0, -1), 0.5, materialRight))
-        
         
         self.world.createRenderArray()
         self.world.assignRender()

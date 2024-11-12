@@ -51,6 +51,8 @@ void scatter(int materialID, float materialParameter, ray3 ray, inout hitRecord 
         reflectiveScatter(materialParameter, ray, record, state);
     } else if (materialID == 2){
         dielectricScatter(materialParameter, ray, record, state);
+    } else if (materialID == 3){
+        record.isLight = true;
     }
 }
 

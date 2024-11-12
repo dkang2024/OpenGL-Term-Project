@@ -7,11 +7,12 @@ struct hitRecord{
     tInterval tValues;
     vec3 rayColor;
     bool frontFace; 
+    bool isLight;
 };
 
 // Creates the default hit record
 hitRecord initDefaultHitRecord(){
-    hitRecord newHitRecord = {initDefaultVec(), initDefaultRay(), false, initDefaultVec(), initDefaultTInterval(), vec3(1.0, 1.0, 1.0), false};
+    hitRecord newHitRecord = {initDefaultVec(), initDefaultRay(), false, initDefaultVec(), initDefaultTInterval(), initDefaultVec(), false, false};
     return newHitRecord;
 }
 
