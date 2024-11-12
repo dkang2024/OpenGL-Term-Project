@@ -42,7 +42,7 @@ class PointLight:
     Class for storing all the attributes with a point light and uploading the attributes to the render array
     '''
     def __init__(self, lightColor):
-        self.lightColor = lightColor 
+        self.lightColor = lightColor
 
     def record(self, renderArray, i):
         renderArray[i]['color'] = glm.vec4(self.lightColor, 0)
