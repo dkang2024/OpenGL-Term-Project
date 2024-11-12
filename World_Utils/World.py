@@ -67,4 +67,3 @@ class World:
         self.rayTracer['numQuads'] = len(self.quadList)
         self.quads = self.ctx.buffer(self.quadArray)
         self.quads.bind_to_storage_buffer(1)
-        self.rayTracer['numQuads'] = 0

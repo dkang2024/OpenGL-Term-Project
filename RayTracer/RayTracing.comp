@@ -82,15 +82,16 @@ vec3 pixelColor(ivec2 pixelCoord, inout uvec4 state){
     
     for (int i = 0; i < maxBounces; i++){
         hitRecord record = initDefaultHitRecord();
-        bool didHit = hit(ray, record, state);
 
-        if (didHit && record.didScatter){
+        if (!hit(ray, record, state)){
+            return throughput * gradientColor(ray.direction);
+        }
+    
+        if (record.didScatter){
             throughput *= record.rayColor;
             ray = record.scatteredRay;
-        } else if (didHit && !record.didScatter){
-            break;
         } else {
-            return throughput * gradientColor(ray.direction);
+            break;
         }
     }
     return vec3(0.0, 0.0, 0.0);

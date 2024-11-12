@@ -36,16 +36,18 @@ class Test(mglw.WindowConfig):
         self.world = World(self.ctx, self.rayTracer)
 
         materialGround = LambertianMaterial(Texture(glm.vec3(0.8, 0.8, 0)))
-        materialCenter = LambertianMaterial(Texture(glm.vec3(0.1, 0.2, 0.5))) #glm.vec3(0.1, 0.2, 0.5)
+        materialCenter = LambertianMaterial(Texture('Earth')) #glm.vec3(0.1, 0.2, 0.5)
         materialLeft = DielectricMaterial(1 / 1.5)
         materialRight = ReflectiveMaterial(glm.vec3(0.8, 0.6, 0.2), 0.1)
+        materialLight = PointLight(glm.vec3(4))
         
         self.world.addHittable(Quad(glm.vec3(0, 0, 0), glm.vec3(1, 0, 0), glm.vec3(0, 1, 0), materialCenter))
         self.world.addHittable(Sphere(glm.vec3(0, -100.5, -1), 100, materialGround))
         self.world.addHittable(Sphere(glm.vec3(0, 0, -1), 0.5, materialCenter))
         self.world.addHittable(Sphere(glm.vec3(-1, 0, -1), 0.5, materialLeft))
         self.world.addHittable(Sphere(glm.vec3(1, 0, -1), 0.5, materialRight))
-
+        
+        
         self.world.createRenderArray()
         self.world.assignRender()
 
