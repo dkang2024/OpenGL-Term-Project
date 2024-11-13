@@ -2,6 +2,7 @@ from Settings import *
 from Window_Utils import *
 from World_Utils import *
 from World_Utils.Textures import Texture #Just because Pylance doesn't like working
+import time 
 
 class screenNames:
     POSITION = 'vertexPosition'
@@ -30,26 +31,31 @@ class Test(mglw.WindowConfig):
         self.rayTracer['maxBounces'] = 4
         self.rayTracer['samplesPerPixel'] = 2
 
-        self.camera = Camera(self, glm.vec3(0, 0, 0), 1, 60, 0.2)
+        self.camera = Camera(self, glm.vec3(278, 278, -10), 1, 60, 0.2)
         self.screenCoords = mglw.geometry.quad_fs(attr_names = screenNames, normals = False, name = 'Screen Coordinates')
         self.crosshair = Crosshair(self, 0.03, glm.vec3(1.0, 1.0, 1.0), self.window_size) #type: ignore
         self.world = World(self.ctx, self.rayTracer)
 
-        materialGround = LambertianMaterial(Texture(glm.vec3(0.8, 0.8, 0)))
-        materialCenter = LambertianMaterial(Texture('Earth')) #glm.vec3(0.1, 0.2, 0.5)
-        materialLeft = DielectricMaterial(1 / 1.5)
-        materialRight = ReflectiveMaterial(glm.vec3(0.8, 0.6, 0.2), 0.1)
-        materialLight = PointLight(glm.vec3(0.5, 2, 0.1))
+        green = LambertianMaterial(Texture(glm.vec3(0, 1, 0)))
+        red = LambertianMaterial(Texture(glm.vec3(1, 0, 0)))
+        white = LambertianMaterial(Texture(glm.vec3(1, 1, 1)))
+        light = PointLight(glm.vec3(15))
+
+        self.world.addHittable(Sphere(glm.vec3(0, 0, 0), 0, white))
         
-        self.world.addHittable(Quad(glm.vec3(0, -0.5, 0), glm.vec3(1, 0, 0), glm.vec3(0, 1, 0), materialLight))
-        self.world.addHittable(Sphere(glm.vec3(0, -100.5, -1), 100, materialGround))
-        self.world.addHittable(Sphere(glm.vec3(0, 0, -1), 0.5, materialCenter))
-        self.world.addHittable(Sphere(glm.vec3(-1, 0, -1), 0.5, materialLeft))
-        self.world.addHittable(Sphere(glm.vec3(1, 0, -1), 0.5, materialRight))
+        self.world.addHittable(Quad(glm.vec3(550, 0, 0), glm.vec3(0, 555, 0), glm.vec3(0, 0, 555), green))
+        self.world.addHittable(Quad(glm.vec3(0, 0, 0), glm.vec3(0, 555, 0), glm.vec3(0, 0, 555), red))
+        self.world.addHittable(Quad(glm.vec3(343, 554, 332), glm.vec3(-130, 0, 0), glm.vec3(0, 0, -105), light))
+        self.world.addHittable(Quad(glm.vec3(0, 0, 0), glm.vec3(555, 0, 0), glm.vec3(0, 0, 555), white))
+        self.world.addHittable(Quad(glm.vec3(555, 555, 555), glm.vec3(-555, 0, 0), glm.vec3(0, 0, -555), white))
+        self.world.addHittable(Quad(glm.vec3(0, 0, 555), glm.vec3(555, 0, 0), glm.vec3(0, 555, 0), white))
+
+        self.world.addHittable(Cube(glm.vec3(130, 0, 65), glm.vec3(295, 165, 230), white))
+        self.world.addHittable(Cube(glm.vec3(265, 0, 295), glm.vec3(430, 330, 460), white))
         
         self.world.createRenderArray()
         self.world.assignRender()
-
+    
     def loadTexture(self, name):
         '''
         Load a specific texture into the ray tracer

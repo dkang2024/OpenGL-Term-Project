@@ -112,7 +112,7 @@ vec4 antialiasing(ivec2 pixelCoord, inout uvec4 state){
     for (int i = 0; i < samplesPerPixel; i++){
         pixel += pixelColor(pixelCoord, state);
     }
-    return vec4(clamp(gamutCorrect(pixel / samplesPerPixel), 0, 1), 1);
+    return vec4(gamutCorrect(pixel / samplesPerPixel), 1);
 }
 
 // Main Function

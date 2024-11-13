@@ -56,3 +56,29 @@ class Quad:
         renderArray[i]['W'] = glm.vec4(self.W, 0)
         renderArray[i]['D'] = self.D 
         self.material.record(renderArray, i)
+
+class Cube:
+    '''
+    Class for creating and recording a cube through a representation by 4 quads
+    '''
+    def __init__(self, point1, point2, material):
+        self.point1, self.point2, self.material = point1, point2, material
+        self.createQuads()
+    
+    def createQuads(self):
+        '''
+        Create all the quads that represent the cube. https://raytracing.github.io/books/RayTracingTheNextWeek.html gave this algorithm to create thix box representation for me. 
+        '''
+        self.quads = []
+        boxMin, boxMax = glm.min(self.point1, self.point2), glm.max(self.point1, self.point2)
+
+        sideX = glm.vec3(boxMax.x - boxMin.x, 0, 0)
+        sideY = glm.vec3(0, boxMax.y - boxMin.y, 0)
+        sideZ = glm.vec3(0, 0, boxMax.z - boxMin.z)
+
+        self.quads.append(Quad(glm.vec3(boxMin.x, boxMin.y, boxMax.z), sideX, sideY, self.material)) # Front 
+        self.quads.append(Quad(glm.vec3(boxMax.x, boxMin.y, boxMax.z), -sideZ, sideY, self.material)) # Right 
+        self.quads.append(Quad(glm.vec3(boxMax.x, boxMin.y, boxMin.z), -sideX, sideY, self.material)) # Back
+        self.quads.append(Quad(glm.vec3(boxMin.x, boxMin.y, boxMin.z), sideZ, sideY, self.material)) # Left 
+        self.quads.append(Quad(glm.vec3(boxMin.x, boxMax.y, boxMax.z), sideX, -sideZ, self.material)) # Top 
+        self.quads.append(Quad(glm.vec3(boxMin.x, boxMin.y, boxMin.z), sideX, sideY, self.material)) # Bottom

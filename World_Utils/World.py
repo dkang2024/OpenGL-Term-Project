@@ -15,8 +15,10 @@ class World:
         '''
         if isinstance(hittable, Sphere):
             self.sphereList.append(hittable)
-        else:
+        elif isinstance(hittable, Quad):
             self.quadList.append(hittable)
+        else:
+            self.quadList = self.quadList + hittable.quads
 
     @staticmethod
     def recordToRender(objectList, dType):
