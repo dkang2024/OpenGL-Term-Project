@@ -85,7 +85,7 @@ vec3 pixelColor(ray3 ray, inout uvec4 state){
         hitRecord record = initDefaultHitRecord();
 
         if (!hit(ray, record, state)){
-            return throughput * vec3(0);
+            return throughput * gradientColor(ray.direction);
         } 
 
         if (record.isLight){
