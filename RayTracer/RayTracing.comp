@@ -77,6 +77,16 @@ bool hit(ray3 ray, inout hitRecord record, inout uvec4 state){
     return didHit;
 }
 
+// Apply the rendering equation with Monte Carlo integration to determine the object color
+vec3 renderingEQ(hitRecord record){
+    float cosTheta = dot(record.normalVector, record.scatteredRay.direction);
+    if (record.materialID == 0){
+        return lambertianBRDF(record.objectColor) * cosTheta * PI / cosTheta;
+    } else {
+        return record.objectColor;
+    }
+}
+
 // Get the pixel color while still reflecting the ray (bouncing it off of surfaces)
 vec3 pixelColor(ray3 ray, inout uvec4 state){
     vec3 throughput = vec3(1.0, 1.0, 1.0);
@@ -85,15 +95,17 @@ vec3 pixelColor(ray3 ray, inout uvec4 state){
         hitRecord record = initDefaultHitRecord();
 
         if (!hit(ray, record, state)){
-            return throughput * gradientColor(ray.direction);
+            return throughput * vec3(0);
         } 
+        
+        // Apply the rendering equation here. Don't allow any more bounces for light so don't ADD emissive. Just multiply by the color
+        throughput *= renderingEQ(record);
 
         if (record.isLight){
-            return record.rayColor * throughput;
+            return throughput;
         }
     
         if (record.didScatter){
-            throughput *= record.rayColor;
             ray = record.scatteredRay;
         } else {
             break;
@@ -107,7 +119,7 @@ vec3 gamutCorrect(vec3 pixel){
     return sqrt(pixel);
 }
 
-// Implement basic antialiasing using a random point in the pixel to shoot rays through and averaging color
+// Implement basic antialiasing (with stratified random sampling to make the Monte Carlo path tracing converge faster at the cost of increasing dimensions) using a random point in the pixel to shoot rays through and averaging color
 vec4 antialiasing(ivec2 pixelCoord, inout uvec4 state){
     vec3 pixel = initDefaultVec();
     for (int i = 0; i < rootSPP; i++){

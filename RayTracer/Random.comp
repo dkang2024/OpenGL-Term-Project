@@ -32,3 +32,15 @@ vec2 boxMuller(inout uvec4 state){
 float randRange(inout uvec4 state, float minValue, float maxValue){
     return minValue + (maxValue - minValue) * rand(state);
 }
+
+// Random cosine sampling on a hemisphere 
+vec3 randomCosineSample(inout uvec4 state){
+    float r1 = rand(state);
+    float r2 = rand(state);
+
+    float phi = 2 * PI * r1;
+    float x = cos(phi) * sqrt(r2);
+    float y = sin(phi) * sqrt(r2);
+    float z = sqrt(1 - r2);
+    return vec3(x, y, z);
+}

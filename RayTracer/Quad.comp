@@ -48,7 +48,8 @@ bool hitQuad(quad3 quad, ray3 ray, inout hitRecord record, inout uvec4 state){
     record.normalVector = normalVector;
     isFrontFace(ray, record);
     scatter(quad.materialID, quad.materialParameter, ray, record, state);
-    record.rayColor = applyTexture(quad.color.rgb, quad.textureID, vec2(alpha, beta));
+
+    record.objectColor = applyTexture(quad.color.rgb, quad.textureID, vec2(alpha, beta));
 
     return true;
 }

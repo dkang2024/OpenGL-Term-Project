@@ -66,6 +66,6 @@ class World:
         self.spheres = self.ctx.buffer(self.sphereArray)
         self.spheres.bind_to_storage_buffer(0)
 
-        self.rayTracer['numQuads'] = 0
+        self.rayTracer['numQuads'] = len(self.quadList)
         self.quads = self.ctx.buffer(self.quadArray)
         self.quads.bind_to_storage_buffer(1)

@@ -28,24 +28,34 @@ class Test(mglw.WindowConfig):
         self.initRand()
 
         self.rayTracer = self.ctx.compute_shader(loadComputeShader(self.ctx, 'RayTracer', 'RayTracing'))
-        self.initRenderer(4, 1)
+        self.initRenderer(4, 50)
 
-        self.camera = Camera(self, glm.vec3(0, 0, 1), 1, 60, 0.2)
+        self.camera = Camera(self, glm.vec3(278, 278, -200), 1, 60, 0.2)
         self.screenCoords = mglw.geometry.quad_fs(attr_names = screenNames, normals = False, name = 'Screen Coordinates')
         self.crosshair = Crosshair(self, 0.03, glm.vec3(1.0, 1.0, 1.0), self.window_size) #type: ignore
         self.world = World(self.ctx, self.rayTracer)
+
+        red = LambertianMaterial(Texture(glm.vec3(.65, .05, .05)))
+        white = LambertianMaterial(Texture(glm.vec3(.73, .73, .73)))
+        green = LambertianMaterial(Texture(glm.vec3(.12, .45, .15)))
+        light = PointLight(glm.vec3(15, 15, 15))
+        
+        self.world.addHittable(Quad(glm.vec3(555, 0, 0), glm.vec3(0, 555, 0), glm.vec3(0, 0, 555), green))
+        self.world.addHittable(Quad(glm.vec3(0, 0, 0), glm.vec3(0, 555, 0), glm.vec3(0, 0, 555), red))
+        self.world.addHittable(Quad(glm.vec3(343, 554, 332), glm.vec3(-130, 0, 0), glm.vec3(0, 0, -105), light))
+        self.world.addHittable(Quad(glm.vec3(0, 0, 0), glm.vec3(555, 0, 0), glm.vec3(0, 0, 555), white))
+        self.world.addHittable(Quad(glm.vec3(555, 555, 555), glm.vec3(-555, 0, 0), glm.vec3(0, 0, -555), white))
+        self.world.addHittable(Quad(glm.vec3(0, 0, 555), glm.vec3(555, 0, 0), glm.vec3(0, 555, 0), white))
+        self.world.addHittable(Cube(glm.vec3(130, 0, 65), glm.vec3(295, 165, 230), white))
+        self.world.addHittable(Cube(glm.vec3(265, 0, 295), glm.vec3(430, 330, 460), white))
 
         materialGround = LambertianMaterial(Texture(glm.vec3(0.8, 0.8, 0.0)))
         materialCenter = LambertianMaterial(Texture(glm.vec3(0.1, 0.2, 0.5)))
         materialLeft = DielectricMaterial(1.0 / 1.3)
         materialRight = ReflectiveMaterial(glm.vec3(0.8, 0.6, 0.2), 0.5)
+        materialLight = PointLight(glm.vec3(2))
 
-        self.world.addHittable(Sphere(glm.vec3(0, 0, -1), 0.5, materialCenter))
-        self.world.addHittable(Sphere(glm.vec3(0, -100.5, -1), 100, materialGround))
-        self.world.addHittable(Sphere(glm.vec3(-1, 0, -1), 0.5, materialLeft))
-        self.world.addHittable(Sphere(glm.vec3(1, 0, -1), 0.5, materialRight))
-        
-        self.world.addHittable(Quad(glm.vec3(0, 0, 2), glm.vec3(0, 23, 0), glm.vec3(0, 0, 234), materialGround))
+        self.world.addHittable(Sphere(glm.vec3(0, 0, -1), 0, materialCenter))
         
         self.world.createRenderArray()
         self.world.assignRender()

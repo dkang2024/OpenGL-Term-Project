@@ -5,14 +5,15 @@ struct hitRecord{
     bool didScatter;
     vec3 normalVector; 
     tInterval tValues;
-    vec3 rayColor;
+    vec3 objectColor;
     bool frontFace; 
     bool isLight;
+    int materialID;
 };
 
 // Creates the default hit record
 hitRecord initDefaultHitRecord(){
-    hitRecord newHitRecord = {initDefaultVec(), initDefaultRay(), false, initDefaultVec(), initDefaultTInterval(), initDefaultVec(), false, false};
+    hitRecord newHitRecord = {initDefaultVec(), initDefaultRay(), false, initDefaultVec(), initDefaultTInterval(), initDefaultVec(), false, false, 0};
     return newHitRecord;
 }
 

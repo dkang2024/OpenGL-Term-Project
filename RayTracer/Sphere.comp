@@ -70,6 +70,7 @@ bool hitSphere(sphere3 sphere, ray3 ray, inout hitRecord record, inout uvec4 sta
     isFrontFace(ray, record);
     scatter(sphere.materialID, sphere.materialParameter, ray, record, state);
 
-    record.rayColor = applyTexture(sphere.color.rgb, sphere.textureID, sphereUV(outwardNormalVector));
+    record.objectColor = applyTexture(sphere.color.rgb, sphere.textureID, sphereUV(outwardNormalVector));
+    
     return true;
 }

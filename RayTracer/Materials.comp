@@ -8,6 +8,11 @@ void lambertianScatter(inout hitRecord record, inout uvec4 state){
     record.scatteredRay = scatteredRay;
 }
 
+// Lambertian BRDF 
+vec3 lambertianBRDF(vec3 objectColor){
+    return objectColor / PI;
+}
+
 // Scattering for reflective objects with the math given by https://raytracing.github.io/books/RayTracingInOneWeekend
 void reflectiveScatter(float fuzz, ray3 ray, inout hitRecord record, inout uvec4 state){
     vec3 reflectDir = reflect(ray.direction, record.normalVector);
@@ -45,6 +50,7 @@ void dielectricScatter(float etaRatio, ray3 ray, inout hitRecord record, inout u
 
 // General scattering 
 void scatter(int materialID, float materialParameter, ray3 ray, inout hitRecord record, inout uvec4 state){
+    record.materialID = materialID;
     if (materialID == 0){
         lambertianScatter(record, state);
     } else if (materialID == 1){
