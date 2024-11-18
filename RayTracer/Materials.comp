@@ -1,4 +1,8 @@
-// Dealing with seperate structures for materials ID 0 = Lambertian material. 
+// Dealing with seperate structures for materials
+const int LAMBERTIAN = 0;
+const int REFLECTIVE = 1;
+const int DIELECTRIC = 2;
+const int LIGHT = 3;
 
 // Lambertian scattering for a material (thanks to https://raytracing.github.io/books/RayTracingInOneWeekend for giving me the math necessary for this)
 void lambertianScatter(inout hitRecord record, inout uvec4 state){
@@ -53,13 +57,16 @@ void dielectricScatter(float etaRatio, ray3 ray, inout hitRecord record, inout u
 // General scattering 
 void scatter(int materialID, float materialParameter, ray3 ray, inout hitRecord record, inout uvec4 state){
     record.materialID = materialID;
-    if (materialID == 0){
+    if (materialID == LAMBERTIAN){
         lambertianScatter(record, state);
-    } else if (materialID == 1){
+    } else if (materialID == REFLECTIVE){
         reflectiveScatter(materialParameter, ray, record, state);
-    } else if (materialID == 2){
+    } else if (materialID == DIELECTRIC){
         dielectricScatter(materialParameter, ray, record, state);
-    } else if (materialID == 3){
+    } else if (materialID == LIGHT){
+        if (!record.frontFace){
+            record.objectColor = vec3(0);
+        }
         record.isLight = true;
     }
 }

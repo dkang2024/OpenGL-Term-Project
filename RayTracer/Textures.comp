@@ -1,10 +1,14 @@
+const int CONSTCOLOR = 0;
+const int BRICKWALL = 1;
+const int EARTH = 2;
+
 // Apply a texture color to return the color of the pixel
 vec3 applyTexture(vec3 objectColor, int objectTextureID, vec2 uv){
-    if (objectTextureID == 0){
+    if (objectTextureID == CONSTCOLOR){
         return objectColor;
-    } else if (objectTextureID == 1){
+    } else if (objectTextureID == BRICKWALL){
         return texture(brickWall, uv).rgb;
-    } else if (objectTextureID == 2){
+    } else if (objectTextureID == EARTH){
         return texture(earth, uv).rgb;
     } 
 }

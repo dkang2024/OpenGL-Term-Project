@@ -24,19 +24,19 @@ bool isExterior(float alpha, float beta){
 bool hitQuad(quad3 quad, ray3 ray, inout hitRecord record, inout uvec4 state){
     vec3 normalVector = quad.normalVector.xyz;
     float denominator = dot(normalVector, ray.direction);
-    float epsilon = 1e-5;
+    float epsilon = 1e-8;
     
     if (abs(denominator) < epsilon){
         return false; // No hit for nearly parallel rays
     }
     
-    float t = (quad.D - dot(normalVector, ray.origin)) / denominator;
+    float t = (quad.D - dot(ray.origin, normalVector)) / denominator;
     if (outOfBounds(record.tValues, t)){
         return false;
     }
 
-    record.pointHit = rayIntersectPoint(ray, t);
-    vec3 hitVector = record.pointHit - quad.point.xyz;
+    vec3 hitPoint = rayIntersectPoint(ray, t);
+    vec3 hitVector = hitPoint - quad.point.xyz;
     float alpha = dot(quad.W.xyz, cross(hitVector, quad.side2.xyz));
     float beta = dot(quad.W.xyz, cross(quad.side1.xyz, hitVector));
 
@@ -45,6 +45,7 @@ bool hitQuad(quad3 quad, ray3 ray, inout hitRecord record, inout uvec4 state){
     }
 
     record.tValues.t = t; 
+    record.pointHit = hitPoint;
     record.normalVector = normalVector;
     isFrontFace(ray, record);
     scatter(quad.materialID, quad.materialParameter, ray, record, state);

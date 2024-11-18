@@ -28,9 +28,9 @@ class Test(mglw.WindowConfig):
         self.initRand()
 
         self.rayTracer = self.ctx.compute_shader(loadComputeShader(self.ctx, 'RayTracer', 'RayTracing'))
-        self.initRenderer(4, 1)
+        self.initRenderer(4, 2)
 
-        self.camera = Camera(self, glm.vec3(278, 278, -200), 1, 60, 0.2)
+        self.camera = Camera(self, glm.vec3(278, 278, -200), 100, 60, 0.2)
         self.screenCoords = mglw.geometry.quad_fs(attr_names = screenNames, normals = False, name = 'Screen Coordinates')
         self.crosshair = Crosshair(self, 0.03, glm.vec3(1.0, 1.0, 1.0), self.window_size) #type: ignore
         self.world = World(self.ctx, self.rayTracer)
@@ -38,7 +38,7 @@ class Test(mglw.WindowConfig):
         red = LambertianMaterial(Texture(glm.vec3(.65, .05, .05)))
         white = LambertianMaterial(Texture(glm.vec3(.73, .73, .73)))
         green = LambertianMaterial(Texture(glm.vec3(.12, .45, .15)))
-        light = PointLight(glm.vec3(15, 15, 15))
+        light = PointLight(glm.vec3(15))
         
         self.world.addHittable(Quad(glm.vec3(555, 0, 0), glm.vec3(0, 555, 0), glm.vec3(0, 0, 555), green))
         self.world.addHittable(Quad(glm.vec3(0, 0, 0), glm.vec3(0, 555, 0), glm.vec3(0, 0, 555), red))
