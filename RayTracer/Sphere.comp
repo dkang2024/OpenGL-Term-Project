@@ -1,11 +1,12 @@
 // Sphere Structure
 struct Sphere{
-    vec4 center;
-    vec4 color;
+    vec3 center;
     float radius;
+    vec3 color;
     int materialID;
     float materialParameter;
     int textureID;
+    vec2 padding;
 };
 
 // Sphere ray intersection helper functions 
@@ -50,7 +51,7 @@ vec2 sphereUV(vec3 outVec){
 
 // Do all of the complete logic to check if a ray intersects with a sphere, including finding the discriminant and other values. The difference between this and checkSphereIntersection is that a, h, discriminant are calculated
 bool hitSphere(Sphere sphere, Ray ray, inout HitRecord record, inout uvec4 state){
-    vec3 rayToSphereCenter = sphere.center.xyz - ray.origin;
+    vec3 rayToSphereCenter = sphere.center - ray.origin;
     float a = dot(ray.direction, ray.direction);
     float h = dot(ray.direction, rayToSphereCenter);
     float c = dot(rayToSphereCenter, rayToSphereCenter) - pow(sphere.radius, 2);
@@ -70,7 +71,7 @@ bool hitSphere(Sphere sphere, Ray ray, inout HitRecord record, inout uvec4 state
     isFrontFace(ray, record);
     scatter(sphere.materialID, sphere.materialParameter, ray, record, state);
 
-    record.objectColor = applyTexture(sphere.color.rgb, sphere.textureID, sphereUV(outwardNormalVector));
+    record.objectColor = applyTexture(sphere.color, sphere.textureID, sphereUV(outwardNormalVector));
     
     return true;
 }

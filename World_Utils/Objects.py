@@ -8,7 +8,7 @@ class Sphere:
         self.center, self.radius, self.material = center, radius, material
 
     def record(self, renderArray, i):
-        renderArray[i]['center'] = glm.vec4(self.center, 0)
+        renderArray[i]['center'] = self.center
         renderArray[i]['radius'] = self.radius 
         self.material.record(renderArray, i)
 

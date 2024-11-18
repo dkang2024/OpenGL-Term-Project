@@ -38,12 +38,13 @@ class World:
         Create the render array from the current hittable list by passing in the specific values for the SSBO 
         '''
         sphereDType = np.dtype([ #Multiple of 16 bytes
-            ('center', 'f4', 4), # 16 bytes
-            ('color', 'f4', 3), # 16 bytes
+            ('center', 'f4', 3), # 16 bytes
             ('radius', 'f4'), # 4 bytes
+            ('color', 'f4', 3), # 16 bytes   
             ('materialID', 'i4'), # 4 bytes
             ('materialParameter', 'f4'), # 4 bytes
-            ('textureID', 'i4') # 4 bytes
+            ('textureID', 'i4'), # 4 bytes
+            ('padding', 'f4', 2)
         ])
         self.sphereArray = self.recordToRender(self.sphereList, sphereDType)
         
