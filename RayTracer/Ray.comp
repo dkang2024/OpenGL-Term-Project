@@ -1,15 +1,20 @@
 // Ray Structure and functions
-struct ray3{
+struct Ray{
     vec3 origin;
     vec3 direction;
 };
 
 // Find where the ray is at a specific t value (thanks 259)
-vec3 rayIntersectPoint(ray3 ray, float t){
+vec3 rayIntersectPoint(Ray ray, float t){
     return ray.origin + ray.direction * t;
 }
 
 // Initialize a default ray 
-ray3 initDefaultRay(){
-    return ray3(initDefaultVec(), initDefaultVec());
+Ray initDefaultRay(){
+    return Ray(initDefaultVec(), initDefaultVec());
+}
+
+// Scattered Ray cosine for the rendering equation
+float scatteredCos(vec3 normalVector, vec3 scatteredDir){
+    return dot(normalVector, scatteredDir);
 }

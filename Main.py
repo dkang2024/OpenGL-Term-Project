@@ -13,7 +13,7 @@ class Test(mglw.WindowConfig):
     aspect_ratio = None 
     gl_version = (4, 6)
     cursor = False 
-    vsync = False 
+    vsync = True
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -39,6 +39,7 @@ class Test(mglw.WindowConfig):
         white = LambertianMaterial(Texture(glm.vec3(.73, .73, .73)))
         green = LambertianMaterial(Texture(glm.vec3(.12, .45, .15)))
         light = PointLight(glm.vec3(15))
+        earth = LambertianMaterial(Texture('Earth'))
         
         self.world.addHittable(Quad(glm.vec3(555, 0, 0), glm.vec3(0, 555, 0), glm.vec3(0, 0, 555), green))
         self.world.addHittable(Quad(glm.vec3(0, 0, 0), glm.vec3(0, 555, 0), glm.vec3(0, 0, 555), red))

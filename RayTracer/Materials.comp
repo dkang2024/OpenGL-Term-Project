@@ -5,10 +5,10 @@ const int DIELECTRIC = 2;
 const int LIGHT = 3;
 
 // Lambertian scattering for a material (thanks to https://raytracing.github.io/books/RayTracingInOneWeekend for giving me the math necessary for this)
-void lambertianScatter(inout hitRecord record, inout uvec4 state){
+void lambertianScatter(inout HitRecord record, inout uvec4 state){
     ONB basis = createONB(record.normalVector);
     vec3 scatteredDir = normalize(transformONB(basis, randomCosineSample(state)));
-    ray3 scatteredRay = ray3(record.pointHit, scatteredDir);
+    Ray scatteredRay = Ray(record.pointHit, scatteredDir);
 
     record.didScatter = true;
     record.scatteredRay = scatteredRay;
@@ -20,10 +20,10 @@ vec3 lambertianBRDF(vec3 objectColor){
 }
 
 // Scattering for reflective objects with the math given by https://raytracing.github.io/books/RayTracingInOneWeekend
-void reflectiveScatter(float fuzz, ray3 ray, inout hitRecord record, inout uvec4 state){
+void reflectiveScatter(float fuzz, Ray ray, inout HitRecord record, inout uvec4 state){
     vec3 reflectDir = reflect(ray.direction, record.normalVector);
     reflectDir = normalize(reflectDir) + fuzz * randomVectorOnUnitSphere(state);
-    ray3 scatteredRay = ray3(record.pointHit, reflectDir);
+    Ray scatteredRay = Ray(record.pointHit, reflectDir);
 
     if (dot(reflectDir, record.normalVector) > 0){
         record.didScatter = true;
@@ -34,7 +34,7 @@ void reflectiveScatter(float fuzz, ray3 ray, inout hitRecord record, inout uvec4
 }
 
 // Scattering for objects where both refraction and reflection is possible. Math given by https://raytracing.github.io/books/RayTracingInOneWeekend.html 
-void dielectricScatter(float etaRatio, ray3 ray, inout hitRecord record, inout uvec4 state){
+void dielectricScatter(float etaRatio, Ray ray, inout HitRecord record, inout uvec4 state){
     if (record.frontFace){
         etaRatio = 1 / etaRatio;
     } 
@@ -51,11 +51,11 @@ void dielectricScatter(float etaRatio, ray3 ray, inout hitRecord record, inout u
     }
     
     record.didScatter = true; 
-    record.scatteredRay = ray3(record.pointHit, rayDir);
+    record.scatteredRay = Ray(record.pointHit, rayDir);
 }
 
 // General scattering 
-void scatter(int materialID, float materialParameter, ray3 ray, inout hitRecord record, inout uvec4 state){
+void scatter(int materialID, float materialParameter, Ray ray, inout HitRecord record, inout uvec4 state){
     record.materialID = materialID;
     if (materialID == LAMBERTIAN){
         lambertianScatter(record, state);

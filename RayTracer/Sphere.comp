@@ -17,17 +17,17 @@ float simplifiedDiscriminant(float a, float c, float h){
 
 // Returns the quadratic formula given a simplified sphere equation
 float simplifiedQuadFormula(float a, float h, float discriminant, float signValue){
-    return (h + signValue * pow(discriminant, 0.5)) / a; 
+    return (h + signValue * sqrt(discriminant)) / a; 
 }
 
 // Find the sphere's normal vector (not always made to point against the ray [this will be done in hit record])
-vec3 findSphereNormalVector(inout hitRecord record, sphere3 sphere){
+vec3 findSphereNormalVector(inout HitRecord record, sphere3 sphere){
     record.normalVector = (record.pointHit - sphere.center.xyz) / sphere.radius;
     return record.normalVector;
 }
 
 // Check if the ray intersects with the sphere using the quadratic formula with math gotten from https://www.cs.colostate.edu/~cs410/yr2016fa/more_progress/cs410_F16_Lecture14.pdf. Automatically deal with returning the lesser t by taking the negative sign first. 
-bool checkSphereIntersection(float a, float h, float discriminant, ray3 ray, inout hitRecord record){
+bool checkSphereIntersection(float a, float h, float discriminant, Ray ray, inout HitRecord record){
     float t = simplifiedQuadFormula(a, h, discriminant, -1);
     if (outOfBounds(record.tValues, t)){
         t = simplifiedQuadFormula(a, h, discriminant, 1);
@@ -49,7 +49,7 @@ vec2 sphereUV(vec3 outVec){
 }
 
 // Do all of the complete logic to check if a ray intersects with a sphere, including finding the discriminant and other values. The difference between this and checkSphereIntersection is that a, h, discriminant are calculated
-bool hitSphere(sphere3 sphere, ray3 ray, inout hitRecord record, inout uvec4 state){
+bool hitSphere(sphere3 sphere, Ray ray, inout HitRecord record, inout uvec4 state){
     vec3 rayToSphereCenter = sphere.center.xyz - ray.origin;
     float a = dot(ray.direction, ray.direction);
     float h = dot(ray.direction, rayToSphereCenter);

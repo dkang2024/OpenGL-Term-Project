@@ -1,5 +1,5 @@
 // Quad Struct. Idea for quads from https://raytracing.github.io/books/RayTracingTheNextWeek.html 
-struct quad3{
+struct Quad{
     vec4 point;
     vec4 side1;
     vec4 side2;
@@ -21,7 +21,7 @@ bool isExterior(float alpha, float beta){
 }
 
 // Ray-plane intersection with equations derived from 259 and with some math assistance from https://raytracing.github.io/books/RayTracingTheNextWeek.html 
-bool hitQuad(quad3 quad, ray3 ray, inout hitRecord record, inout uvec4 state){
+bool hitQuad(Quad quad, Ray ray, inout HitRecord record, inout uvec4 state){
     vec3 normalVector = quad.normalVector.xyz;
     float denominator = dot(normalVector, ray.direction);
     float epsilon = 1e-8;
