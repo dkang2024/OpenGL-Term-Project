@@ -6,8 +6,8 @@ struct hitRecord{
     vec3 normalVector; 
     tInterval tValues;
     vec3 objectColor;
-    bool frontFace; 
     bool isLight;
+    bool frontFace; 
     int materialID;
 };
 

@@ -78,40 +78,85 @@ bool hit(ray3 ray, inout hitRecord record, inout uvec4 state){
 }
 
 // Apply the rendering equation with Monte Carlo integration to determine the object color
-vec3 renderingEQ(hitRecord record){
-    float cosTheta = dot(record.normalVector, record.scatteredRay.direction);
+vec3 renderingEQ(inout hitRecord record, inout uvec4 state){
     if (record.materialID == 0){
-        return lambertianBRDF(record.objectColor) * cosTheta * PI / cosTheta;
-    } else {
-        return record.objectColor;
-    }
+        vec3 onLight = vec3(randRange(state, 213, 343), 554, randRange(state, 227, 332));
+        vec3 toLight = onLight - record.pointHit;
+        float distanceSquared = dot(toLight, toLight);
+        toLight = normalize(toLight);
+
+        float cosToLight = dot(toLight, record.normalVector);
+        if (dot(toLight, record.normalVector) < 0){
+            return vec3(0);        
+        }
+
+        float lightArea = (343 - 213) * (332 - 227);
+        float lightCosine = abs(toLight.y);
+
+        if (lightCosine < 1e-6){
+            return vec3(0);
+        }
+       
+        float lightPDF = distanceSquared / (lightCosine * lightArea);
+        return lambertianBRDF(record.objectColor) * cosToLight / lightPDF;
+    } 
+    return record.objectColor;
 }
 
 // Get the pixel color while still reflecting the ray (bouncing it off of surfaces)
 vec3 pixelColor(ray3 ray, inout uvec4 state){
-    vec3 throughput = vec3(1.0, 1.0, 1.0);
+    vec3 accumulatedColor = vec3(0);
+    vec3 throughput = vec3(1);
     
     for (int i = 0; i < maxBounces; i++){
         hitRecord record = initDefaultHitRecord();
 
         if (!hit(ray, record, state)){
-            return throughput * vec3(0);
+            accumulatedColor += throughput * vec3(0);
+            break;
         } 
-        
+
         // Apply the rendering equation here. Don't allow any more bounces for light so don't ADD emissive. Just multiply by the color
-        throughput *= renderingEQ(record);
+
+        if (record.materialID == 0){
+            vec3 onLight = vec3(randRange(state, 213, 343), 554, randRange(state, 227, 332));
+            vec3 toLight = onLight - record.pointHit;
+            float distanceSquared = dot(toLight, toLight);
+            toLight = normalize(toLight);
+
+            float cosToLight = dot(toLight, record.normalVector);
+            if (dot(toLight, record.normalVector) < 0){
+                return vec3(0);        
+            }
+
+            float lightArea = (343 - 213) * (332 - 227);
+            float lightCosine = abs(toLight.y);
+
+            if (lightCosine < 1e-6){
+                return vec3(0);
+            }
+
+            float pdf_value = distanceSquared / (lightCosine * lightArea);
+            record.scatteredRay = ray3(record.pointHit, toLight);
+
+            throughput *= lambertianBRDF(record.objectColor) * cosToLight / pdf_value;
+        } else {
+            throughput *= record.objectColor; // Note that BRDF and PDF cancel out the cosine theta terms
+        }
 
         if (record.isLight){
-            return throughput;
+            accumulatedColor += throughput;
+            break;
         }
     
         if (record.didScatter){
             ray = record.scatteredRay;
         } else {
+            accumulatedColor += throughput;
             break;
         }
     }
-    return vec3(0.0, 0.0, 0.0);
+    return accumulatedColor;
 }
 
 // Gamut correction
