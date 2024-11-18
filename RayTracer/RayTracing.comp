@@ -105,18 +105,9 @@ vec3 pixelColor(Ray ray, inout uvec4 state){
             break;
         }
 
-        vec3 on_light = vec3(randRange(state, 213, 343), 554, randRange(state, 227, 332));
-        vec3 to_light = on_light - record.pointHit;
-        float distance_squared = dot(to_light, to_light);
-        to_light = normalize(to_light);
-
-        float light_area = (343-213)*(332-227);
-        float light_cosine = abs(to_light.y);
-        
-        float pdf_value = distance_squared / (light_area * light_cosine);
         float lightPDF = quadLightPDF(lights[0], record, state);
-        record.scatteredRay = Ray(record.pointHit, to_light);
-        throughput *= lambertianBRDF(record.objectColor) * scatteredCos(record.normalVector, record.scatteredRay.direction) / pdf_value;
+        record.scatteredRay = Ray(record.pointHit, normalize(randomOnQuad(lights[0], state) - record.pointHit));
+        throughput *= lambertianBRDF(record.objectColor) * scatteredCos(record.normalVector, record.scatteredRay.direction) / lightPDF;
     
         if (record.didScatter){
             ray = record.scatteredRay;

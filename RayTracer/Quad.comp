@@ -66,7 +66,7 @@ vec3 randomOnQuad(Quad quad, inout uvec4 state){
 float quadLightPDF(Quad quad, HitRecord record, inout uvec4 state){
     vec3 toLight = randomOnQuad(quad, state) - record.pointHit;
     float distanceSquared = dot(toLight, toLight);
-    float cosLight = abs(dot(toLight, record.normalVector) / length(toLight));
+    float cosLight = abs(dot(normalize(toLight), quad.normalVector));
 
     return distanceSquared / (cosLight * quad.area);
 }
