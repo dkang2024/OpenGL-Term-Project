@@ -19,7 +19,7 @@ class ReflectiveMaterial:
         self.color, self.fuzz = color, fuzz 
 
     def record(self, renderArray, i):
-        renderArray[i]['color'] = glm.vec4(self.color, 0)
+        renderArray[i]['color'] = self.color
         renderArray[i]['textureID'] = 0
         renderArray[i]['materialID'] = 1
         renderArray[i]['materialParameter'] = self.fuzz
@@ -32,7 +32,7 @@ class DielectricMaterial:
         self.refractionIndex = refractionIndex 
     
     def record(self, renderArray, i):
-        renderArray[i]['color'] = glm.vec4(1, 1, 1, 0)
+        renderArray[i]['color'] = glm.vec3(1)
         renderArray[i]['textureID'] = 0
         renderArray[i]['materialID'] = 2 
         renderArray[i]['materialParameter'] = self.refractionIndex
@@ -45,6 +45,6 @@ class PointLight:
         self.lightColor = lightColor
 
     def record(self, renderArray, i):
-        renderArray[i]['color'] = glm.vec4(self.lightColor, 0)
+        renderArray[i]['color'] = self.lightColor
         renderArray[i]['textureID'] = 0
         renderArray[i]['materialID'] = 3

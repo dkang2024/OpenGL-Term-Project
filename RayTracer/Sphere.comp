@@ -1,5 +1,5 @@
 // Sphere Structure
-struct sphere3{
+struct Sphere{
     vec4 center;
     vec4 color;
     float radius;
@@ -21,7 +21,7 @@ float simplifiedQuadFormula(float a, float h, float discriminant, float signValu
 }
 
 // Find the sphere's normal vector (not always made to point against the ray [this will be done in hit record])
-vec3 findSphereNormalVector(inout HitRecord record, sphere3 sphere){
+vec3 findSphereNormalVector(inout HitRecord record, Sphere sphere){
     record.normalVector = (record.pointHit - sphere.center.xyz) / sphere.radius;
     return record.normalVector;
 }
@@ -49,7 +49,7 @@ vec2 sphereUV(vec3 outVec){
 }
 
 // Do all of the complete logic to check if a ray intersects with a sphere, including finding the discriminant and other values. The difference between this and checkSphereIntersection is that a, h, discriminant are calculated
-bool hitSphere(sphere3 sphere, Ray ray, inout HitRecord record, inout uvec4 state){
+bool hitSphere(Sphere sphere, Ray ray, inout HitRecord record, inout uvec4 state){
     vec3 rayToSphereCenter = sphere.center.xyz - ray.origin;
     float a = dot(ray.direction, ray.direction);
     float h = dot(ray.direction, rayToSphereCenter);

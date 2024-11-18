@@ -1,5 +1,6 @@
 from Settings import *
 from Objects import *
+from Materials import *
 
 class World:
     '''
@@ -7,7 +8,7 @@ class World:
     '''
     def __init__(self, ctx, rayTracer):
         self.ctx, self.rayTracer = ctx, rayTracer
-        self.sphereList, self.quadList = [], []
+        self.sphereList, self.quadList, self.lightList = [], [], []
 
     def addHittable(self, hittable):
         '''
@@ -15,8 +16,10 @@ class World:
         '''
         if isinstance(hittable, Sphere):
             self.sphereList.append(hittable)
-        elif isinstance(hittable, Quad):
+        elif isinstance(hittable, Quad) and not isinstance(hittable.material, PointLight):
             self.quadList.append(hittable)
+        elif isinstance(hittable, Quad):
+            self.lightList.append(hittable)
         else:
             self.quadList = self.quadList + hittable.quads
 
@@ -36,7 +39,7 @@ class World:
         '''
         sphereDType = np.dtype([ #Multiple of 16 bytes
             ('center', 'f4', 4), # 16 bytes
-            ('color', 'f4', 4), # 16 bytes
+            ('color', 'f4', 3), # 16 bytes
             ('radius', 'f4'), # 4 bytes
             ('materialID', 'i4'), # 4 bytes
             ('materialParameter', 'f4'), # 4 bytes
@@ -45,18 +48,21 @@ class World:
         self.sphereArray = self.recordToRender(self.sphereList, sphereDType)
         
         quadDType = np.dtype([
-            ('point', 'f4', 4),
-            ('side1', 'f4', 4),
-            ('side2', 'f4', 4),
-            ('color', 'f4', 4),
-            ('normalVector', 'f4', 4),
-            ('W', 'f4', 4),
+            ('point', 'f4', 3),
+            ('area', 'f4'),
+            ('side1', 'f4', 3),
             ('D', 'f4'), 
+            ('side2', 'f4', 3),
             ('materialID', 'i4'),
+            ('color', 'f4', 3),
             ('materialParameter', 'f4'),
-            ('textureID', 'i4')
+            ('normalVector', 'f4', 3),
+            ('textureID', 'i4'),
+            ('W', 'f4', 3),
+            ('padding', 'f4')    
         ])
         self.quadArray = self.recordToRender(self.quadList, quadDType)
+        self.lightArray = self.recordToRender(self.lightList, quadDType)
 
     def assignRender(self):
         '''
@@ -69,3 +75,7 @@ class World:
         self.rayTracer['numQuads'] = len(self.quadList)
         self.quads = self.ctx.buffer(self.quadArray)
         self.quads.bind_to_storage_buffer(1)
+
+        self.rayTracer['numLights'] = len(self.lightList)
+        self.lights = self.ctx.buffer(self.lightArray)
+        self.lights.bind_to_storage_buffer(2)

@@ -1,15 +1,17 @@
 // Quad Struct. Idea for quads from https://raytracing.github.io/books/RayTracingTheNextWeek.html 
 struct Quad{
-    vec4 point;
-    vec4 side1;
-    vec4 side2;
-    vec4 color;
-    vec4 normalVector;
-    vec4 W;
+    vec3 point;
+    float area;
+    vec3 side1;
     float D; 
+    vec3 side2;
     int materialID;
+    vec3 color;
     float materialParameter;
+    vec3 normalVector;
     int textureID;
+    vec3 W;
+    float padding;
 };
 
 // Inspired by the function from https://raytracing.github.io/books/RayTracingTheNextWeek.html#quadrilaterals/orientingpointsontheplane
@@ -22,7 +24,7 @@ bool isExterior(float alpha, float beta){
 
 // Ray-plane intersection with equations derived from 259 and with some math assistance from https://raytracing.github.io/books/RayTracingTheNextWeek.html 
 bool hitQuad(Quad quad, Ray ray, inout HitRecord record, inout uvec4 state){
-    vec3 normalVector = quad.normalVector.xyz;
+    vec3 normalVector = quad.normalVector;
     float denominator = dot(normalVector, ray.direction);
     float epsilon = 1e-8;
     
@@ -36,9 +38,9 @@ bool hitQuad(Quad quad, Ray ray, inout HitRecord record, inout uvec4 state){
     }
 
     vec3 hitPoint = rayIntersectPoint(ray, t);
-    vec3 hitVector = hitPoint - quad.point.xyz;
-    float alpha = dot(quad.W.xyz, cross(hitVector, quad.side2.xyz));
-    float beta = dot(quad.W.xyz, cross(quad.side1.xyz, hitVector));
+    vec3 hitVector = hitPoint - quad.point;
+    float alpha = dot(quad.W, cross(hitVector, quad.side2));
+    float beta = dot(quad.W, cross(quad.side1, hitVector));
 
     if (isExterior(alpha, beta)){
         return false;
@@ -50,7 +52,21 @@ bool hitQuad(Quad quad, Ray ray, inout HitRecord record, inout uvec4 state){
     isFrontFace(ray, record);
     scatter(quad.materialID, quad.materialParameter, ray, record, state);
 
-    record.objectColor = applyTexture(quad.color.rgb, quad.textureID, vec2(alpha, beta));
+    record.objectColor = applyTexture(quad.color, quad.textureID, vec2(alpha, beta));
 
     return true;
+}
+
+// Sample a random point on the quad for light sampling
+vec3 randomOnQuad(Quad quad, inout uvec4 state){
+    return quad.point + rand(state) * quad.side1 + rand(state) * quad.side2;
+}
+
+// Quad Light PDF (given by the modified rendering equation for directly sampling lights)
+float quadLightPDF(Quad quad, HitRecord record, inout uvec4 state){
+    vec3 toLight = randomOnQuad(quad, state) - record.pointHit;
+    float distanceSquared = dot(toLight, toLight);
+    float cosLight = abs(dot(toLight, record.normalVector) / length(toLight));
+
+    return distanceSquared / (cosLight * quad.area);
 }

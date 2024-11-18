@@ -23,6 +23,7 @@ class Quad:
         self.normalVector = self.calculateNormalVector()
         self.D = self.calculateD()
         self.W = self.calculateW()
+        self.area = self.calculateArea()
     
     def calculateN(self):
         '''
@@ -48,13 +49,20 @@ class Quad:
         '''
         return self.n / glm.dot(self.n, self.n)
     
+    def calculateArea(self):
+        '''
+        Calculate the area of the quad using the cross product (thanks 259)
+        '''
+        return glm.length(glm.cross(self.side1, self.side2))
+    
     def record(self, renderArray, i):
-        renderArray[i]['point'] = glm.vec4(self.point, 0)
-        renderArray[i]['side1'] = glm.vec4(self.side1, 0) 
-        renderArray[i]['side2'] = glm.vec4(self.side2, 0)
-        renderArray[i]['normalVector'] = glm.vec4(self.normalVector, 0)
-        renderArray[i]['W'] = glm.vec4(self.W, 0)
+        renderArray[i]['point'] = self.point
+        renderArray[i]['side1'] = self.side1
+        renderArray[i]['side2'] = self.side2
+        renderArray[i]['normalVector'] = self.normalVector
+        renderArray[i]['W'] = self.W
         renderArray[i]['D'] = self.D 
+        renderArray[i]['area'] = self.area
         self.material.record(renderArray, i)
 
 class Cube:
