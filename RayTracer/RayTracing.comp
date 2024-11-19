@@ -116,6 +116,9 @@ void renderingEQ(inout HitRecord record, inout vec3 throughput, inout uvec4 stat
     float lightPDF = quadLightPDF(lights[0], record, lightTime, lightRay, state);
     record.scatteredRay = lightRay;
     throughput *= lambertianBRDF(record.objectColor) * scatteredCos(record.normalVector, record.scatteredRay.direction) / lightPDF;
+    if (!lightVisible(lightRay, lightTime, 0)){
+        throughput *= lambertianBRDF(record.objectColor) * scatteredCos(record.normalVector, record.scatteredRay.direction) / lightPDF;
+    }
 }
 
 // Get the pixel color while still reflecting the ray (bouncing it off of surfaces)

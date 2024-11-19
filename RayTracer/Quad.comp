@@ -91,5 +91,10 @@ float quadLightPDF(Quad quad, HitRecord record, inout float lightTime, inout Ray
 }
 
 bool hitQuadLight(Quad quad, Ray ray, Interval tInterval){
-    return false;
+    float t;
+    vec3 hitPoint;
+    vec3 normalVector;
+    float alpha;
+    float beta;
+    return commonQuadCalculations(quad, ray, tInterval, t, hitPoint, normalVector, alpha, beta);
 }
