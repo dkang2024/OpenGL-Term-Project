@@ -117,7 +117,7 @@ bool lightVisible(vec3 objectNormal, Ray ray, float lightTime, int lightIndex){
     return true;
 }
 
-// Direct Lighting for lambertian materials with direct light sampling (don't include BRDF sampling because it doesn't matter for a Lambertian BRDF that's constant)
+// Direct Lighting for lambertian materials with direct light sampling (don't include BRDF sampling because it doesn't matter / help for a Lambertian BRDF that's constant)
 void directLighting(inout HitRecord record, inout vec3 accumulatedColor, vec3 throughput, inout uvec4 state){
     Ray lightRay;
     float lightTime;
@@ -163,11 +163,23 @@ vec3 pixelColor(Ray ray, inout uvec4 state){
         
         throughput *= record.objectColor; // Note that this implicitly applies the rendering equation (because for lambertian materials all the terms cancel out to just multiply by the object color)
     
-        if (record.didScatter){
+        if (record.didScatter){ // If it did scatter, set the new ray equal to the scattered ray
             ray = record.scatteredRay;
-        } else {
+        } else { // If it didn't scatter, break here 
             accumulatedColor += throughput;
             break;
+        }
+
+        // Russian Roulette Path termination with assistance from https://www.pbr-book.org/3ed-2018/Light_Transport_I_Surface_Reflection/Path_Tracing 
+        if (bounce <= 3){
+            continue;
+        }
+       
+        float p = max(throughput.x, max(throughput.y, throughput.z));
+        if (rand(state) > p){
+            break;
+        } else {
+            throughput *= 1 / p; //Add the additional light to the throughput we get from randomly terminating paths
         }
     }
     return accumulatedColor;

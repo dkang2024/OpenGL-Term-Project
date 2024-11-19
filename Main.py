@@ -13,7 +13,7 @@ class Test(mglw.WindowConfig):
     aspect_ratio = None 
     gl_version = (4, 6)
     cursor = False 
-    vsync = True
+    vsync = False 
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -28,7 +28,7 @@ class Test(mglw.WindowConfig):
         self.initRand()
 
         self.rayTracer = self.ctx.compute_shader(loadComputeShader(self.ctx, 'RayTracer', 'RayTracing'))
-        self.initRenderer(4, 2)
+        self.initRenderer(10, 1)
 
         self.camera = Camera(self, glm.vec3(278, 278, -200), 100, 60, 0.2)
         self.screenCoords = mglw.geometry.quad_fs(attr_names = screenNames, normals = False, name = 'Screen Coordinates')
