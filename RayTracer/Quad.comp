@@ -63,10 +63,13 @@ vec3 randomOnQuad(Quad quad, inout uvec4 state){
 }
 
 // Quad Light PDF (given by the modified rendering equation for directly sampling lights)
-float quadLightPDF(Quad quad, HitRecord record, inout uvec4 state){
+float quadLightPDF(Quad quad, HitRecord record, inout Ray lightRay, inout uvec4 state){
     vec3 toLight = randomOnQuad(quad, state) - record.pointHit;
     float distanceSquared = dot(toLight, toLight);
-    float cosLight = abs(dot(normalize(toLight), quad.normalVector));
+
+    toLight = normalize(toLight);
+    float cosLight = abs(dot(toLight, quad.normalVector));
+    lightRay = Ray(record.pointHit, toLight);
 
     return distanceSquared / (cosLight * quad.area);
 }

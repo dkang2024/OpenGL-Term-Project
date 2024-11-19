@@ -85,6 +85,8 @@ bool hit(Ray ray, inout HitRecord record, inout uvec4 state){
     return didHit;
 }
 
+// Check if a 
+
 // Get the pixel color while still reflecting the ray (bouncing it off of surfaces)
 vec3 pixelColor(Ray ray, inout uvec4 state){
     vec3 accumulatedColor = vec3(0);
@@ -105,9 +107,14 @@ vec3 pixelColor(Ray ray, inout uvec4 state){
             break;
         }
 
-        float lightPDF = quadLightPDF(lights[0], record, state);
-        record.scatteredRay = Ray(record.pointHit, normalize(randomOnQuad(lights[0], state) - record.pointHit));
-        throughput *= lambertianBRDF(record.objectColor) * scatteredCos(record.normalVector, record.scatteredRay.direction) / lightPDF;
+        if (record.materialID == LAMBERTIAN){
+            Ray lightRay;
+            float lightPDF = quadLightPDF(lights[0], record, lightRay, state);
+            record.scatteredRay = lightRay;
+            throughput *= lambertianBRDF(record.objectColor) * scatteredCos(record.normalVector, record.scatteredRay.direction) / lightPDF;
+        } else {
+            throughput *= record.objectColor;
+        }
     
         if (record.didScatter){
             ray = record.scatteredRay;
