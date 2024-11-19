@@ -115,10 +115,12 @@ void renderingEQ(inout HitRecord record, inout vec3 throughput, inout uvec4 stat
 
     float lightPDF = quadLightPDF(lights[0], record, lightTime, lightRay, state);
     record.scatteredRay = lightRay;
-    throughput *= lambertianBRDF(record.objectColor) * scatteredCos(record.normalVector, record.scatteredRay.direction) / lightPDF;
-    if (!lightVisible(lightRay, lightTime, 0)){
-        throughput *= lambertianBRDF(record.objectColor) * scatteredCos(record.normalVector, record.scatteredRay.direction) / lightPDF;
-    }
+    
+    if (lightVisible(lightRay, lightTime, 0)){
+        throughput *= lambertianBRDF(record.objectColor) * scatteredCos(record.normalVector, record.scatteredRay.direction) / lightPDF * vec3(15);
+    } else { 
+        throughput = vec3(0);
+    } 
 }
 
 // Get the pixel color while still reflecting the ray (bouncing it off of surfaces)
@@ -143,6 +145,8 @@ vec3 pixelColor(Ray ray, inout uvec4 state){
 
         if (record.materialID == LAMBERTIAN){
             renderingEQ(record, throughput, state);
+            accumulatedColor += throughput;
+            break;
         } else {
             throughput *= record.objectColor;
         }
