@@ -1,5 +1,5 @@
 // Struct for tInterval that makes dealing with intersections a lot easier. Idea for this was gained from https://raytracing.github.io/books/RayTracingInOneWeekend.html#movingcameracodeintoitsownclass. However, I made some modifications to better suit me 
-struct tInterval{
+struct Interval{
     float tMin;
     float t; 
 };
@@ -9,13 +9,13 @@ const float rayMin = 0.001;
 const float rayMax = 1e10;
 
 // Initialize a default tInterval with rayMin and rayMax
-tInterval initDefaultTInterval(){
-    tInterval interval = {rayMin, rayMax};
+Interval initDefaultInterval(){
+    Interval interval = {rayMin, rayMax};
     return interval; 
 }
 
 // Check if the t value that the ray intersection test returns is out of bounds of the tInterval
-bool outOfBounds(tInterval interval, float t){
+bool outOfBounds(Interval interval, float t){
     return t < interval.tMin || interval.t < t;
 }
 

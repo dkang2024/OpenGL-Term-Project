@@ -4,7 +4,7 @@ struct HitRecord{
     Ray scatteredRay;
     bool didScatter;
     vec3 normalVector; 
-    tInterval tValues;
+    Interval tValues;
     vec3 objectColor;
     bool isLight;
     bool frontFace; 
@@ -13,7 +13,7 @@ struct HitRecord{
 
 // Creates the default hit record
 HitRecord initDefaultHitRecord(){
-    HitRecord newHitRecord = {initDefaultVec(), initDefaultRay(), false, initDefaultVec(), initDefaultTInterval(), initDefaultVec(), false, false, 0};
+    HitRecord newHitRecord = {initDefaultVec(), initDefaultRay(), false, initDefaultVec(), initDefaultInterval(), initDefaultVec(), false, false, 0};
     return newHitRecord;
 }
 
