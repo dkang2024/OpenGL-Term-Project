@@ -46,3 +46,8 @@ ONB createONB(vec3 normalVector){
 vec3 transformONB(ONB basis, vec3 v){
     return (v.x * basis.axis1) + (v.y * basis.axis2) + (v.z * basis.axis3);
 }
+
+// Return the maximum component of a vector 
+float maxVector(vec3 v){
+    return max(v.x, max(v.y, v.z));
+}

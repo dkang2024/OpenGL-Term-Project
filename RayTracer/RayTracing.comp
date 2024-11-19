@@ -170,12 +170,12 @@ vec3 pixelColor(Ray ray, inout uvec4 state){
             break;
         }
 
-        // Russian Roulette Path termination with assistance from https://www.pbr-book.org/3ed-2018/Light_Transport_I_Surface_Reflection/Path_Tracing 
+        // Russian Roulette path termination with assistance from https://www.pbr-book.org/3ed-2018/Light_Transport_I_Surface_Reflection/Path_Tracing 
         if (bounce <= 3){
             continue;
         }
        
-        float p = max(throughput.x, max(throughput.y, throughput.z));
+        float p = maxVector(throughput);
         if (rand(state) > p){
             break;
         } else {
