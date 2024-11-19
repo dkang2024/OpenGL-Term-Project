@@ -92,7 +92,7 @@ bool hit(Ray ray, inout HitRecord record, inout uvec4 state){
 
 // Check if a light is visible 
 bool lightVisible(vec3 objectNormal, Ray ray, float lightTime, int lightIndex){
-    if (dot(objectNormal, ray.direction) < 0){ // If the normal vector of the record that points against the origin of the ray is at all antiparallel to the lightray, the light is on the opposite side of the object
+    if (dot(objectNormal, ray.direction) <= 0){ // If the normal vector of the record that points against the origin of the ray is at all antiparallel to the lightray, the light is on the opposite side of the object
         return false;
     }
 
@@ -117,8 +117,8 @@ bool lightVisible(vec3 objectNormal, Ray ray, float lightTime, int lightIndex){
     return true;
 }
 
-// Lambertian rendering equation (with direct light sampling and shadow rays implemented)
-void renderingEQ(inout HitRecord record, inout vec3 throughput, inout uvec4 state){
+// Direct Lighting for lambertian materials with direct light sampling (don't include BRDF sampling because it doesn't matter for a Lambertian BRDF that's constant)
+void directLighting(inout HitRecord record, inout vec3 accumulatedColor, vec3 throughput, inout uvec4 state){
     Ray lightRay;
     float lightTime;
 
@@ -132,7 +132,7 @@ void renderingEQ(inout HitRecord record, inout vec3 throughput, inout uvec4 stat
             directLight += lambertianBRDF(record.objectColor) * scatteredCos(record.normalVector, record.scatteredRay.direction) * lights[lightIndex].color / lightPDF;
         } 
     }
-    throughput *= directLight;
+    accumulatedColor += directLight * throughput;
 }
 
 // Get the pixel color while still reflecting the ray (bouncing it off of surfaces)
@@ -152,20 +152,16 @@ vec3 pixelColor(Ray ray, inout uvec4 state){
         if (record.isLight){ 
             if (bounce == 0 || prevMaterialID != LAMBERTIAN){ // Check these conditions to avoid double dipping the light source with the direct light sampling. If the previous material was lambertian, then I already accounted for the direct light. 
                 accumulatedColor += throughput * record.objectColor;
-            } else {
-                accumulatedColor += throughput;  
-            }
+            } 
             break; // Break at the light (separate from regular renderers because it allows me to simplify calculations)
         } 
 
         prevMaterialID = record.materialID;
         if (record.materialID == LAMBERTIAN){
-            renderingEQ(record, throughput, state);
-            accumulatedColor += throughput;
-            break;
-        } else {
-            throughput *= record.objectColor;
-        }
+            directLighting(record, accumulatedColor, throughput, state);
+        } 
+        
+        throughput *= record.objectColor;
     
         if (record.didScatter){
             ray = record.scatteredRay;
