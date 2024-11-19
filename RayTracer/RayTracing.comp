@@ -91,7 +91,11 @@ bool hit(Ray ray, inout HitRecord record, inout uvec4 state){
 }
 
 // Check if a light is visible 
-bool lightVisible(Ray ray, float lightTime, int lightIndex){
+bool lightVisible(vec3 objectNormal, Ray ray, float lightTime, int lightIndex){
+    if (dot(objectNormal, ray.direction) < 0){ // If the normal vector of the record that points against the origin of the ray is at all antiparallel to the lightray, the light is on the opposite side of the object
+        return false;
+    }
+
     Interval lightInterval = {rayMin, lightTime};
     for (int i = 0; i < numSpheres; i++){
         if (hitSphereLight(spheres[i], ray, lightInterval)){
@@ -124,7 +128,7 @@ void renderingEQ(inout HitRecord record, inout vec3 throughput, inout uvec4 stat
         int lightIndex = randInt(state, 0, numLights);
 
         float lightPDF = quadLightPDF(lights[lightIndex], record, lightTime, lightRay, state);
-        if (lightVisible(lightRay, lightTime, lightIndex)){
+        if (lightVisible(record.normalVector, lightRay, lightTime, lightIndex)){
             directLight += lambertianBRDF(record.objectColor) * scatteredCos(record.normalVector, record.scatteredRay.direction) * lights[lightIndex].color / lightPDF;
         } 
     }
