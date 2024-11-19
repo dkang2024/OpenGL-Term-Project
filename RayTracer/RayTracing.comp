@@ -50,6 +50,11 @@ vec3 gradientColor(vec3 rayDirection){
     return mix(colorTop, colorBottom, t);
 }
 
+// Return the background color
+vec3 backgroundColor(vec3 rayDir){
+    return vec3(0);
+}
+
 // Sample within the pixel's square from -0.5 to 0.5 in order to do some antialiasing (also stratify to increase dimensionality but converge faster for randomness)
 vec2 samplePixel(int i, int j, inout uvec4 state){
     float pixelX = ((i + rand(state)) * invRootSPP) - 0.5;
@@ -130,22 +135,26 @@ void renderingEQ(inout HitRecord record, inout vec3 throughput, inout uvec4 stat
 vec3 pixelColor(Ray ray, inout uvec4 state){
     vec3 accumulatedColor = vec3(0);
     vec3 throughput = vec3(1);
+    int prevMaterialID;
     
-    for (int i = 0; i < maxBounces; i++){
+    for (int bounce = 0; bounce < maxBounces; bounce++){
         HitRecord record = initDefaultHitRecord();
 
         if (!hit(ray, record, state)){
-            accumulatedColor += throughput * vec3(0);
+            accumulatedColor += throughput * backgroundColor(vec3(0));
             break;
         } 
         
-        // Apply the rendering equation here. Don't allow any more bounces for light so don't ADD emissive. Just multiply by the color
+        if (record.isLight){ 
+            if (bounce == 0 || prevMaterialID != LAMBERTIAN){ // Check these conditions to avoid double dipping the light source with the direct light sampling. If the previous material was lambertian, then I already accounted for the direct light. 
+                accumulatedColor += throughput * record.objectColor;
+            } else {
+                accumulatedColor += throughput;  
+            }
+            break; // Break at the light (separate from regular renderers because it allows me to simplify calculations)
+        } 
 
-        if (record.isLight){
-            accumulatedColor += throughput * record.objectColor;
-            break;
-        }
-
+        prevMaterialID = record.materialID;
         if (record.materialID == LAMBERTIAN){
             renderingEQ(record, throughput, state);
             accumulatedColor += throughput;
