@@ -22,9 +22,9 @@ bool isExterior(float alpha, float beta){
     return false;
 }
 
-// Ray-plane intersection with equations derived from 259 and with some math assistance from https://raytracing.github.io/books/RayTracingTheNextWeek.html 
-bool hitQuad(Quad quad, Ray ray, inout HitRecord record, inout uvec4 state){
-    vec3 normalVector = quad.normalVector;
+// Common quad intersection code in both hitQuad and hitQuadLight
+bool commonQuadCalculations(Quad quad, Ray ray, Interval tInterval, inout float t, inout vec3 hitPoint, inout vec3 normalVector, inout float alpha, inout float beta){
+    normalVector = quad.normalVector;
     float denominator = dot(normalVector, ray.direction);
     float epsilon = 1e-8;
     
@@ -32,17 +32,32 @@ bool hitQuad(Quad quad, Ray ray, inout HitRecord record, inout uvec4 state){
         return false; // No hit for nearly parallel rays
     }
     
-    float t = (quad.D - dot(ray.origin, normalVector)) / denominator;
-    if (outOfBounds(record.tValues, t)){
+    t = (quad.D - dot(ray.origin, normalVector)) / denominator;
+    if (outOfBounds(tInterval, t)){
         return false;
     }
 
-    vec3 hitPoint = rayIntersectPoint(ray, t);
+    hitPoint = rayIntersectPoint(ray, t);
     vec3 hitVector = hitPoint - quad.point;
-    float alpha = dot(quad.W, cross(hitVector, quad.side2));
-    float beta = dot(quad.W, cross(quad.side1, hitVector));
+    alpha = dot(quad.W, cross(hitVector, quad.side2));
+    beta = dot(quad.W, cross(quad.side1, hitVector));
 
     if (isExterior(alpha, beta)){
+        return false;
+    }
+    return true;
+}
+
+// Ray-plane intersection with equations derived from 259 and with some math assistance from https://raytracing.github.io/books/RayTracingTheNextWeek.html 
+bool hitQuad(Quad quad, Ray ray, inout HitRecord record, inout uvec4 state){
+    float t;
+    vec3 hitPoint;
+    vec3 normalVector;
+    float alpha;
+    float beta;
+
+    bool didHit = commonQuadCalculations(quad, ray, record.tValues, t, hitPoint, normalVector, alpha, beta);
+    if (!didHit){
         return false;
     }
 
@@ -73,4 +88,8 @@ float quadLightPDF(Quad quad, HitRecord record, inout float lightTime, inout Ray
     lightTime = toLight.x / normalizedToLight.x;
 
     return distanceSquared / (cosLight * quad.area);
+}
+
+bool hitQuadLight(Quad quad, Ray ray, Interval tInterval){
+    return false;
 }

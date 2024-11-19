@@ -86,8 +86,26 @@ bool hit(Ray ray, inout HitRecord record, inout uvec4 state){
 }
 
 // Check if a light is visible 
-bool lightVisible(Ray lightRay, float lightTime){
-    return false;
+bool lightVisible(Ray ray, float lightTime, int lightIndex){
+    Interval lightInterval = {rayMin, lightTime};
+    for (int i = 0; i < numSpheres; i++){
+        if (hitSphereLight(spheres[i], ray, lightInterval)){
+            return false; 
+        }
+    }
+    for (int i = 0; i < numQuads; i++){
+        if (hitQuadLight(quads[i], ray, lightInterval)){
+            return false; 
+        }
+    }
+    for (int i = 0; i < numLights; i++){
+        if (i == lightIndex){
+            continue;
+        } else if (hitQuadLight(lights[i], ray, lightInterval)){
+            return false;
+        }
+    }
+    return true;
 }
 
 // Lambertian rendering equation (with direct light sampling and shadow rays implemented)
