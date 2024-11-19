@@ -44,3 +44,8 @@ vec3 randomCosineSample(inout uvec4 state){
     float z = sqrt(1 - r2);
     return vec3(x, y, z);
 }
+
+// Return a random integer between [a, b)
+int randInt(inout uvec4 state, int minValue, int maxValue){
+    return minValue + int(floor((maxValue - minValue) * rand(state)));
+}
