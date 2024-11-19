@@ -145,7 +145,7 @@ vec3 pixelColor(Ray ray, inout uvec4 state){
         HitRecord record = initDefaultHitRecord();
 
         if (!hit(ray, record, state)){
-            accumulatedColor += throughput * backgroundColor(vec3(0));
+            accumulatedColor += throughput * backgroundColor(ray.direction);
             break;
         } 
         
@@ -156,12 +156,12 @@ vec3 pixelColor(Ray ray, inout uvec4 state){
             break; // Break at the light (separate from regular renderers because it allows me to simplify calculations)
         } 
 
-        prevMaterialID = record.materialID;
+        prevMaterialID = record.materialID; // Set the previous material ID for the above calculations
         if (record.materialID == LAMBERTIAN){
             directLighting(record, accumulatedColor, throughput, state);
         } 
         
-        throughput *= record.objectColor;
+        throughput *= record.objectColor; // Note that this implicitly applies the rendering equation (because for lambertian materials all the terms cancel out to just multiply by the object color)
     
         if (record.didScatter){
             ray = record.scatteredRay;
