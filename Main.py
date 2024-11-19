@@ -28,7 +28,7 @@ class Test(mglw.WindowConfig):
         self.initRand()
 
         self.rayTracer = self.ctx.compute_shader(loadComputeShader(self.ctx, 'RayTracer', 'RayTracing'))
-        self.initRenderer(4, 10, 2)
+        self.initRenderer(4, 2)
 
         self.camera = Camera(self, glm.vec3(278, 278, -200), 100, 60, 0.2)
         self.screenCoords = mglw.geometry.quad_fs(attr_names = screenNames, normals = False, name = 'Screen Coordinates')
@@ -61,7 +61,7 @@ class Test(mglw.WindowConfig):
         self.world.createRenderArray()
         self.world.assignRender()
 
-    def initRenderer(self, maxBounces, samplesPerPixel, maxShadowRays):
+    def initRenderer(self, maxBounces, samplesPerPixel):
         '''
         Initialize the quantities necessary for the renderer and pass them in 
         '''
@@ -69,7 +69,6 @@ class Test(mglw.WindowConfig):
         rootSPP = int(np.sqrt(samplesPerPixel))
         self.rayTracer['rootSPP'] = rootSPP 
         self.rayTracer['invRootSPP'] = 1 / rootSPP
-        self.rayTracer['maxShadowRays'] = maxShadowRays
     
     def loadTexture(self, name):
         '''
