@@ -19,6 +19,10 @@ vec3 lambertianBRDF(vec3 objectColor){
     return objectColor / PI;
 }
 
+float lambertianPDF(vec3 normalVector, vec3 scatteredDir){
+    return scatteredCos(normalVector, scatteredDir) / PI;
+}
+
 // Scattering for reflective objects with the math given by https://raytracing.github.io/books/RayTracingInOneWeekend
 void reflectiveScatter(float fuzz, Ray ray, inout HitRecord record, inout uvec4 state){
     vec3 reflectDir = reflect(ray.direction, record.normalVector);
