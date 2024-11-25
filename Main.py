@@ -21,6 +21,7 @@ class Test(mglw.WindowConfig):
         self.wnd.mouse_exclusivity = True 
 
         self.loadTextures()
+        self.TAA = self.ctx.compute_shader(loadComputeShader(self.ctx, 'TAA', 'TAA'))
         self.rayTracer = self.ctx.compute_shader(loadComputeShader(self.ctx, 'RayTracer', 'RayTracing'))
         self.initRenderer(10, 1)
 
@@ -52,8 +53,8 @@ class Test(mglw.WindowConfig):
         self.world.addHittable(Quad(glm.vec3(0, 0, 555), glm.vec3(555, 0, 0), glm.vec3(0, 555, 0), white))
         #self.world.addHittable(Sphere(glm.vec3(190, 90, 190), 90, materialLeft))
         
-        self.world.addHittable(Cube(glm.vec3(130, 0, 65), glm.vec3(295, 165, 230), materialBack))
-        self.world.addHittable(Cube(glm.vec3(265, 0, 295), glm.vec3(430, 330, 460), white))
+        self.world.addHittable(Cube(glm.vec3(130, 0, 65), glm.vec3(295, 165, 230), white))
+        self.world.addHittable(Cube(glm.vec3(265, 0, 295), glm.vec3(430, 330, 460), materialBack))
 
         self.world.addHittable(Sphere(glm.vec3(0, 0, -1), 0, materialCenter))
         
@@ -102,6 +103,7 @@ class Test(mglw.WindowConfig):
 
         self.frameCount = 0
         self.rayTracer['frameCount'] = self.frameCount
+        self.TAA['frameCount'] = self.frameCount
         self.program['frameCount'] = self.frameCount
      
     def initRand(self):
@@ -168,20 +170,26 @@ class Test(mglw.WindowConfig):
         '''
         self.frameCount += 1
         self.rayTracer['frameCount'] = self.frameCount
+        self.TAA['frameCount'] = self.frameCount
         self.program['frameCount'] = self.frameCount
 
-    def render(self, time, frameTime):
+    def render(self, t, frameTime):
         '''
         Render the screen and display the fps
         '''
         self.ctx.clear()
         self.cameraMovementKeys()
         self.camera.render(frameTime)
-       
-        self.rayTracer.run(math.ceil(self.window_size[0] / 8), math.ceil(self.window_size[1] / 4))
-        self.ctx.memory_barrier(mgl.SHADER_IMAGE_ACCESS_BARRIER_BIT)
-        self.screenCoords.render(self.program)
 
+        workgroupX, workgroupY = math.ceil(self.window_size[0] / 8), math.ceil(self.window_size[1] / 4)
+       
+        self.rayTracer.run(workgroupX, workgroupY)
+        self.ctx.memory_barrier(mgl.SHADER_IMAGE_ACCESS_BARRIER_BIT)
+
+        self.TAA.run(workgroupX, workgroupY)
+        self.ctx.memory_barrier(mgl.SHADER_IMAGE_ACCESS_BARRIER_BIT)
+
+        self.screenCoords.render(self.program)
         self.crosshair.render()
         
         self.updateFrameCount()
