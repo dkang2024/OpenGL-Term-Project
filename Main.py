@@ -21,14 +21,13 @@ class Test(mglw.WindowConfig):
         self.wnd.mouse_exclusivity = True 
 
         self.loadTextures()
+        self.rayTracer = self.ctx.compute_shader(loadComputeShader(self.ctx, 'RayTracer', 'RayTracing'))
+        self.initRenderer(10, 1)
 
         self.ctx.gc_mode = 'auto'
         self.program = self.ctx.program(*loadVertexAndFrag('Window', 'Window', 'Window'))
         self.initScreen()
         self.initRand()
-
-        self.rayTracer = self.ctx.compute_shader(loadComputeShader(self.ctx, 'RayTracer', 'RayTracing'))
-        self.initRenderer(10, 1)
 
         self.camera = Camera(self, glm.vec3(278, 278, -200), 100, 60, 0.2)
         self.screenCoords = mglw.geometry.quad_fs(attr_names = screenNames, normals = False, name = 'Screen Coordinates')
@@ -89,12 +88,21 @@ class Test(mglw.WindowConfig):
            
     def initScreen(self):
         '''
-        Initialize the screen texture to draw to so that the compute shader can "render" to the screen indirectly
+        Initialize two screen textures so that the renderer can draw to the screen indirectly using the texture. Initialize two textures and cycle between them to enable TAA. Note that I have to do this manually without using a helper function because of OPENGL shenanigans
         '''
-        self.screen = self.ctx.texture(self.window_size, 4, dtype = 'f4')
-        self.screen.filter = (mgl.NEAREST, mgl.NEAREST)
-        self.screen.bind_to_image(0)        
-        self.screen.use(0)       
+        self.screen1 = self.ctx.texture(self.window_size, 4, dtype = 'f4')
+        self.screen1.filter = (mgl.NEAREST, mgl.NEAREST)
+        self.screen1.bind_to_image(0)        
+        self.screen1.use(0)       
+
+        self.screen2 = self.ctx.texture(self.window_size, 4, dtype = 'f4')
+        self.screen2.filter = (mgl.NEAREST, mgl.NEAREST)
+        self.screen2.bind_to_image(1)
+        self.screen2.use(1)
+
+        self.frameCount = 0
+        self.rayTracer['frameCount'] = self.frameCount
+        self.program['frameCount'] = self.frameCount
      
     def initRand(self):
         '''
@@ -103,7 +111,7 @@ class Test(mglw.WindowConfig):
         RandGen = np.random.default_rng()
         self.seed = RandGen.integers(128, 100000, (*self.window_size, 4), dtype = 'u4')
         self.seed = self.ctx.texture(self.window_size, 4, data = self.seed, dtype = 'u4')
-        self.seed.bind_to_image(1)
+        self.seed.bind_to_image(2)
 
     def cameraMovementKeys(self):
         '''
@@ -154,6 +162,14 @@ class Test(mglw.WindowConfig):
         self.initRand()
         self.ctx.viewport = (0, 0, screenWidth, screenHeight)
 
+    def updateFrameCount(self):
+        '''
+        Update the framecount uniform in OpenGL for TAA
+        '''
+        self.frameCount += 1
+        self.rayTracer['frameCount'] = self.frameCount
+        self.program['frameCount'] = self.frameCount
+
     def render(self, time, frameTime):
         '''
         Render the screen and display the fps
@@ -168,6 +184,7 @@ class Test(mglw.WindowConfig):
 
         self.crosshair.render()
         
+        self.updateFrameCount()
         if frameTime != 0:
             self.wnd.title = f'FPS: {1 / frameTime: .2f}'
 

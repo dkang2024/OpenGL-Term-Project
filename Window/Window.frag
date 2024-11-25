@@ -4,8 +4,16 @@ in vec2 textureCoord;
 
 out vec4 fragColor; 
 
-uniform sampler2D screen;
+uniform int frameCount;
+uniform sampler2D screen1;
+uniform sampler2D screen2;
 
 void main(){
-    fragColor = texture(screen, textureCoord);
+    if (frameCount == 0){
+        fragColor = texture(screen1, textureCoord);
+    } else if (frameCount % 2 == 0){
+        fragColor = texture(screen1, textureCoord);
+    } else {
+        fragColor = texture(screen2, textureCoord);
+    }
 }

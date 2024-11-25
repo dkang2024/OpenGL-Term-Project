@@ -18,8 +18,9 @@ layout(binding = 2) uniform sampler2D earth;
 
 // Set up invocation size and take in the screen texture to modify it per pixel. Note that the size volume is 32 (which is optimized for NVIDIA gpus rather than AMD gpus [which prefer a size of multiples of 64])
 layout(local_size_x = 8, local_size_y = 4, local_size_z = 1) in;
-layout(rgba32f, binding = 0) uniform image2D screen;
-layout(rgba32ui, binding = 1) uniform uimage2D seeds;
+layout(rgba32f, binding = 0) uniform image2D screen1;
+layout(rgba32f, binding = 1) uniform image2D screen2;
+layout(rgba32ui, binding = 2) uniform uimage2D seeds;
 
 layout(std430, binding = 0) buffer scene1 {
     Sphere spheres[];
@@ -31,6 +32,7 @@ layout(std430, binding = 2) buffer scene3 {
     Quad lights[];
 };
 
+uniform int frameCount;
 uniform int numSpheres;
 uniform int numQuads;
 uniform int numLights;
@@ -202,6 +204,15 @@ vec4 antialiasing(ivec2 pixelCoord, inout uvec4 state){
     return vec4(gamutCorrect(pixel / pow(rootSPP, 2)), 1);
 }
 
+// Choose a screen to render to given a frame count
+void chooseScreen(ivec2 pixelCoord, vec4 pixel){
+    if (frameCount % 2 == 0){ // Render to screen 1 if the frameCount is even
+        imageStore(screen1, pixelCoord, pixel);
+    } else {
+        imageStore(screen2, pixelCoord, pixel);
+    }
+}
+
 // Main Function
 void main(){
     ivec2 pixelCoord = ivec2(gl_GlobalInvocationID.xy); // Get the global invocation ID in order to determine the exact pixel location. 
@@ -209,5 +220,5 @@ void main(){
     vec4 pixel = antialiasing(pixelCoord, state);
 
     imageStore(seeds, pixelCoord, state);
-    imageStore(screen, pixelCoord, pixel);
+    chooseScreen(pixelCoord, pixel);
 }
