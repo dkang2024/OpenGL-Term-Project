@@ -184,9 +184,8 @@ vec3 pixelColor(Ray ray, inout uvec4 state){
         float p = maxVector(throughput);
         if (rand(state) > p){
             break;
-        } else {
-            throughput *= 1 / p; //Add the additional light to the throughput we get from randomly terminating paths
-        }
+        } 
+        throughput *= 1 / p; //Add the additional light to the throughput we get from randomly terminating paths
     }
     return clamp(accumulatedColor, 0, 1);
 }
