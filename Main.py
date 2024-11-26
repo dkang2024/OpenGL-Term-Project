@@ -22,7 +22,7 @@ class Test(mglw.WindowConfig):
 
         self.loadTextures()
         self.rayTracer = self.ctx.compute_shader(loadComputeShader(self.ctx, 'RayTracer', 'RayTracing'))
-        self.initRenderer(10, 1)
+        self.initRenderer(10, 1, 0.01)
 
         self.ctx.gc_mode = 'auto'
         self.program = self.ctx.program(*loadVertexAndFrag('Window', 'Window', 'Window'))
@@ -60,14 +60,15 @@ class Test(mglw.WindowConfig):
         self.world.createRenderArray()
         self.world.assignRender()
 
-    def initRenderer(self, maxBounces, samplesPerPixel):
+    def initRenderer(self, maxBounces, samplesPerPixel, temporalReuseFactor):
         '''
-        Initialize the quantities necessary for the renderer and pass them in 
+        Initialize the quantities necessary for the renderer and pass them in (including the temporal reuse mix factor)
         '''
         self.rayTracer['maxBounces'] = maxBounces
         rootSPP = int(np.sqrt(samplesPerPixel))
         self.rayTracer['rootSPP'] = rootSPP 
         self.rayTracer['invRootSPP'] = 1 / rootSPP
+        self.rayTracer['temporalReuseFactor'] = temporalReuseFactor
     
     def loadTexture(self, name):
         '''

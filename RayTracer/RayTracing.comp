@@ -12,6 +12,7 @@ layout(rgba32f, binding = 1) uniform image2D screen2;
 layout(rgba32ui, binding = 2) uniform uimage2D seeds;
 
 uniform int frameCount;
+uniform float temporalReuseFactor;
 
 // Import files here using the "include" statement that Python processes with string processing and txt file processing
 #include "Random"
@@ -205,15 +206,6 @@ vec4 antialiasing(ivec2 pixelCoord, inout uvec4 state){
         }
     }
     return vec4(gamutCorrect(pixel / pow(rootSPP, 2)), 1);
-}
-
-// Choose a screen to render to given a frame count
-void chooseScreen(ivec2 pixelCoord, vec4 pixel){
-    if (frameCount % 2 == 0){ // Render to screen 1 if the frameCount is even
-        imageStore(screen1, pixelCoord, pixel);
-    } else {
-        imageStore(screen2, pixelCoord, pixel);
-    }
 }
 
 // Main Function

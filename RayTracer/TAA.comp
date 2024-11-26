@@ -1,6 +1,6 @@
 // Apply temporal reuse with blending across frames
 void temporalReuse(vec4 prevPixel, inout vec4 pixel){
-    pixel = mix(prevPixel, pixel, 0.01);
+    pixel = mix(prevPixel, pixel, temporalReuseFactor);
 }
 
 // Apply TAA to the frame
