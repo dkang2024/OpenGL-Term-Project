@@ -21,7 +21,6 @@ class Test(mglw.WindowConfig):
         self.wnd.mouse_exclusivity = True 
 
         self.loadTextures()
-        self.TAA = self.ctx.compute_shader(loadComputeShader(self.ctx, 'TAA', 'TAA'))
         self.rayTracer = self.ctx.compute_shader(loadComputeShader(self.ctx, 'RayTracer', 'RayTracing'))
         self.initRenderer(10, 1)
 
@@ -82,7 +81,7 @@ class Test(mglw.WindowConfig):
         '''
         Register the texture directory to moderngl window and load all the textures
         '''
-        self.textureBind = 1
+        self.textureBind = 2
         mglw.resources.register_texture_dir(os.path.abspath('Textures'))
         self.loadTexture('Brick Wall.jpg')
         self.loadTexture('Earth.jpg')
@@ -103,7 +102,6 @@ class Test(mglw.WindowConfig):
 
         self.frameCount = 0
         self.rayTracer['frameCount'] = self.frameCount
-        self.TAA['frameCount'] = self.frameCount
         self.program['frameCount'] = self.frameCount
      
     def initRand(self):
@@ -170,7 +168,6 @@ class Test(mglw.WindowConfig):
         '''
         self.frameCount += 1
         self.rayTracer['frameCount'] = self.frameCount
-        self.TAA['frameCount'] = self.frameCount
         self.program['frameCount'] = self.frameCount
 
     def render(self, t, frameTime):
@@ -184,9 +181,6 @@ class Test(mglw.WindowConfig):
         workgroupX, workgroupY = math.ceil(self.window_size[0] / 8), math.ceil(self.window_size[1] / 4)
        
         self.rayTracer.run(workgroupX, workgroupY)
-        self.ctx.memory_barrier(mgl.SHADER_IMAGE_ACCESS_BARRIER_BIT)
-
-        self.TAA.run(workgroupX, workgroupY)
         self.ctx.memory_barrier(mgl.SHADER_IMAGE_ACCESS_BARRIER_BIT)
 
         self.screenCoords.render(self.program)

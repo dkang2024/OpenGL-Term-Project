@@ -1,0 +1,24 @@
+// Apply temporal reuse with blending across frames
+void temporalReuse(vec4 prevPixel, inout vec4 pixel){
+    pixel = mix(prevPixel, pixel, 0.01);
+}
+
+// Apply TAA to the frame
+void applyTAA(ivec2 pixelCoord, vec4 pixel){
+    if (frameCount == 0){ // If it's the first frame, store the pixel in the first screen and don't apply TAA. 
+        imageStore(screen1, pixelCoord, pixel);
+        return;
+    }
+
+    vec4 prevPixel;
+
+    if (frameCount % 2 == 0){ // Current screen is screen1, we want to store there
+        prevPixel = imageLoad(screen2, pixelCoord);
+        temporalReuse(prevPixel, pixel);
+        imageStore(screen1, pixelCoord, pixel);
+    } else {
+        prevPixel = imageLoad(screen1, pixelCoord);
+        temporalReuse(prevPixel, pixel);
+        imageStore(screen2, pixelCoord, pixel);
+    }
+}

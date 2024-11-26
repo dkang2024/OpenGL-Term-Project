@@ -1,8 +1,17 @@
 // Initialize the version
 #version 460 core
 
-layout(binding = 1) uniform sampler2D brickWall;
-layout(binding = 2) uniform sampler2D earth;
+layout(binding = 2) uniform sampler2D brickWall;
+layout(binding = 3) uniform sampler2D earth;
+
+// Set up invocation size and take in the screen texture to modify it per pixel. Note that the size volume is 32 (which is optimized for NVIDIA gpus rather than AMD gpus [which prefer a size of multiples of 64])
+layout(local_size_x = 8, local_size_y = 4, local_size_z = 1) in;
+
+layout(rgba32f, binding = 0) uniform image2D screen1;
+layout(rgba32f, binding = 1) uniform image2D screen2;
+layout(rgba32ui, binding = 2) uniform uimage2D seeds;
+
+uniform int frameCount;
 
 // Import files here using the "include" statement that Python processes with string processing and txt file processing
 #include "Random"
@@ -15,12 +24,7 @@ layout(binding = 2) uniform sampler2D earth;
 #include "Textures"
 #include "Sphere"
 #include "Quad"
-
-// Set up invocation size and take in the screen texture to modify it per pixel. Note that the size volume is 32 (which is optimized for NVIDIA gpus rather than AMD gpus [which prefer a size of multiples of 64])
-layout(local_size_x = 8, local_size_y = 4, local_size_z = 1) in;
-layout(rgba32f, binding = 0) uniform image2D screen1;
-layout(rgba32f, binding = 1) uniform image2D screen2;
-layout(rgba32ui, binding = 2) uniform uimage2D seeds;
+#include "TAA"
 
 layout(std430, binding = 0) buffer scene1 {
     Sphere spheres[];
@@ -32,7 +36,6 @@ layout(std430, binding = 2) buffer scene3 {
     Quad lights[];
 };
 
-uniform int frameCount;
 uniform int numSpheres;
 uniform int numQuads;
 uniform int numLights;
@@ -184,7 +187,7 @@ vec3 pixelColor(Ray ray, inout uvec4 state){
             throughput *= 1 / p; //Add the additional light to the throughput we get from randomly terminating paths
         }
     }
-    return accumulatedColor;
+    return clamp(accumulatedColor, 0, 1);
 }
 
 // Gamut correction
@@ -217,8 +220,8 @@ void chooseScreen(ivec2 pixelCoord, vec4 pixel){
 void main(){
     ivec2 pixelCoord = ivec2(gl_GlobalInvocationID.xy); // Get the global invocation ID in order to determine the exact pixel location. 
     uvec4 state = imageLoad(seeds, pixelCoord);
-    vec4 pixel = clamp(antialiasing(pixelCoord, state), 0, 1);
+    vec4 pixel = antialiasing(pixelCoord, state);
 
     imageStore(seeds, pixelCoord, state);
-    chooseScreen(pixelCoord, pixel);
+    applyTAA(pixelCoord, pixel);
 }
