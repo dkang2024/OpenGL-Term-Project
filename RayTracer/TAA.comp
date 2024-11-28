@@ -47,17 +47,16 @@ void applyTAA(ivec2 pixelCoord, vec4 pixel, TemporalRecord tempRecord){
         return;
     }
 
-    vec3 maxColor = vec3(-1000000000);
-    vec3 minColor = vec3(1000000000);
+    vec3 minColor = vec3(1000000000); vec3 maxColor = vec3(-1000000000);
     
     if (frameCount % 2 == 0){ // Current screen is screen1, we want to store there
         prevPixel = imageLoad(screen2, prevPixelCoord);
 
-        for (int i = 0; i <= 1; i++){
-            for (int j = 0; j <= 1; j++){
-                vec4 neighborColor = imageLoad(screen2, prevPixelCoord + ivec2(i, j));
-                minColor = min(minColor, neighborColor.rgb);
-                maxColor = max(maxColor, neighborColor.rgb);
+        for (int i = -1; i <= 1; i++){
+            for (int j = -1; j <= 1; j++){
+                vec3 neighborColor = imageLoad(screen2, prevPixelCoord + ivec2(i, j)).rgb;
+                minColor = min(minColor, neighborColor);
+                maxColor = max(maxColor, neighborColor);
             }
         }
         prevPixel = clamp(prevPixel, vec4(minColor, 1), vec4(maxColor, 1));
@@ -67,11 +66,11 @@ void applyTAA(ivec2 pixelCoord, vec4 pixel, TemporalRecord tempRecord){
     } else {
         prevPixel = imageLoad(screen1, prevPixelCoord);
         
-        for (int i = 0; i <= 1; i++){
-            for (int j = 0; j <= 1; j++){
-                vec4 neighborColor = imageLoad(screen1, prevPixelCoord + ivec2(i, j));
-                minColor = min(minColor, neighborColor.rgb);
-                maxColor = max(maxColor, neighborColor.rgb);
+        for (int i = -1; i <= 1; i++){
+            for (int j = -1; j <= 1; j++){
+                vec3 neighborColor = imageLoad(screen1, prevPixelCoord + ivec2(i, j)).rgb;
+                minColor = min(minColor, neighborColor);
+                maxColor = max(maxColor, neighborColor);
             }
         }
         prevPixel = clamp(prevPixel, vec4(minColor, 1), vec4(maxColor, 1));

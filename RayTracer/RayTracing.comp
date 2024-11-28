@@ -164,7 +164,7 @@ vec3 pixelColor(Ray ray, inout uvec4 state, out TemporalRecord tempRecord){
         } 
 
         if (bounce == 0){
-            tempRecord = TemporalRecord(true, vec3(record.pointHit));
+            tempRecord = TemporalRecord(true, record.pointHit);
         }
         
         if (record.isLight){ 
