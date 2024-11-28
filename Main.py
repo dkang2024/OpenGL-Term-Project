@@ -180,7 +180,6 @@ class Test(mglw.WindowConfig):
         self.camera.render(frameTime)
 
         workgroupX, workgroupY = math.ceil(self.window_size[0] / 8), math.ceil(self.window_size[1] / 4)
-       
         self.rayTracer.run(workgroupX, workgroupY)
         self.ctx.memory_barrier(mgl.SHADER_IMAGE_ACCESS_BARRIER_BIT)
 
