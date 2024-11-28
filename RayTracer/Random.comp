@@ -47,5 +47,5 @@ vec3 randomCosineSample(inout uvec4 state){
 
 // Return a random integer between [a, b)
 int randInt(inout uvec4 state, int minValue, int maxValue){
-    return minValue + int(floor((maxValue - minValue) * rand(state)));
+    return minValue + int((maxValue - minValue) * rand(state));
 }

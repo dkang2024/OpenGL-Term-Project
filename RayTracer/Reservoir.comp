@@ -1,0 +1,14 @@
+// Reservoir for keeping track of lights with reservoir importance sampling
+struct Reservoir {
+    int lightIndex;
+    float sumWeight;
+};
+
+// Update the reservoir with another bad light sample. Flip a coin to reject or accept this sample based on the sample's weight.
+void updateReservoir(inout Reservoir lightReservoir, int lightIndex, float lightWeight, inout uvec4 state){
+    lightReservoir.sumWeight += lightWeight;
+
+    if (rand(state) < lightWeight / lightReservoir.sumWeight){
+        lightReservoir.lightIndex = lightIndex;
+    }
+}

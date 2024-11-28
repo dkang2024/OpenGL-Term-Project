@@ -15,11 +15,9 @@ ivec2 temporalReprojection(vec3 pointHit, ivec2 windowSize){
 
 // Check if the temporal reprojection is within the window. 
 bool inWindow(ivec2 pixelCoord, ivec2 windowSize){
-    if (!(0 < pixelCoord.x && pixelCoord.x < windowSize.x)){
+    if (!(0 < pixelCoord.x && pixelCoord.x < windowSize.x) || !(0 < pixelCoord.y && pixelCoord.y < windowSize.y)){
         return false;
-    } else if (!(0 < pixelCoord.y && pixelCoord.y < windowSize.y)){
-        return false;
-    }
+    } 
     return true;
 }
 
@@ -38,7 +36,7 @@ void applyTAA(ivec2 pixelCoord, vec4 pixel, TemporalRecord tempRecord){
     ivec2 windowSize = imageSize(screen1); vec4 prevPixel; 
     ivec2 prevPixelCoord = temporalReprojection(tempRecord.pointHit, windowSize);
 
-    if (!inWindow(prevPixelCoord, windowSize) || !tempRecord.didHit){
+    if (!inWindow(prevPixelCoord, windowSize) || !tempRecord.didHit){ // If the previous pixel is not in the window or we didn't hit anything with first bounce, don't do a temporal reuse
         if (frameCount % 2 == 0){
             imageStore(screen1, pixelCoord, pixel);
         } else {
@@ -52,6 +50,7 @@ void applyTAA(ivec2 pixelCoord, vec4 pixel, TemporalRecord tempRecord){
     if (frameCount % 2 == 0){ // Current screen is screen1, we want to store there
         prevPixel = imageLoad(screen2, prevPixelCoord);
 
+        // Neighborhood clamping
         for (int i = -1; i <= 1; i++){
             for (int j = -1; j <= 1; j++){
                 vec3 neighborColor = imageLoad(screen2, prevPixelCoord + ivec2(i, j)).rgb;
@@ -66,6 +65,7 @@ void applyTAA(ivec2 pixelCoord, vec4 pixel, TemporalRecord tempRecord){
     } else {
         prevPixel = imageLoad(screen1, prevPixelCoord);
         
+        // Neighborhood clamping
         for (int i = -1; i <= 1; i++){
             for (int j = -1; j <= 1; j++){
                 vec3 neighborColor = imageLoad(screen1, prevPixelCoord + ivec2(i, j)).rgb;

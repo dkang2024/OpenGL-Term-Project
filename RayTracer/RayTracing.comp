@@ -29,6 +29,7 @@ uniform mat4 prevViewProj;
 #include "Sphere"
 #include "Quad"
 #include "TAA" 
+#include "Reservoir"
 
 layout(std430, binding = 0) buffer scene1 {
     Sphere spheres[];
@@ -46,6 +47,7 @@ uniform int numLights;
 uniform int maxBounces;
 uniform int rootSPP;
 uniform float invRootSPP;
+uniform int badLightSamples;
 uniform ViewerCamera camera;
 
 // Create a gradient from the top of the screen to the bottom of the screen based on the ray's y direction 
@@ -126,22 +128,41 @@ bool lightVisible(vec3 objectNormal, Ray ray, float lightTime, int lightIndex){
     return true;
 }
 
+// Get the light's radiance through the modified version of the rendering equation
+vec3 getLightRadiance(HitRecord record, Ray lightRay, int lightIndex, float lightPDF){
+    return lambertianBRDF(record.objectColor) * scatteredCos(record.normalVector, lightRay.direction) * lights[lightIndex].color / lightPDF;
+}
+
 // Direct Lighting for lambertian materials with direct light sampling (don't include BRDF sampling because it doesn't matter / help for a Lambertian BRDF that's constant)
 void directLighting(HitRecord record, inout vec3 accumulatedColor, vec3 throughput, inout uvec4 state){
-    Ray lightRay;
-    float lightTime;
+    Ray lightRay; float lightTime;
 
-    vec3 directLight = vec3(0);
-
-    for (int i = 0; i < numLights; i++){
+    vec3 directLight = vec3(0); Reservoir lightReservoir;
+    
+    for (int i = 0; i < badLightSamples; i++){ // Generate a bunch of bad samples and add them to the reservoir
         int lightIndex = randInt(state, 0, numLights);
 
         float lightPDF = quadLightPDF(lights[lightIndex], record, lightTime, lightRay, state);
-        if (lightVisible(record.normalVector, lightRay, lightTime, lightIndex)){
-            directLight += lambertianBRDF(record.objectColor) * scatteredCos(record.normalVector, record.scatteredRay.direction) * lights[lightIndex].color / lightPDF;
-        } 
+        float pHat = length(getLightRadiance(record, lightRay, lightIndex, lightPDF)); // This is the weight given for weighted importance sampling (we're sampling from the PDF of the rendering equation without knowing what it is)
+
+        float lightWeight = pHat * numLights / badLightSamples; // Get the final light weight by multiplying the sampled pHat by the number of lights (because the uniform pdf for the light sampling is 1 / numLights) and dividing by the total number of bad light samples for the w_i term. 
+
+        updateReservoir(lightReservoir, lightIndex, lightWeight, state);
     }
-    accumulatedColor += directLight * throughput;
+
+    int lightIndex = lightReservoir.lightIndex;
+    float weightSum = lightReservoir.sumWeight;
+
+    float lightPDF = quadLightPDF(lights[lightIndex], record, lightTime, lightRay, state);
+
+    if (!lightVisible(record.normalVector, lightRay, lightTime, lightIndex)){
+        return; // Don't do anything if the light isn't visible.
+    }
+
+    vec3 radiance = getLightRadiance(record, lightRay, lightIndex, lightPDF);
+    float pHat = length(radiance);
+
+    accumulatedColor += weightSum / pHat * radiance * throughput; // Add the light's radiance to the accumulated color with the Monte Carlo integration of getting the W_r with weightSum / pHat and multiplying that quantity by the radiance and the throughput 
 }
 
 // Get the pixel color while still reflecting the ray (bouncing it off of surfaces)
@@ -157,14 +178,14 @@ vec3 pixelColor(Ray ray, inout uvec4 state, out TemporalRecord tempRecord){
             accumulatedColor += throughput * backgroundColor(ray.direction);
             
             if (bounce == 0){
-                tempRecord = TemporalRecord(false, vec3(0));
+                tempRecord = TemporalRecord(false, vec3(0)); // Set the temporal record to show no hits
             }
             
             break;
         } 
 
         if (bounce == 0){
-            tempRecord = TemporalRecord(true, record.pointHit);
+            tempRecord = TemporalRecord(true, record.pointHit); // Set the temporal record to show the hit
         }
         
         if (record.isLight){ 
