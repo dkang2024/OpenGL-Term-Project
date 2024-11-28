@@ -1,7 +1,15 @@
 // Camera structure to make passing in important camera values cleaner, and initialize constants here
-struct viewerCamera{
+struct ViewerCamera{
     vec3 position;
     vec3 pixelDX; 
     vec3 pixelDY; 
     vec3 initPixelPos;
+};
+
+// Previous camera structure in order to hold valuable quantities for TAA 
+struct PreviousCamera{
+    vec3 position;
+    vec3 i;
+    vec3 j;
+    vec3 k;
 };

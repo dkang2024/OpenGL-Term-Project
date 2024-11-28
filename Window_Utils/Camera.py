@@ -160,3 +160,21 @@ class Camera:
         self.moveCamera(frameTime)
         self.calculateRenderValues()
         self.assignRenderValues()
+
+    def calculateProjMat(self):
+        '''
+        Calculate the camera's projection matrix
+        '''
+        return glm.perspective(glm.radians(self.fov), self.app.window_size[0] / self.app.window_size[1], 0.1, 100)
+
+    def calculateViewMat(self):
+        '''
+        Calculate the camera's view matrix
+        '''
+        return glm.lookAt(self.cameraPosition, self.lookAt, self.vectorUp)
+
+    def assignPrevRenderValues(self):
+        '''
+        Assign each of the render values for the previous camera in the prevCamera struct for the ray tracing compute shader with TAA
+        '''
+        self.app.rayTracer['prevViewProj'].write(self.calculateProjMat() * self.calculateViewMat())

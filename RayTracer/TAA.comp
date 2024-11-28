@@ -1,24 +1,59 @@
+// TAA with assistance from https://ubm-twvideo01.s3.amazonaws.com/o1/vault/gdc2016/Presentations/Pedersen_LasseJonFuglsang_TemporalReprojectionAntiAliasing.pdf 
+
+// Temporal record to keep track of point hit and whether or not the ray actually hit something
+struct TemporalRecord {
+    bool didHit;
+    vec3 pointHit;
+};
+
+// Temporally reproject previous frame to the current frame in order to keep track of movement 
+ivec2 temporalReprojection(vec3 pointHit, ivec2 windowSize){
+    vec4 prevPos = prevViewProj * vec4(pointHit, 1);
+    vec2 texturePos = 0.5 * prevPos.xy / prevPos.w + 0.5;
+    return ivec2(texturePos * windowSize);
+}
+
+// Check if the temporal reprojection is within the window. 
+bool inWindow(ivec2 pixelCoord, ivec2 windowSize){
+    if (!(0 < pixelCoord.x && pixelCoord.x < windowSize.x)){
+        return false;
+    } else if (!(0 < pixelCoord.y && pixelCoord.y < windowSize.y)){
+        return false;
+    }
+    return true;
+}
+
 // Apply temporal reuse with blending across frames
 void temporalReuse(vec4 prevPixel, inout vec4 pixel){
     pixel = mix(prevPixel, pixel, temporalReuseFactor);
 }
 
 // Apply TAA to the frame
-void applyTAA(ivec2 pixelCoord, vec4 pixel){
-    if (frameCount == 0){ // If it's the first frame, store the pixel in the first screen and don't apply TAA. 
+void applyTAA(ivec2 pixelCoord, vec4 pixel, TemporalRecord tempRecord){
+    if (frameCount == 0){ // If it's the first frame or the TAA record records that it hits nothing, store the pixel in the first screen and don't apply TAA. 
         imageStore(screen1, pixelCoord, pixel);
         return;
     }
 
-    vec4 prevPixel;
+    ivec2 windowSize = imageSize(screen1); vec4 prevPixel; 
+    ivec2 prevPixelCoord = temporalReprojection(tempRecord.pointHit, windowSize);
 
+    if (!inWindow(prevPixelCoord, windowSize) || !tempRecord.didHit){
+        if (frameCount % 2 == 0){
+            imageStore(screen1, pixelCoord, pixel);
+        } else {
+            imageStore(screen2, pixelCoord, pixel);
+        }
+        return;
+    }
+    
     if (frameCount % 2 == 0){ // Current screen is screen1, we want to store there
-        prevPixel = imageLoad(screen2, pixelCoord);
+        prevPixel = imageLoad(screen2, prevPixelCoord);
         temporalReuse(prevPixel, pixel);
         imageStore(screen1, pixelCoord, pixel);
     } else {
-        prevPixel = imageLoad(screen1, pixelCoord);
+        prevPixel = imageLoad(screen1, prevPixelCoord);
         temporalReuse(prevPixel, pixel);
         imageStore(screen2, pixelCoord, pixel);
-    }
+    } 
 }

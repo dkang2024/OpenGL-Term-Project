@@ -188,6 +188,7 @@ class Test(mglw.WindowConfig):
         self.crosshair.render()
         
         self.updateFrameCount()
+        self.camera.assignPrevRenderValues()
         if frameTime != 0:
             self.wnd.title = f'FPS: {1 / frameTime: .2f}'
 
