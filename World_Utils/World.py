@@ -8,6 +8,22 @@ class World:
     '''
     def __init__(self, ctx, rayTracer):
         self.ctx, self.rayTracer = ctx, rayTracer
+
+        self.worldArray = np.zeros((256, 256, 256, 4), 'f4')
+        self.worldArray[0, 0, 0] = (1, 1, 1, 1)
+
+        materialDType = np.dtype([
+            ('color', 'f4', 3),
+            ('materialID', 'i4'),
+            ('materialParameter', 'f4'),
+            ('textureID', 'i4'),
+            ('padding', 'f4', 2)
+        ])
+        self.materialArray = np.empty(1, materialDType)
+        self.materialArray[0]['color'] = glm.vec3(1, 0, 0)
+        self.materialArray[0]['materialID'] = 0
+        self.materialArray[0]['textureID'] = 0
+
         self.sphereList, self.quadList, self.lightList = [], [], []
 
     def addHittable(self, hittable):
@@ -69,14 +85,20 @@ class World:
         '''
         Assign the render values to the compute shader in order to render all the hittables
         '''
-        self.rayTracer['numSpheres'] = len(self.sphereList)
+        self.materials = self.ctx.buffer(self.materialArray)
+        self.materials.bind_to_storage_buffer(0)
+
+        self.world = self.ctx.texture3d((256, 256, 256), 4, self.worldArray, dtype = 'f4')
+        self.world.bind_to_image(2)
+
+        self.rayTracer['numSpheres'] = len(self.sphereArray)
         self.spheres = self.ctx.buffer(self.sphereArray)
-        self.spheres.bind_to_storage_buffer(0)
+        self.spheres.bind_to_storage_buffer(1)
 
-        self.rayTracer['numQuads'] = len(self.quadList)
+        self.rayTracer['numQuads'] = len(self.quadArray)
         self.quads = self.ctx.buffer(self.quadArray)
-        self.quads.bind_to_storage_buffer(1)
+        self.quads.bind_to_storage_buffer(2)
 
-        self.rayTracer['numLights'] = len(self.lightList)
+        self.rayTracer['numLights'] = 0
         self.lights = self.ctx.buffer(self.lightArray)
-        self.lights.bind_to_storage_buffer(2)
+        self.lights.bind_to_storage_buffer(3)

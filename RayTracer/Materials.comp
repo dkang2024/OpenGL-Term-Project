@@ -4,6 +4,15 @@ const int REFLECTIVE = 1;
 const int DIELECTRIC = 2;
 const int LIGHT = 3;
 
+// General material structure to hold important information (so that each voxel doesn't hold this information but rather an index to this material)
+struct Material {
+    vec3 color;
+    int materialID;
+    float materialParameter;
+    int textureID;
+    vec2 padding;
+};
+
 // Lambertian scattering for a material (thanks to https://raytracing.github.io/books/RayTracingInOneWeekend for giving me the math necessary for this)
 void lambertianScatter(inout HitRecord record, inout uvec4 state){
     ONB basis = createONB(record.normalVector);

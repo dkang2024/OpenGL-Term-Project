@@ -22,14 +22,15 @@ class Test(mglw.WindowConfig):
 
         self.loadTextures()
         self.rayTracer = self.ctx.compute_shader(loadComputeShader(self.ctx, 'RayTracer', 'RayTracing'))
-        self.initRenderer(10, 1, 0.01, 10)
+        self.initRenderer(10, 1, 1, 10, 350)
 
         self.ctx.gc_mode = 'auto'
         self.program = self.ctx.program(*loadVertexAndFrag('Window', 'Window', 'Window'))
         self.initScreen()
         self.initRand()
 
-        self.camera = Camera(self, glm.vec3(278, 278, -200), 100, 60, 0.2)
+        # self.camera = Camera(self, glm.vec3(278, 278, -200), 100, 60, 0.2)
+        self.camera = Camera(self, glm.vec3(0, 0, -1), 2, 60, 0.2)
         self.screenCoords = mglw.geometry.quad_fs(attr_names = screenNames, normals = False, name = 'Screen Coordinates')
         self.crosshair = Crosshair(self, 0.03, glm.vec3(1.0, 1.0, 1.0), self.window_size) #type: ignore
         self.world = World(self.ctx, self.rayTracer)
@@ -44,23 +45,26 @@ class Test(mglw.WindowConfig):
         materialCenter = LambertianMaterial(Texture(glm.vec3(0.1, 0.2, 0.5)))
         materialLeft = DielectricMaterial(1.0 / 1.3)
         
-        self.world.addHittable(Quad(glm.vec3(555, 0, 0), glm.vec3(0, 555, 0), glm.vec3(0, 0, 555), green))
-        self.world.addHittable(Quad(glm.vec3(0, 0, 0), glm.vec3(0, 555, 0), glm.vec3(0, 0, 555), red))
+        #self.world.addHittable(Quad(glm.vec3(555, 0, 0), glm.vec3(0, 555, 0), glm.vec3(0, 0, 555), green))
+        #self.world.addHittable(Quad(glm.vec3(0, 0, 0), glm.vec3(0, 555, 0), glm.vec3(0, 0, 555), red))
         self.world.addHittable(Quad(glm.vec3(343, 554, 332), glm.vec3(-130, 0, 0), glm.vec3(0, 0, -105), light))
-        self.world.addHittable(Quad(glm.vec3(0, 0, 0), glm.vec3(555, 0, 0), glm.vec3(0, 0, 555), white))
-        self.world.addHittable(Quad(glm.vec3(555, 555, 555), glm.vec3(-555, 0, 0), glm.vec3(0, 0, -555), white))
-        self.world.addHittable(Quad(glm.vec3(0, 0, 555), glm.vec3(555, 0, 0), glm.vec3(0, 555, 0), white))
+        #self.world.addHittable(Quad(glm.vec3(0, 0, 0), glm.vec3(555, 0, 0), glm.vec3(0, 0, 555), white))
+        #self.world.addHittable(Quad(glm.vec3(555, 555, 555), glm.vec3(-555, 0, 0), glm.vec3(0, 0, -555), white))
+        #self.world.addHittable(Quad(glm.vec3(0, 0, 555), glm.vec3(555, 0, 0), glm.vec3(0, 555, 0), white))
         #self.world.addHittable(Sphere(glm.vec3(190, 90, 190), 90, materialLeft))
         
-        self.world.addHittable(Cube(glm.vec3(130, 0, 65), glm.vec3(295, 165, 230), white))
-        self.world.addHittable(Cube(glm.vec3(265, 0, 295), glm.vec3(430, 330, 460), materialBack))
+        #self.world.addHittable(Cube(glm.vec3(130, 0, 65), glm.vec3(295, 165, 230), white))
+        #self.world.addHittable(Cube(glm.vec3(265, 0, 295), glm.vec3(430, 330, 460), white))
 
-        self.world.addHittable(Sphere(glm.vec3(0, 0, -1), 0, materialCenter))
+        self.world.addHittable(Quad(glm.vec3(0), glm.vec3(1, 0, 0), glm.vec3(0, 1, 0), red))
+        #self.world.addHittable(Cube(glm.vec3(0), glm.vec3(1), red))
+
+        self.world.addHittable(Sphere(glm.vec3(0), 0, materialCenter))
         
         self.world.createRenderArray()
         self.world.assignRender()
 
-    def initRenderer(self, maxBounces, samplesPerPixel, temporalReuseFactor, badLightSamples):
+    def initRenderer(self, maxBounces, samplesPerPixel, temporalReuseFactor, badLightSamples, maxRaySteps):
         '''
         Initialize the quantities necessary for the renderer and pass them in (including the temporal reuse mix factor)
         '''
@@ -70,6 +74,7 @@ class Test(mglw.WindowConfig):
         self.rayTracer['invRootSPP'] = 1 / rootSPP
         self.rayTracer['temporalReuseFactor'] = temporalReuseFactor
         self.rayTracer['badLightSamples'] = badLightSamples
+        #self.rayTracer['maxRaySteps'] = maxRaySteps
     
     def loadTexture(self, name):
         '''
@@ -113,7 +118,7 @@ class Test(mglw.WindowConfig):
         RandGen = np.random.default_rng()
         self.seed = RandGen.integers(128, 100000, (*self.window_size, 4), dtype = 'u4')
         self.seed = self.ctx.texture(self.window_size, 4, data = self.seed, dtype = 'u4')
-        self.seed.bind_to_image(2)
+        self.seed.bind_to_image(3)
 
     def cameraMovementKeys(self):
         '''
