@@ -11,6 +11,7 @@ class World:
 
         self.worldArray = np.zeros((256, 256, 256, 4), 'f4')
         self.worldArray[0, 0, 0] = (1, 1, 1, 1)
+        self.worldArray[1, 1, 1] = (1, 1, 1, 1)
 
         materialDType = np.dtype([
             ('color', 'f4', 3),
@@ -91,11 +92,11 @@ class World:
         self.world = self.ctx.texture3d((256, 256, 256), 4, self.worldArray, dtype = 'f4')
         self.world.bind_to_image(2)
 
-        self.rayTracer['numSpheres'] = len(self.sphereArray)
+        self.rayTracer['numSpheres'] = 0
         self.spheres = self.ctx.buffer(self.sphereArray)
         self.spheres.bind_to_storage_buffer(1)
 
-        self.rayTracer['numQuads'] = len(self.quadArray)
+        self.rayTracer['numQuads'] = 0
         self.quads = self.ctx.buffer(self.quadArray)
         self.quads.bind_to_storage_buffer(2)
 

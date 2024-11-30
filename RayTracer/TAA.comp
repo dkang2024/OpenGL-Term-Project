@@ -36,7 +36,7 @@ void applyTAA(ivec2 pixelCoord, vec4 pixel, TemporalRecord tempRecord){
     ivec2 windowSize = imageSize(screen1); vec4 prevPixel; 
     ivec2 prevPixelCoord = temporalReprojection(tempRecord.pointHit, windowSize);
 
-    if (!inWindow(prevPixelCoord, windowSize) || !tempRecord.didHit || true){ // If the previous pixel is not in the window or we didn't hit anything with first bounce, don't do a temporal reuse
+    if (!inWindow(prevPixelCoord, windowSize) || !tempRecord.didHit){ // If the previous pixel is not in the window or we didn't hit anything with first bounce, don't do a temporal reuse
         if (frameCount % 2 == 0){
             imageStore(screen1, pixelCoord, pixel);
         } else {

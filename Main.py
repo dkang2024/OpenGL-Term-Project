@@ -22,7 +22,7 @@ class Test(mglw.WindowConfig):
 
         self.loadTextures()
         self.rayTracer = self.ctx.compute_shader(loadComputeShader(self.ctx, 'RayTracer', 'RayTracing'))
-        self.initRenderer(10, 1, 1, 10, 350)
+        self.initRenderer(10, 1, 0.01, 10, 350)
 
         self.ctx.gc_mode = 'auto'
         self.program = self.ctx.program(*loadVertexAndFrag('Window', 'Window', 'Window'))
@@ -74,7 +74,7 @@ class Test(mglw.WindowConfig):
         self.rayTracer['invRootSPP'] = 1 / rootSPP
         self.rayTracer['temporalReuseFactor'] = temporalReuseFactor
         self.rayTracer['badLightSamples'] = badLightSamples
-        #self.rayTracer['maxRaySteps'] = maxRaySteps
+        self.rayTracer['maxRaySteps'] = maxRaySteps
     
     def loadTexture(self, name):
         '''

@@ -16,7 +16,7 @@ layout(rgba32ui, binding = 3) uniform uimage2D seeds;
 
 uniform int frameCount;
 uniform float temporalReuseFactor;
-// uniform int maxRaySteps;
+uniform int maxRaySteps;
 uniform mat4 prevViewProj;
 
 // Import files here using the "include" statement that Python processes with string processing and txt file processing
@@ -54,6 +54,46 @@ layout(std430, binding = 2) buffer scene2 {
 layout(std430, binding = 3) buffer scene3 {
     Quad lights[];
 };
+
+// Extract important information from the voxel world space given the map position 
+bool extractVoxel(ivec3 mapPos, out Material material){
+    material = Material(vec3(1, 0, 0), 0, 0, 0, vec2(0));
+    if (imageLoad(world, mapPos).x == 1){
+        return true; 
+    }
+    return false; 
+}
+
+// Branchless DDA with help from https://www.shadertoy.com/view/4dX3zl and https://www.shadertoy.com/view/mtyfRV (I know how branched DDA works, but this is more efficient)
+bool rayMarch(Ray ray, inout HitRecord record, inout uvec4 state){
+    vec3 rayDirSign = sign(ray.direction);
+    ivec3 mapPos = ivec3(floor(ray.origin));   
+    vec3 deltaDist = abs(vec3(length(ray.direction)) / ray.direction);
+    ivec3 rayStep = ivec3(rayDirSign);
+    vec3 sideDist = (rayDirSign * (vec3(mapPos) - ray.origin) + (rayDirSign * 0.5 + 0.5)) * deltaDist;
+    vec3 mask; Material material;
+
+    for (int i; i < maxRaySteps; i++){
+        if (extractVoxel(mapPos, material)){
+            record.normalVector = -rayDirSign * mask;
+            record.tValues.t = dot(record.normalVector, vec3(mapPos) + max(vec3(0), record.normalVector) - ray.origin) / dot(record.normalVector, ray.direction);
+
+            record.pointHit = rayIntersectPoint(ray, record.tValues.t);    
+            isFrontFace(ray, record);
+
+            scatter(material.materialID, material.materialParameter, ray, record, state);  
+            record.objectColor = applyTexture(material.color, material.textureID, vec2(0, 0));   
+
+            return true;
+        }
+
+        mask = step(sideDist.xyz, min(sideDist.yzx, sideDist.zxy));
+
+        sideDist += mask * deltaDist;
+        mapPos += ivec3(mask) * rayStep;
+    }
+    return false;
+}
 
 // Create a gradient from the top of the screen to the bottom of the screen based on the ray's y direction 
 vec3 gradientColor(vec3 rayDirection){
@@ -179,7 +219,7 @@ vec3 pixelColor(Ray ray, inout uvec4 state, out TemporalRecord tempRecord){
     for (int bounce = 0; bounce < maxBounces; bounce++){
         HitRecord record = initDefaultHitRecord();
 
-        if (!hit(ray, record, state)){
+        if (!rayMarch(ray, record, state)){
             accumulatedColor += throughput * backgroundColor(ray.direction);
             
             if (bounce == 0){
