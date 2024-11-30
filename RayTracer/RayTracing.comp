@@ -48,7 +48,7 @@ layout(std430, binding = 1) buffer LightBuffer{
 
 // Extract important information from the voxel world space given the map position 
 bool extractVoxel(ivec3 mapPos, out Material material){
-    material = Material(vec3(1, 0, 0), 1, 0, 0, vec2(0));
+    material = Material(vec3(0.5), 2, 0, 0, vec2(0));
     if (imageLoad(world, mapPos).x == 1){
         return true; 
     }
@@ -190,9 +190,6 @@ vec3 pixelColor(Ray ray, inout uvec4 state, out TemporalRecord tempRecord){
         HitRecord record = initDefaultHitRecord();
 
         if (!rayMarch(ray, record, state)){
-            if (bounce == 1){
-                return vec3(1, 0, 0);
-            }
             accumulatedColor += throughput * backgroundColor(ray.direction);
             
             if (bounce == 0){
