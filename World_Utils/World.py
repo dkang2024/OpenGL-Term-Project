@@ -10,8 +10,8 @@ class World:
         self.ctx, self.rayTracer = ctx, rayTracer
 
         self.worldArray = np.zeros((256, 256, 256, 4), 'f4')
-        self.worldArray[0, 0, 0] = (1, 1, 1, 1)
-        self.worldArray[1, 1, 1] = (1, 1, 1, 1)
+        self.worldArray[0, 0, 0] = (1, 0, 0, 0)
+        self.worldArray[1, 1, 1] = (1, 0, 0, 0)
 
         materialDType = np.dtype([
             ('color', 'f4', 3),
@@ -23,7 +23,7 @@ class World:
         self.materialArray = np.empty(1, materialDType)
         self.materialArray[0]['color'] = glm.vec3(1, 0, 0)
         self.materialArray[0]['materialID'] = 0
-        self.materialArray[0]['textureID'] = 0
+        self.materialArray[0]['textureID'] = 1
 
         self.lights = []
 
@@ -37,4 +37,4 @@ class World:
         self.world = self.ctx.texture3d((256, 256, 256), 4, self.worldArray, dtype = 'f4')
         self.world.bind_to_image(2)
 
-        self.rayTracer['numLights'] = -10
+        self.rayTracer['numLights'] = len(self.lights)

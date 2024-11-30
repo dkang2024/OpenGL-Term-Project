@@ -70,7 +70,7 @@ class Test(mglw.WindowConfig):
         texture = self.ctx.texture_cube((512, 512), 3, dtype = 'f4')
 
         for i, img in enumerate(faces):
-            data = np.array(img).astype('f4') / 255
+            data = np.array(img).astype('f4') / 512
             texture.write(i, data)
         
         texture.use(self.textureBind)

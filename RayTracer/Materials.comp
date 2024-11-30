@@ -15,6 +15,11 @@ struct Material {
     vec2 padding;
 };
 
+// Return the default material 
+Material initDefaultMaterial(){
+    return Material(vec3(0), 0, 0, 0, vec2(0));
+}
+
 // Scatter the ray according to a scattered point hit and a scattered direction. Add a little bit to the hit point in the scattered direction to prevent rehitting the same voxel 
 Ray scatterRay(vec3 pointHit, vec3 scatteredDir){
     return Ray(pointHit + scatteredDir * RAY_ERROR_BOUND, scatteredDir);

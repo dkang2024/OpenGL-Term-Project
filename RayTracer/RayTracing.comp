@@ -47,9 +47,14 @@ layout(std430, binding = 1) buffer LightBuffer{
 };
 
 // Extract important information from the voxel world space given the map position 
-bool extractVoxel(ivec3 mapPos, out Material material){
-    material = Material(vec3(0.5), 2, 0, 0, vec2(0));
-    if (imageLoad(world, mapPos).x == 1){
+bool extractVoxel(ivec3 mapPos, inout Material material){
+    vec4 voxelData = imageLoad(world, mapPos);
+    if (voxelData.x == 1){
+        int materialIndex = int(voxelData.y);
+        if (materialIndex >= 0 && materialIndex < materials.length()){
+            material = materials[materialIndex];
+        }
+
         return true; 
     }
     return false; 
@@ -76,7 +81,7 @@ bool rayMarch(Ray ray, inout HitRecord record, inout uvec4 state){
     vec3 deltaDist = abs(vec3(length(ray.direction)) / ray.direction);
     ivec3 rayStep = ivec3(rayDirSign);
     vec3 sideDist = (rayDirSign * (vec3(mapPos) - ray.origin) + (rayDirSign * 0.5 + 0.5)) * deltaDist;
-    vec3 mask; Material material;
+    vec3 mask; Material material = initDefaultMaterial();
 
     for (int i; i < maxRaySteps; i++){
         if (extractVoxel(mapPos, material)){
