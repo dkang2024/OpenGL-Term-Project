@@ -4,6 +4,8 @@ const int REFLECTIVE = 1;
 const int DIELECTRIC = 2;
 const int LIGHT = 3;
 
+const float RAY_ERROR_BOUND = 0.001;
+
 // General material structure to hold important information (so that each voxel doesn't hold this information but rather an index to this material)
 struct Material {
     vec3 color;
@@ -17,7 +19,7 @@ struct Material {
 void lambertianScatter(inout HitRecord record, inout uvec4 state){
     ONB basis = createONB(record.normalVector);
     vec3 scatteredDir = normalize(transformONB(basis, randomCosineSample(state)));
-    Ray scatteredRay = Ray(record.pointHit, scatteredDir);
+    Ray scatteredRay = Ray(record.pointHit + scatteredDir * RAY_ERROR_BOUND, scatteredDir);
 
     record.didScatter = true;
     record.scatteredRay = scatteredRay;
@@ -36,7 +38,7 @@ float lambertianPDF(vec3 normalVector, vec3 scatteredDir){
 void reflectiveScatter(float fuzz, Ray ray, inout HitRecord record, inout uvec4 state){
     vec3 reflectDir = reflect(ray.direction, record.normalVector);
     reflectDir = normalize(reflectDir) + fuzz * randomVectorOnUnitSphere(state);
-    Ray scatteredRay = Ray(record.pointHit, reflectDir);
+    Ray scatteredRay = Ray(record.pointHit + reflectDir * RAY_ERROR_BOUND, reflectDir);
 
     if (dot(reflectDir, record.normalVector) > 0){
         record.didScatter = true;
@@ -64,7 +66,7 @@ void dielectricScatter(float etaRatio, Ray ray, inout HitRecord record, inout uv
     }
     
     record.didScatter = true; 
-    record.scatteredRay = Ray(record.pointHit, rayDir);
+    record.scatteredRay = Ray(record.pointHit + rayDir * RAY_ERROR_BOUND, rayDir);
 }
 
 // General scattering 

@@ -25,6 +25,8 @@ class World:
         self.materialArray[0]['materialID'] = 0
         self.materialArray[0]['textureID'] = 0
 
+        self.lights = []
+
     def assignRender(self):
         '''
         Assign the render values to the compute shader in order to render all the hittables
@@ -34,3 +36,5 @@ class World:
 
         self.world = self.ctx.texture3d((256, 256, 256), 4, self.worldArray, dtype = 'f4')
         self.world.bind_to_image(2)
+
+        self.rayTracer['numLights'] = -10

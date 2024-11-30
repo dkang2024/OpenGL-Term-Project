@@ -61,6 +61,14 @@ vec3 cubeDirection(vec3 hitPoint, ivec3 mapPos){
     return hitPoint - centerCube;
 }
 
+// Determine whether the ray is front facing with the voxel 
+void voxelFrontFace(inout HitRecord record, Ray ray, ivec3 mapPos){
+    vec3 centerCube = vec3(mapPos) + vec3(0.5);
+    vec3 toHitPoint = record.pointHit - centerCube;
+
+    record.frontFace = dot(ray.direction, toHitPoint) < 0;
+}
+
 // Branchless DDA with help from https://www.shadertoy.com/view/4dX3zl and https://www.shadertoy.com/view/mtyfRV (I know how branched DDA works, but this is more efficient)
 bool rayMarch(Ray ray, inout HitRecord record, inout uvec4 state){
     vec3 rayDirSign = sign(ray.direction);
@@ -75,11 +83,10 @@ bool rayMarch(Ray ray, inout HitRecord record, inout uvec4 state){
             record.normalVector = -rayDirSign * mask;
             record.tValues.t = dot(record.normalVector, vec3(mapPos) + max(vec3(0), record.normalVector) - ray.origin) / dot(record.normalVector, ray.direction);
 
+            voxelFrontFace(record, ray, mapPos);
             record.pointHit = rayIntersectPoint(ray, record.tValues.t);    
-            isFrontFace(ray, record);
-
             scatter(material.materialID, material.materialParameter, ray, record, state);  
-            record.objectColor = applyTexture(material.color, 1, cubeDirection(record.pointHit, mapPos));   
+            record.objectColor = applyTexture(material.color, material.textureID, cubeDirection(record.pointHit, mapPos));   
 
             return true;
         }
@@ -172,7 +179,7 @@ void directLighting(HitRecord record, inout vec3 accumulatedColor, vec3 throughp
     float pHat = length(radiance);
 
     accumulatedColor += weightSum / pHat * radiance * throughput; // Add the light's radiance to the accumulated color with the Monte Carlo integration of getting the W_r with weightSum / pHat and multiplying that quantity by the radiance and the throughput 
-}
+} 
 
 // Get the pixel color while still reflecting the ray (bouncing it off of surfaces)
 vec3 pixelColor(Ray ray, inout uvec4 state, out TemporalRecord tempRecord){
@@ -183,6 +190,9 @@ vec3 pixelColor(Ray ray, inout uvec4 state, out TemporalRecord tempRecord){
         HitRecord record = initDefaultHitRecord();
 
         if (!rayMarch(ray, record, state)){
+            if (bounce == 1){
+                return vec3(1, 0, 0);
+            }
             accumulatedColor += throughput * backgroundColor(ray.direction);
             
             if (bounce == 0){
