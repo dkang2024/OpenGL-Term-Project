@@ -8,6 +8,7 @@ from pyglet import shapes
 import time 
 import glm 
 import os 
+from PIL import Image
 
 ti.init(ti.cpu)
 MAX_ANGLE = 89

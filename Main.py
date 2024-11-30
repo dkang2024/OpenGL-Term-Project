@@ -40,28 +40,11 @@ class Test(mglw.WindowConfig):
         green = LambertianMaterial(Texture(glm.vec3(.12, .45, .15)))
         light = PointLight(glm.vec3(15))
         materialBack = ReflectiveMaterial(glm.vec3(0.8, 0.8, 0.8), 0)
-        earth = LambertianMaterial(Texture('Earth'))
+        earth = LambertianMaterial(Texture('Grass'))
         materialGround = LambertianMaterial(Texture(glm.vec3(0.8, 0.8, 0.0)))
         materialCenter = LambertianMaterial(Texture(glm.vec3(0.1, 0.2, 0.5)))
         materialLeft = DielectricMaterial(1.0 / 1.3)
         
-        #self.world.addHittable(Quad(glm.vec3(555, 0, 0), glm.vec3(0, 555, 0), glm.vec3(0, 0, 555), green))
-        #self.world.addHittable(Quad(glm.vec3(0, 0, 0), glm.vec3(0, 555, 0), glm.vec3(0, 0, 555), red))
-        self.world.addHittable(Quad(glm.vec3(343, 554, 332), glm.vec3(-130, 0, 0), glm.vec3(0, 0, -105), light))
-        #self.world.addHittable(Quad(glm.vec3(0, 0, 0), glm.vec3(555, 0, 0), glm.vec3(0, 0, 555), white))
-        #self.world.addHittable(Quad(glm.vec3(555, 555, 555), glm.vec3(-555, 0, 0), glm.vec3(0, 0, -555), white))
-        #self.world.addHittable(Quad(glm.vec3(0, 0, 555), glm.vec3(555, 0, 0), glm.vec3(0, 555, 0), white))
-        #self.world.addHittable(Sphere(glm.vec3(190, 90, 190), 90, materialLeft))
-        
-        #self.world.addHittable(Cube(glm.vec3(130, 0, 65), glm.vec3(295, 165, 230), white))
-        #self.world.addHittable(Cube(glm.vec3(265, 0, 295), glm.vec3(430, 330, 460), white))
-
-        self.world.addHittable(Quad(glm.vec3(0), glm.vec3(1, 0, 0), glm.vec3(0, 1, 0), red))
-        #self.world.addHittable(Cube(glm.vec3(0), glm.vec3(1), red))
-
-        self.world.addHittable(Sphere(glm.vec3(0), 0, materialCenter))
-        
-        self.world.createRenderArray()
         self.world.assignRender()
 
     def initRenderer(self, maxBounces, samplesPerPixel, temporalReuseFactor, badLightSamples, maxRaySteps):
@@ -80,7 +63,16 @@ class Test(mglw.WindowConfig):
         '''
         Load a specific texture into the ray tracer
         '''
-        texture = self.load_texture_2d(name)
+        faces = []
+        for side in ('Side', 'Side', 'Top', 'Bot', 'Side', 'Side'):
+            faces.append(Image.open(f'Textures/{name} {side}.jpg'))
+
+        texture = self.ctx.texture_cube((512, 512), 3, dtype = 'f4')
+
+        for i, img in enumerate(faces):
+            data = np.array(img).astype('f4') / 255
+            texture.write(i, data)
+        
         texture.use(self.textureBind)
         self.textureBind += 1
 
@@ -89,9 +81,7 @@ class Test(mglw.WindowConfig):
         Register the texture directory to moderngl window and load all the textures
         '''
         self.textureBind = 2
-        mglw.resources.register_texture_dir(os.path.abspath('Textures'))
-        self.loadTexture('Brick Wall.jpg')
-        self.loadTexture('Earth.jpg')
+        self.loadTexture('Grass')
            
     def initScreen(self):
         '''

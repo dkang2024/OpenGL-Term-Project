@@ -3,8 +3,7 @@
 
 layout(binding = 0) uniform sampler2D screen1Texture;
 layout(binding = 1) uniform sampler2D screen2Texture;
-layout(binding = 2) uniform sampler2D brickWall;
-layout(binding = 3) uniform sampler2D earth;
+layout(binding = 2) uniform samplerCube grassTexture;
 
 // Set up invocation size and take in the screen texture to modify it per pixel. Note that the size volume is 32 (which is optimized for NVIDIA gpus rather than AMD gpus [which prefer a size of multiples of 64])
 layout(local_size_x = 8, local_size_y = 4, local_size_z = 1) in;
@@ -28,13 +27,11 @@ uniform mat4 prevViewProj;
 #include "Materials"
 #include "Camera"
 #include "Textures"
-#include "Sphere"
-#include "Quad"
 #include "TAA" 
+#include "Light"
 #include "Reservoir"
+#include "Quad"
 
-uniform int numSpheres;
-uniform int numQuads;
 uniform int numLights;
 uniform int maxBounces;
 uniform int rootSPP;
@@ -45,23 +42,23 @@ uniform ViewerCamera camera;
 layout(std430, binding = 0) buffer MatBuffer {
     Material materials[];
 };
-layout(std430, binding = 1) buffer scene1 {
-    Sphere spheres[];
-};
-layout(std430, binding = 2) buffer scene2 {
-    Quad quads[];
-};
-layout(std430, binding = 3) buffer scene3 {
+layout(std430, binding = 1) buffer LightBuffer{
     Quad lights[];
 };
 
 // Extract important information from the voxel world space given the map position 
 bool extractVoxel(ivec3 mapPos, out Material material){
-    material = Material(vec3(1, 0, 0), 0, 0, 0, vec2(0));
+    material = Material(vec3(1, 0, 0), 1, 0, 0, vec2(0));
     if (imageLoad(world, mapPos).x == 1){
         return true; 
     }
     return false; 
+}
+
+// Get the direction vector for cube texture map sampling 
+vec3 cubeDirection(vec3 hitPoint, ivec3 mapPos){
+    vec3 centerCube = vec3(mapPos) + vec3(0.5);
+    return hitPoint - centerCube;
 }
 
 // Branchless DDA with help from https://www.shadertoy.com/view/4dX3zl and https://www.shadertoy.com/view/mtyfRV (I know how branched DDA works, but this is more efficient)
@@ -82,7 +79,7 @@ bool rayMarch(Ray ray, inout HitRecord record, inout uvec4 state){
             isFrontFace(ray, record);
 
             scatter(material.materialID, material.materialParameter, ray, record, state);  
-            record.objectColor = applyTexture(material.color, material.textureID, vec2(0, 0));   
+            record.objectColor = applyTexture(material.color, 1, cubeDirection(record.pointHit, mapPos));   
 
             return true;
         }
@@ -125,27 +122,6 @@ Ray constructCameraRay(ivec2 pixelCoord, int i, int j, inout uvec4 state){
     return Ray(camera.position, rayDir);
 }
 
-// Check if a ray hits any hittable and update a hit record to show the ray's color and reflect that change. 
-bool hit(Ray ray, inout HitRecord record, inout uvec4 state){
-    bool didHit = false; 
-    
-    for (int i = 0; i < numSpheres; i++){
-        if (hitSphere(spheres[i], ray, record, state)){
-            didHit = true; 
-        }
-    }
-    for (int i = 0; i < numQuads; i++){
-        if (hitQuad(quads[i], ray, record, state)){
-            didHit = true;
-        }
-    }
-    for (int i = 0; i < numLights; i++){
-        if (hitQuad(lights[i], ray, record, state)){
-            didHit = true;
-        }
-    }
-    return didHit;
-}
 
 // Check if a light is visible 
 bool lightVisible(vec3 objectNormal, Ray ray, float lightTime, int lightIndex){
@@ -154,23 +130,10 @@ bool lightVisible(vec3 objectNormal, Ray ray, float lightTime, int lightIndex){
     }
 
     Interval lightInterval = {rayMin, lightTime};
-    for (int i = 0; i < numSpheres; i++){
-        if (hitSphereLight(spheres[i], ray, lightInterval)){
-            return false; 
-        }
-    }
-    for (int i = 0; i < numQuads; i++){
-        if (hitQuadLight(quads[i], ray, lightInterval)){
-            return false; 
-        }
-    }
-    for (int i = 0; i < numLights; i++){
-        if (i == lightIndex){
-            continue;
-        } else if (hitQuadLight(lights[i], ray, lightInterval)){
-            return false;
-        }
-    }
+    
+    uvec4 state = uvec4(0);
+    HitRecord record = initDefaultHitRecord();
+    rayMarch(ray, record, state);
     return true;
 }
 
