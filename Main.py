@@ -133,7 +133,7 @@ class Test(mglw.WindowConfig):
         else:
             self.camera.dirY = 0
 
-    def key_event(self, key, action, modifiers):
+    def on_key_event(self, key, action, modifiers):
         '''
         Set the camera to be moving down if you're pressing / holding shift
         '''
@@ -146,10 +146,10 @@ class Test(mglw.WindowConfig):
             self.wnd.mouse_exclusivity = not self.wnd.mouse_exclusivity
             self.wnd.cursor = not self.wnd.cursor
         
-    def mouse_position_event(self, mouseX, mouseY, dx, dy):
+    def on_mouse_position_event(self, mouseX, mouseY, dx, dy):
         self.camera.updateMouse(dx, -dy) 
 
-    def resize(self, screenWidth, screenHeight):
+    def on_resize(self, screenWidth, screenHeight):
         '''
         Resize the texture to fit the bigger screen and reset viewport dimensions (prevents weird screen shenanigans)
         '''
@@ -167,7 +167,7 @@ class Test(mglw.WindowConfig):
         self.rayTracer['frameCount'] = self.frameCount
         self.program['frameCount'] = self.frameCount
 
-    def render(self, t, frameTime):
+    def on_render(self, t, frameTime):
         '''
         Render the screen and display the fps
         '''

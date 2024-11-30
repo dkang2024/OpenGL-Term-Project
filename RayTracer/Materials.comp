@@ -15,11 +15,16 @@ struct Material {
     vec2 padding;
 };
 
+// Scatter the ray according to a scattered point hit and a scattered direction. Add a little bit to the hit point in the scattered direction to prevent rehitting the same voxel 
+Ray scatterRay(vec3 pointHit, vec3 scatteredDir){
+    return Ray(pointHit + scatteredDir * RAY_ERROR_BOUND, scatteredDir);
+}
+
 // Lambertian scattering for a material (thanks to https://raytracing.github.io/books/RayTracingInOneWeekend for giving me the math necessary for this)
 void lambertianScatter(inout HitRecord record, inout uvec4 state){
     ONB basis = createONB(record.normalVector);
     vec3 scatteredDir = normalize(transformONB(basis, randomCosineSample(state)));
-    Ray scatteredRay = Ray(record.pointHit + scatteredDir * RAY_ERROR_BOUND, scatteredDir);
+    Ray scatteredRay = scatterRay(record.pointHit, scatteredDir);
 
     record.didScatter = true;
     record.scatteredRay = scatteredRay;
@@ -38,7 +43,7 @@ float lambertianPDF(vec3 normalVector, vec3 scatteredDir){
 void reflectiveScatter(float fuzz, Ray ray, inout HitRecord record, inout uvec4 state){
     vec3 reflectDir = reflect(ray.direction, record.normalVector);
     reflectDir = normalize(reflectDir) + fuzz * randomVectorOnUnitSphere(state);
-    Ray scatteredRay = Ray(record.pointHit + reflectDir * RAY_ERROR_BOUND, reflectDir);
+    Ray scatteredRay = scatterRay(record.pointHit, reflectDir);
 
     if (dot(reflectDir, record.normalVector) > 0){
         record.didScatter = true;
@@ -66,7 +71,7 @@ void dielectricScatter(float etaRatio, Ray ray, inout HitRecord record, inout uv
     }
     
     record.didScatter = true; 
-    record.scatteredRay = Ray(record.pointHit + rayDir * RAY_ERROR_BOUND, rayDir);
+    record.scatteredRay = scatterRay(record.pointHit, rayDir);
 }
 
 // General scattering 
