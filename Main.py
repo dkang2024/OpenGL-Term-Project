@@ -2,7 +2,6 @@ from Settings import *
 from Window_Utils import *
 from World_Utils import *
 from World_Utils.Textures import Texture #Just because Pylance doesn't like working
-import time 
 
 class screenNames:
     POSITION = 'vertexPosition'

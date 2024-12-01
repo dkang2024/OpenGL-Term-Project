@@ -1,6 +1,7 @@
 from Settings import *
 from Objects import *
 from Materials import *
+from World_Utils.Textures import Texture
 
 class World:
     '''
@@ -10,8 +11,12 @@ class World:
         self.ctx, self.rayTracer = ctx, rayTracer
 
         self.worldArray = np.zeros((256, 256, 256, 4), 'f4')
-        self.worldArray[0, 0, 0] = (1, 0, 0, 0)
-        self.worldArray[1, 1, 1] = (1, 0, 0, 0)
+
+        defaultBlock = (1, 0, 0, 0)
+        self.worldArray[0, 0, 0] = defaultBlock
+        self.worldArray[1, 1, 1] = defaultBlock 
+        self.worldArray[1, 0, 0] = defaultBlock 
+        self.worldArray[0, 1, 0] = (1, 1, 0, 0)
 
         materialDType = np.dtype([
             ('color', 'f4', 3),
@@ -20,10 +25,14 @@ class World:
             ('textureID', 'i4'),
             ('padding', 'f4', 2)
         ])
-        self.materialArray = np.empty(1, materialDType)
-        self.materialArray[0]['color'] = glm.vec3(1, 0, 0)
-        self.materialArray[0]['materialID'] = 0
-        self.materialArray[0]['textureID'] = 1
+
+        self.materialArray = np.empty(2, materialDType)
+
+        defaultMat = LambertianMaterial(Texture('Grass'))
+        defaultMat.record(self.materialArray, 0)
+
+        otherMat = DielectricMaterial(1 / 1.5)
+        otherMat.record(self.materialArray, 1)
 
         self.lights = []
 
