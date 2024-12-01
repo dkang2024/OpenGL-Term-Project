@@ -10,7 +10,8 @@ class World:
     def __init__(self, ctx, rayTracer):
         self.ctx, self.rayTracer = ctx, rayTracer
 
-        self.worldArray = np.zeros((256, 256, 256), 'u1')
+        self.worldSize = [256] * 3
+        self.worldArray = np.zeros(self.worldSize, 'u1')
 
         defaultBlock = 1
         self.worldArray[0, 0, 0] = defaultBlock
@@ -47,7 +48,7 @@ class World:
         '''
         self.assignMaterials()
 
-        self.world = self.ctx.texture3d((256, 256, 256), 1, self.worldArray.tobytes(), dtype = 'u1')
+        self.world = self.ctx.texture3d(self.worldSize, 1, self.worldArray, dtype = 'u1')
         self.world.bind_to_image(2)
 
         self.rayTracer['numLights'] = len(self.lights)
