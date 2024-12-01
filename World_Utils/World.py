@@ -21,6 +21,8 @@ class World:
         self.newChunk = Chunk(self.worldArray, glm.ivec3(CHUNK_SIZE))
         self.newChunk.upload()
 
+        self.worldArray[0, 1, 0] = 2
+
         self.materialList = []
         self.materialList.append(LambertianMaterial(Texture('Grass')))
         self.materialList.append(DielectricMaterial(1 / 1.5))
