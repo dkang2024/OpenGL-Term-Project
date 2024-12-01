@@ -21,7 +21,7 @@ class Chunk:
         for x in prange(CHUNK_SIZE):
             for y in range(CHUNK_SIZE):
                 for z in range(CHUNK_SIZE):
-                    worldArray[getWorldIndex(initChunkPosition, x, y, z)] = 2
+                    worldArray[getWorldIndex(initChunkPosition, x, y, z)] = 1
 
     def upload(self):
         '''
