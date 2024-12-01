@@ -111,7 +111,7 @@ class Window(mglw.WindowConfig):
         RandGen = np.random.default_rng()
         self.seed = RandGen.integers(128, 100000, (*self.window_size, 4), dtype = 'u4')
         self.seed = self.ctx.texture(self.window_size, 4, data = self.seed, dtype = 'u4')
-        self.seed.bind_to_image(3)
+        self.seed.bind_to_image(4)
 
     def cameraMovementKeys(self):
         '''

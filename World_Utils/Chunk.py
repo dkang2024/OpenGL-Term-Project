@@ -34,8 +34,8 @@ class Chunk:
     '''
     Create and render a chunk of blocks
     '''
-    def __init__(self, worldArray, initChunkPosition):
-        self.worldArray, self.initChunkPosition = worldArray, initChunkPosition
+    def __init__(self, worldArray, brickmapPosition, initChunkPosition):
+        self.worldArray, self.brickmapPosition, self.initChunkPosition = worldArray, brickmapPosition, initChunkPosition
 
     @staticmethod 
     @njit(parallel = True, cache = True)
@@ -55,8 +55,28 @@ class Chunk:
                     worldY = getWorldIndex(y, initChunkPosition[Y_INDEX])
                     worldArray[worldX, worldY, worldZ] = 1
 
+    @staticmethod 
+    @njit(cache = True)
+    def checkFilled(worldArray, initChunkPosition):
+        '''
+        Check whether the chunk is filled for the brickmap
+        '''
+        for x in range(CHUNK_SIZE):
+            worldX = getWorldIndex(x, initChunkPosition[X_INDEX])
+
+            for y in range(CHUNK_SIZE):
+                worldY = getWorldIndex(y, initChunkPosition[Y_INDEX])
+
+                for z in range(CHUNK_SIZE):
+                    worldZ = getWorldIndex(z, initChunkPosition[Z_INDEX])
+
+                    if worldArray[worldX, worldY, worldZ] != EMPTY_VOXEL:
+                        return False 
+
+        return True
+
     def upload(self):
         '''
         Upload the chunk to the world array
         '''
-        return self.generate(self.worldArray, self.initChunkPosition)
+        self.generate(self.worldArray, self.initChunkPosition)

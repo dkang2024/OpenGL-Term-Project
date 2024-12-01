@@ -53,8 +53,8 @@ ray = Ray(glm.vec3(20), glm.vec3(0.2, 0.5, 0.1))
 
 rayDirSign = glm.sign(ray.direction)
 mapPos = glm.ivec3(glm.floor(ray.origin))
-deltaDist = glm.abs(glm.vec3(glm.length(ray.direction)) / ray.direction)
-rayStep = glm.ivec3(rayDirSign)
+deltaDist = 8 * glm.abs(glm.vec3(glm.length(ray.direction)) / ray.direction)
+rayStep = 8 *glm.ivec3(rayDirSign)
 
 sideDist = (rayDirSign * (glm.vec3(mapPos) - ray.origin) + (rayDirSign * 0.5) + 0.5) * deltaDist
 

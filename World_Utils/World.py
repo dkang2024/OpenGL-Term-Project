@@ -10,6 +10,9 @@ class World:
     def __init__(self, ctx, rayTracer):
         self.ctx, self.rayTracer = ctx, rayTracer
 
+        self.brickMapSize = [WORLD_SIZE] * 3
+        self.brickMapArray = np.zeros(self.brickMapSize, 'u1')
+
         self.worldSize = [WORLD_SIZE * CHUNK_SIZE] * 3
         self.worldArray = np.zeros(self.worldSize, 'u1')
 
@@ -25,17 +28,25 @@ class World:
 
     @staticmethod
     @njit(cache = True)
-    def convertWorldIndexToPosition(worldXIndex, worldYIndex, worldZIndex):
-        return (worldXIndex * CHUNK_SIZE, worldYIndex * CHUNK_SIZE, worldZIndex * CHUNK_SIZE)
+    def convertWorldIndexToPosition(worldIndex):
+        return (worldIndex[X_INDEX] * CHUNK_SIZE, worldIndex[Y_INDEX] * CHUNK_SIZE, worldIndex[Z_INDEX] * CHUNK_SIZE)
 
     def generateChunks(self):
         for worldXIndex in range(WORLD_SIZE):
             for worldYIndex in range(WORLD_SIZE):
                 for worldZIndex in range(WORLD_SIZE):
-                    chunk = Chunk(self.worldArray, self.convertWorldIndexToPosition(worldXIndex, worldYIndex, worldZIndex))
+                    chunkIndex = (worldXIndex, worldYIndex, worldZIndex)
+                    chunkPosition = self.convertWorldIndexToPosition(chunkIndex)
+                    
+                    chunk = Chunk(self.worldArray, chunkIndex, chunkPosition)
                     self.chunkList.append(chunk)
                     chunk.upload()
 
+                    if chunk.checkFilled(self.worldArray, chunkPosition):
+                        self.brickMapArray[chunkIndex] = 1
+                    else:
+                        self.brickMapArray[chunkIndex] = 0
+                
     def assignMaterials(self):
         materialDType = np.dtype([
             ('color', 'f4', 3),

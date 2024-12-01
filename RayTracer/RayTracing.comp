@@ -12,7 +12,8 @@ layout(local_size_x = 8, local_size_y = 4, local_size_z = 1) in;
 layout(rgba32f, binding = 0) uniform image2D screen1;
 layout(rgba32f, binding = 1) uniform image2D screen2;
 layout(r8ui, binding = 2) uniform uimage3D world;
-layout(rgba32ui, binding = 3) uniform uimage2D seeds;
+layout(r8ui, binding = 3) uniform uimage3D brickmap;
+layout(rgba32ui, binding = 4) uniform uimage2D seeds;
 
 uniform int frameCount;
 uniform float temporalReuseFactor;

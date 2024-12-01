@@ -21,6 +21,7 @@ WORLD_SIZE = 2 #Number of chunks that the world contains
 WORLD_CENTER_X = WORLD_SIZE * CHUNK_SIZE // 2
 WORLD_CENTER_Y = WORLD_CENTER_X
 
+EMPTY_VOXEL = 0
 GRASS = 1
 DIRT = 2
 
