@@ -18,6 +18,13 @@ class World:
         self.worldArray[1, 0, 0] = defaultBlock 
         self.worldArray[0, 1, 0] = (1, 1, 0, 0)
 
+        self.materialList = []
+        self.materialList.append(LambertianMaterial(Texture('Grass')))
+        self.materialList.append(DielectricMaterial(1 / 1.5))
+        
+        self.lights = []
+
+    def assignMaterials(self):
         materialDType = np.dtype([
             ('color', 'f4', 3),
             ('materialID', 'i4'),
@@ -26,22 +33,19 @@ class World:
             ('padding', 'f4', 2)
         ])
 
-        self.materialArray = np.empty(2, materialDType)
+        self.materialArray = np.empty(len(self.materialList), materialDType)
 
-        defaultMat = LambertianMaterial(Texture('Grass'))
-        defaultMat.record(self.materialArray, 0)
+        for i, material in enumerate(self.materialList):
+            material.record(self.materialArray, i)
 
-        otherMat = DielectricMaterial(1 / 1.5)
-        otherMat.record(self.materialArray, 1)
-
-        self.lights = []
+        self.materials = self.ctx.buffer(self.materialArray)
+        self.materials.bind_to_storage_buffer(0)
 
     def assignRender(self):
         '''
         Assign the render values to the compute shader in order to render all the hittables
         '''
-        self.materials = self.ctx.buffer(self.materialArray)
-        self.materials.bind_to_storage_buffer(0)
+        self.assignMaterials()
 
         self.world = self.ctx.texture3d((256, 256, 256), 4, self.worldArray, dtype = 'f4')
         self.world.bind_to_image(2)
