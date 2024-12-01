@@ -7,6 +7,10 @@ import time
 import glm 
 import os 
 from PIL import Image
+from numba import njit, prange
+
+CHUNK_SIZE = 32
+WORLD_SIZE = CHUNK_SIZE * 32
 
 ti.init(ti.cpu)
 MAX_ANGLE = 89

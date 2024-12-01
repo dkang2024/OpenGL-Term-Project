@@ -1,5 +1,5 @@
 from Settings import *
-from Objects import *
+from Chunk import *
 from Materials import *
 from World_Utils.Textures import Texture
 
@@ -10,14 +10,16 @@ class World:
     def __init__(self, ctx, rayTracer):
         self.ctx, self.rayTracer = ctx, rayTracer
 
-        self.worldSize = [256] * 3
+        self.worldSize = [WORLD_SIZE] * 3
         self.worldArray = np.zeros(self.worldSize, 'u1')
 
-        defaultBlock = 1
-        self.worldArray[0, 0, 0] = defaultBlock
-        self.worldArray[1, 1, 1] = defaultBlock 
-        self.worldArray[1, 0, 0] = defaultBlock 
-        self.worldArray[0, 1, 0] = 2
+        self.worldIndex = glm.ivec3(0)
+
+        self.chunk = Chunk(self.worldArray, self.worldIndex)
+        self.chunk.upload()
+
+        self.newChunk = Chunk(self.worldArray, glm.ivec3(CHUNK_SIZE))
+        self.newChunk.upload()
 
         self.materialList = []
         self.materialList.append(LambertianMaterial(Texture('Grass')))
