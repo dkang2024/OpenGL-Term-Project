@@ -10,13 +10,11 @@ class World:
     def __init__(self, ctx, rayTracer):
         self.ctx, self.rayTracer = ctx, rayTracer
 
-        self.worldSize = [WORLD_SIZE] * 3
+        self.worldSize = [WORLD_SIZE * CHUNK_SIZE] * 3
         self.worldArray = np.zeros(self.worldSize, 'u1')
 
-        self.worldIndex = glm.ivec3(0)
-        chunk = Chunk(self.worldArray, self.worldIndex)
-        chunk.upload()
-        self.worldArray[0, 1, 0] = 2
+        self.chunkList = []
+        self.generateChunks()
 
         self.materialList = []
         self.materialList.append(LambertianMaterial(Texture('Dirt')))
@@ -24,6 +22,19 @@ class World:
         self.materialList.append(ReflectiveMaterial(Texture(glm.vec3(0.5, 0.7, 0.5)), 0.1))
         
         self.lights = []
+
+    @staticmethod
+    @njit(cache = True)
+    def convertWorldIndexToPosition(worldXIndex, worldYIndex, worldZIndex):
+        return (worldXIndex * CHUNK_SIZE, worldYIndex * CHUNK_SIZE, worldZIndex * CHUNK_SIZE)
+
+    def generateChunks(self):
+        for worldXIndex in range(WORLD_SIZE):
+            for worldYIndex in range(WORLD_SIZE):
+                for worldZIndex in range(WORLD_SIZE):
+                    chunk = Chunk(self.worldArray, self.convertWorldIndexToPosition(worldXIndex, worldYIndex, worldZIndex))
+                    self.chunkList.append(chunk)
+                    chunk.upload()
 
     def assignMaterials(self):
         materialDType = np.dtype([

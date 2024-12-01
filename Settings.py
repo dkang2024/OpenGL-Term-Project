@@ -11,8 +11,15 @@ from numba import njit, prange
 
 SEED = 16
 
-CHUNK_SIZE = 32
-WORLD_SIZE = CHUNK_SIZE * 32
+X_INDEX = 0 
+Y_INDEX = 1
+Z_INDEX = 2
+
+CHUNK_SIZE = 8
+WORLD_SIZE = 2 #Number of chunks that the world contains
+
+WORLD_CENTER_X = WORLD_SIZE * CHUNK_SIZE // 2
+WORLD_CENTER_Y = WORLD_CENTER_X
 
 GRASS = 1
 DIRT = 2
