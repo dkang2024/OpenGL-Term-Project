@@ -10,13 +10,13 @@ class World:
     def __init__(self, ctx, rayTracer):
         self.ctx, self.rayTracer = ctx, rayTracer
 
-        self.worldArray = np.zeros((256, 256, 256, 4), 'f4')
+        self.worldArray = np.zeros((256, 256, 256), 'u1')
 
-        defaultBlock = (1, 0, 0, 0)
+        defaultBlock = 1
         self.worldArray[0, 0, 0] = defaultBlock
         self.worldArray[1, 1, 1] = defaultBlock 
         self.worldArray[1, 0, 0] = defaultBlock 
-        self.worldArray[0, 1, 0] = (1, 1, 0, 0)
+        self.worldArray[0, 1, 0] = 2
 
         self.materialList = []
         self.materialList.append(LambertianMaterial(Texture('Grass')))
@@ -47,7 +47,7 @@ class World:
         '''
         self.assignMaterials()
 
-        self.world = self.ctx.texture3d((256, 256, 256), 4, self.worldArray, dtype = 'f4')
+        self.world = self.ctx.texture3d((256, 256, 256), 1, self.worldArray.tobytes(), dtype = 'u1')
         self.world.bind_to_image(2)
 
         self.rayTracer['numLights'] = len(self.lights)

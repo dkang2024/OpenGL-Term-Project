@@ -33,17 +33,7 @@ class Window(mglw.WindowConfig):
         self.screenCoords = mglw.geometry.quad_fs(attr_names = screenNames, normals = False, name = 'Screen Coordinates')
         self.crosshair = Crosshair(self, 0.03, glm.vec3(1.0, 1.0, 1.0), self.window_size) #type: ignore
         self.world = World(self.ctx, self.rayTracer)
-
-        red = LambertianMaterial(Texture(glm.vec3(.65, .05, .05)))
-        white = LambertianMaterial(Texture(glm.vec3(.73, .73, .73)))
-        green = LambertianMaterial(Texture(glm.vec3(.12, .45, .15)))
-        light = PointLight(glm.vec3(15))
-        materialBack = ReflectiveMaterial(glm.vec3(0.8, 0.8, 0.8), 0)
-        earth = LambertianMaterial(Texture('Grass'))
-        materialGround = LambertianMaterial(Texture(glm.vec3(0.8, 0.8, 0.0)))
-        materialCenter = LambertianMaterial(Texture(glm.vec3(0.1, 0.2, 0.5)))
-        materialLeft = DielectricMaterial(1.0 / 1.3)
-        
+    
         self.world.assignRender()
 
     def initRenderer(self, maxBounces, samplesPerPixel, temporalReuseFactor, badLightSamples, maxRaySteps):

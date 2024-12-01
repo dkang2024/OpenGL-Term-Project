@@ -1,0 +1,44 @@
+const int emptyVoxel = 0;
+
+// Check whether a map position is within the world
+bool inWorld(ivec3 mapPos){
+    ivec3 worldSize = imageSize(world);
+    return all(greaterThanEqual(mapPos, ivec3(0))) && all(lessThan(mapPos, worldSize));
+}
+
+// Get the direction vector for cube texture map sampling 
+vec3 cubeDirection(vec3 hitPoint, ivec3 mapPos){
+    vec3 centerCube = vec3(mapPos) + vec3(0.5);
+    return hitPoint - centerCube;
+}
+
+// Determine whether we're inside the voxel for the ray tracing 
+void voxelFrontFace(inout HitRecord record, Ray ray, ivec3 mapPos) {
+    // Calculate the voxel center
+    vec3 voxelCenter = vec3(mapPos) + vec3(0.5);
+    record.frontFace = distance(ray.origin, voxelCenter) > 0.5;
+}
+
+// DDA Step forward
+void ddaStep(inout vec3 mask, inout vec3 sideDist, inout ivec3 mapPos, vec3 deltaDist, ivec3 rayStep){
+    mask = step(sideDist.xyz, min(sideDist.yzx, sideDist.zxy));
+
+    sideDist += mask * deltaDist;
+    mapPos += ivec3(mask) * rayStep;
+}
+
+// Set common record values in ray marching 
+void setCommonRecordValues(inout HitRecord record, vec3 rayDirSign, vec3 mask, ivec3 mapPos, Ray ray, Material material, inout uvec4 state){
+    record.normalVector = -rayDirSign * mask;
+    record.tValues.t = dot(record.normalVector, vec3(mapPos) + max(vec3(0), record.normalVector) - ray.origin) / dot(record.normalVector, ray.direction);
+
+    record.pointHit = rayIntersectPoint(ray, record.tValues.t);    
+    scatter(material.materialID, material.materialParameter, ray, record, state);     
+}
+
+// Set record values in ray marching
+void setRecordValues(inout HitRecord record, vec3 rayDirSign, vec3 mask, ivec3 mapPos, Ray ray, Material material, inout uvec4 state){
+    setCommonRecordValues(record, rayDirSign, mask, mapPos, ray, material, state);
+    voxelFrontFace(record, ray, mapPos);
+    record.objectColor = applyTexture(material.color, material.textureID, cubeDirection(record.pointHit, mapPos));   
+}

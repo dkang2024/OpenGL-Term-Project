@@ -10,7 +10,7 @@ layout(local_size_x = 8, local_size_y = 4, local_size_z = 1) in;
 
 layout(rgba32f, binding = 0) uniform image2D screen1;
 layout(rgba32f, binding = 1) uniform image2D screen2;
-layout(rgba32f, binding = 2) uniform image3D world;
+layout(r8ui, binding = 2) uniform uimage3D world;
 layout(rgba32ui, binding = 3) uniform uimage2D seeds;
 
 uniform int frameCount;
@@ -30,6 +30,7 @@ uniform mat4 prevViewProj;
 #include "TAA" 
 #include "Light"
 #include "Reservoir"
+#include "World"
 #include "Quad"
 
 uniform int numLights;
@@ -48,53 +49,22 @@ layout(std430, binding = 1) buffer LightBuffer{
 
 // Extract important information from the voxel world space given the map position 
 bool extractVoxel(ivec3 mapPos, inout Material material){
-    vec4 voxelData = imageLoad(world, mapPos);
-    if (voxelData.x == 1){
-        int materialIndex = int(voxelData.y);
-        if (materialIndex >= 0 && materialIndex < materials.length()){
-            material = materials[materialIndex];
-        }
-
-        return true; 
+    if (!inWorld(mapPos)){
+        return false;
     }
-    return false; 
-}
 
-// Get the direction vector for cube texture map sampling 
-vec3 cubeDirection(vec3 hitPoint, ivec3 mapPos){
-    vec3 centerCube = vec3(mapPos) + vec3(0.5);
-    return hitPoint - centerCube;
-}
+    uint voxelData = imageLoad(world, mapPos).x;
+    if (voxelData == emptyVoxel){
+        return false;
+    }
 
-// Determine whether we're inside the voxel for the ray tracing 
-void voxelFrontFace(inout HitRecord record, Ray ray, ivec3 mapPos) {
-    // Calculate the voxel center
-    vec3 voxelCenter = vec3(mapPos) + vec3(0.5);
-    record.frontFace = distance(ray.origin, voxelCenter) > 0.5;
-}
+    uint materialIndex = voxelData - 1;
+    if (materialIndex >= 0 && materialIndex < materials.length()){ // Check whether this materialIndex actually exists
+        material = materials[materialIndex];
+    }
 
-// DDA Step forward
-void ddaStep(inout vec3 mask, inout vec3 sideDist, inout ivec3 mapPos, vec3 deltaDist, ivec3 rayStep){
-    mask = step(sideDist.xyz, min(sideDist.yzx, sideDist.zxy));
-
-    sideDist += mask * deltaDist;
-    mapPos += ivec3(mask) * rayStep;
-}
-
-// Set common record values in ray marching 
-void setCommonRecordValues(inout HitRecord record, vec3 rayDirSign, vec3 mask, ivec3 mapPos, Ray ray, Material material, inout uvec4 state){
-    record.normalVector = -rayDirSign * mask;
-    record.tValues.t = dot(record.normalVector, vec3(mapPos) + max(vec3(0), record.normalVector) - ray.origin) / dot(record.normalVector, ray.direction);
-
-    record.pointHit = rayIntersectPoint(ray, record.tValues.t);    
-    scatter(material.materialID, material.materialParameter, ray, record, state);     
-}
-
-// Set record values in ray marching
-void setRecordValues(inout HitRecord record, vec3 rayDirSign, vec3 mask, ivec3 mapPos, Ray ray, Material material, inout uvec4 state){
-    setCommonRecordValues(record, rayDirSign, mask, mapPos, ray, material, state);
-    voxelFrontFace(record, ray, mapPos);
-    record.objectColor = applyTexture(material.color, material.textureID, cubeDirection(record.pointHit, mapPos));   
+    return true; 
+    
 }
 
 // Branchless DDA with help from https://www.shadertoy.com/view/4dX3zl and https://www.shadertoy.com/view/mtyfRV (I know how branched DDA works, but this is more efficient)
