@@ -1,4 +1,21 @@
-from Settings import * 
+from Settings import *
+from opensimplex.internals import _noise2, _noise3, _init 
+
+perm, permGradIndex3 = _init(SEED)
+
+@njit(cache = True)
+def noise2(x, y):
+    '''
+    Generate 2d simplex noise
+    '''
+    return _noise2(x, y, perm) 
+
+@njit(cache = True)
+def noise3(x, y, z):
+    '''
+    Generate 3d simplex noise
+    '''
+    return _noise3(x, y, z, perm, permGradIndex3) 
  
 @njit(cache = True)
 def getWorldIndex(initChunkPosition, x, y, z):
@@ -28,3 +45,6 @@ class Chunk:
         Upload the chunk to the world array
         '''
         return self.uploadHelper(self.worldArray, self.initChunkPosition)
+    
+print(noise2(0.5, 0.5))
+print(noise3(0.5, 0.5, 0.5))

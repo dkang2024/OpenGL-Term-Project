@@ -65,12 +65,26 @@ class Window(mglw.WindowConfig):
         texture.use(self.textureBind)
         self.textureBind += 1
 
+    def loadSameTexture(self, name):
+        '''
+        load a specific texture into the ray tracer that has the same elements on all sides
+        '''
+        faceData = np.array(Image.open(f'Textures/{name}.jpg')).astype('f4') / 512
+        texture = self.ctx.texture_cube((512, 512), 3, dtype = 'f4')
+
+        for i in range(6):
+            texture.write(i, faceData)
+        
+        texture.use(self.textureBind)
+        self.textureBind += 1
+
     def loadTextures(self):
         '''
         Register the texture directory to moderngl window and load all the textures
         '''
         self.textureBind = 2
         self.loadTexture('Grass')
+        self.loadSameTexture('Dirt')
            
     def initScreen(self):
         '''
