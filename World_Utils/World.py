@@ -18,13 +18,13 @@ class World:
         self.worldArray[0, 0, 0] = 1
         self.worldArray[1, 1, 1] = 1 
         self.worldArray[1, 0, 0] = 1
-        self.worldArray[0, 1, 0] = 3
+        self.worldArray[0, 1, 0] = 2
         self.worldArray[0, 1, 1] = 1
-        # self.worldArray[1, 1, 0] = 1
+        self.worldArray[1, 1, 0] = 1
 
         self.materialList = []
         self.materialList.append(LambertianMaterial(Texture('Grass')))
-        self.materialList.append(DielectricMaterial(Texture(glm.vec3(0.6, 0.5, 0.4)), 1 / 1.5))
+        self.materialList.append(DielectricMaterial(Texture(glm.vec3(1)), 1 / 1.5))
         self.materialList.append(ReflectiveMaterial(Texture(glm.vec3(0.5, 0.7, 0.5)), 0.1))
         
         self.lights = []

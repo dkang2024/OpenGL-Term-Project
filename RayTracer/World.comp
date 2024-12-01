@@ -12,6 +12,13 @@ vec3 cubeDirection(vec3 hitPoint, ivec3 mapPos){
     return hitPoint - centerCube;
 }
 
+// Determine whether we're inside the voxel for the ray tracing 
+void voxelFrontFace(inout HitRecord record, Ray ray, ivec3 mapPos) {
+    // Calculate the voxel center
+    vec3 voxelCenter = vec3(mapPos) + vec3(0.5);
+    record.frontFace = distance(ray.origin, voxelCenter) > 0.5;
+}
+
 // DDA Step forward
 void ddaStep(inout vec3 mask, inout vec3 sideDist, inout ivec3 mapPos, vec3 deltaDist, ivec3 rayStep){
     mask = step(sideDist.xyz, min(sideDist.yzx, sideDist.zxy));
@@ -32,6 +39,6 @@ void setCommonRecordValues(inout HitRecord record, vec3 rayDirSign, vec3 mask, i
 // Set record values in ray marching
 void setRecordValues(inout HitRecord record, vec3 rayDirSign, vec3 mask, ivec3 mapPos, Ray ray, Material material, inout uvec4 state){
     setCommonRecordValues(record, rayDirSign, mask, mapPos, ray, material, state);
-    record.frontFace = true; // Assume that the ray starts outside the voxel (although this can be incorrect)
+    voxelFrontFace(record, ray, mapPos);
     record.objectColor = applyTexture(material.color, material.textureID, cubeDirection(record.pointHit, mapPos));   
 }
