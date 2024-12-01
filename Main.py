@@ -7,7 +7,7 @@ class screenNames:
     POSITION = 'vertexPosition'
     TEXCOORD_0 = 'uv'
 
-class Test(mglw.WindowConfig):
+class Window(mglw.WindowConfig):
     resizable = True 
     aspect_ratio = None 
     gl_version = (4, 6)
@@ -187,4 +187,4 @@ class Test(mglw.WindowConfig):
             self.wnd.title = f'FPS: {1 / frameTime: .2f}'
 
 if __name__ == '__main__':  
-    Test.run() 
+    Window.run()

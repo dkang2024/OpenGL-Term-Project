@@ -110,7 +110,7 @@ bool rayMarch(Ray ray, inout HitRecord record, inout uvec4 state){
         if (extractVoxel(mapPos, material)){
             setRecordValues(record, rayDirSign, mask, mapPos, ray, material, state);
         
-            if (material.materialID == DIELECTRIC){ // If we refract, do another DDA step here
+            if (material.materialID == DIELECTRIC){ // If we have a chance of refraction, another DDA step here
                 ddaStep(mask, sideDist, mapPos, deltaDist, rayStep);
 
                 record.frontFace = !record.frontFace;
