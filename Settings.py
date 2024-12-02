@@ -9,7 +9,7 @@ import os
 from PIL import Image
 from numba import njit, prange
 
-SEED = 16
+SEED = 23
 
 X_INDEX = 0 
 Y_INDEX = 1
@@ -17,8 +17,8 @@ Z_INDEX = 2
 
 CHUNK_SIZE = 32
 
-WORLD_SIZE_XZ = 10
-WORLD_SIZE_Y = 1
+WORLD_SIZE_XZ = 32
+WORLD_SIZE_Y = 5
 
 WORLD_CENTER_Y = WORLD_SIZE_Y // 2 * CHUNK_SIZE
 

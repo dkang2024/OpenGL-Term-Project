@@ -9,18 +9,40 @@ def getWorldIndex(position, initChunkPosition):
     return position + initChunkPosition
 
 @njit(cache = True)
-def getWorldHeight(x, z):
-    # amplitude
-    a = 2
-    
-    height, aSum = 0, 0
-    for _ in range(5):
-        a /= 2
-        aSum += a
-        height += a * noise2(x / a, z / a)
-    height /= aSum 
+def convertToNormalized(position):
+    '''
+    Convert the world position to [-1, 1] for inputting into simplex noise 
+    '''
+    return position / WORLD_SIZE_XZ - 0.5
 
-    return height ** 0.27
+@njit(cache = True)
+def getWorldElevation(x, z):
+    '''
+    Simplex noise world generation with help from https://www.redblobgames.com/maps/terrain-from-noise/
+    '''
+    x, z = convertToNormalized(x), convertToNormalized(z)
+
+    NUM_OCTAVES, FUDGE_FACTOR, REDISTRIBUTION = 15, 1.2, 0.6
+
+    elevation, amplitude, frequency, sumAmplitude = 0, 1, 0.1, 0
+    for _ in range(NUM_OCTAVES):
+        elevation += amplitude * noise2(x * frequency, z * frequency)
+        sumAmplitude += amplitude 
+
+        amplitude *= 0.5
+        frequency *= 2
+    
+    elevation /= sumAmplitude 
+    elevation = (elevation * FUDGE_FACTOR) ** REDISTRIBUTION
+
+    return elevation
+
+@njit(cache = True)
+def getWorldHeight(elevation):
+    '''
+    Convert elevation to world height
+    '''
+    return int(elevation * CHUNK_SIZE * WORLD_SIZE_Y)
 
 class Chunk:
     '''
@@ -40,9 +62,9 @@ class Chunk:
 
             for z in range(CHUNK_SIZE):
                 worldZ = getWorldIndex(z, initChunkPosition[Z_INDEX])
-                elevation = getWorldHeight(worldX, worldZ)
+                elevation = getWorldElevation(worldX, worldZ)
 
-                worldHeight = int(elevation * WORLD_SIZE_Y * CHUNK_SIZE)
+                worldHeight = getWorldHeight(elevation)
                 localHeight = min(worldHeight - initChunkPosition[Y_INDEX], CHUNK_SIZE)
 
                 for y in range(localHeight):
