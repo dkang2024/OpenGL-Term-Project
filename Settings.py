@@ -8,8 +8,9 @@ import glm
 import os 
 from PIL import Image
 from numba import njit, prange
+from random import randint
 
-SEED = 23
+SEED = randint(0, 10000000)
 
 X_INDEX = 0 
 Y_INDEX = 1

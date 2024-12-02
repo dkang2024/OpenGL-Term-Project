@@ -18,7 +18,8 @@ class World:
 
         self.materialList = []
         self.materialList.append(LambertianMaterial(Texture('Grass')))
-        self.materialList.append(DielectricMaterial(Texture(glm.vec3(1)), 1 / 1.5))
+        self.materialList.append(LambertianMaterial(Texture('Dirt')))
+        self.materialList.append(DielectricMaterial(Texture(glm.vec3(0.3, 0.8, 0.3)), 1 / 1.5))
         self.materialList.append(ReflectiveMaterial(Texture(glm.vec3(0.5, 0.7, 0.5)), 0.1))
         
         self.lights = []

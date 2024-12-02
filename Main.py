@@ -59,7 +59,7 @@ class Window(mglw.WindowConfig):
         texture = self.ctx.texture_cube((512, 512), 3, dtype = 'f4')
 
         for i, img in enumerate(faces):
-            data = np.array(img).astype('f4') / 512
+            data = np.array(img).astype('f4') / 255
             texture.write(i, data)
         
         texture.use(self.textureBind)
@@ -69,7 +69,7 @@ class Window(mglw.WindowConfig):
         '''
         load a specific texture into the ray tracer that has the same elements on all sides
         '''
-        faceData = np.array(Image.open(f'Textures/{name}.jpg')).astype('f4') / 512
+        faceData = np.array(Image.open(f'Textures/{name}.jpg')).astype('f4') / 255
         texture = self.ctx.texture_cube((512, 512), 3, dtype = 'f4')
 
         for i in range(6):
