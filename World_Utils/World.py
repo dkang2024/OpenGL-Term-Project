@@ -10,17 +10,14 @@ class World:
     def __init__(self, ctx, rayTracer):
         self.ctx, self.rayTracer = ctx, rayTracer
 
-        self.brickMapSize = [WORLD_SIZE] * 3
-        self.brickMapArray = np.zeros(self.brickMapSize, 'u1')
-
-        self.worldSize = [WORLD_SIZE * CHUNK_SIZE] * 3
+        self.worldSize = [WORLD_SIZE_XZ * CHUNK_SIZE, WORLD_SIZE_Y * CHUNK_SIZE, WORLD_SIZE_XZ * CHUNK_SIZE]
         self.worldArray = np.zeros(self.worldSize, 'u1')
 
         self.chunkList = []
         self.generateChunks()
 
         self.materialList = []
-        self.materialList.append(LambertianMaterial(Texture('Dirt')))
+        self.materialList.append(LambertianMaterial(Texture('Grass')))
         self.materialList.append(DielectricMaterial(Texture(glm.vec3(1)), 1 / 1.5))
         self.materialList.append(ReflectiveMaterial(Texture(glm.vec3(0.5, 0.7, 0.5)), 0.1))
         
@@ -32,20 +29,15 @@ class World:
         return (worldIndex[X_INDEX] * CHUNK_SIZE, worldIndex[Y_INDEX] * CHUNK_SIZE, worldIndex[Z_INDEX] * CHUNK_SIZE)
 
     def generateChunks(self):
-        for worldXIndex in range(WORLD_SIZE):
-            for worldYIndex in range(WORLD_SIZE):
-                for worldZIndex in range(WORLD_SIZE):
+        for worldXIndex in range(WORLD_SIZE_XZ):
+            for worldYIndex in range(WORLD_SIZE_Y):
+                for worldZIndex in range(WORLD_SIZE_XZ):
                     chunkIndex = (worldXIndex, worldYIndex, worldZIndex)
                     chunkPosition = self.convertWorldIndexToPosition(chunkIndex)
                     
                     chunk = Chunk(self.worldArray, chunkIndex, chunkPosition)
                     self.chunkList.append(chunk)
                     chunk.upload()
-
-                    if chunk.checkFilled(self.worldArray, chunkPosition):
-                        self.brickMapArray[chunkIndex] = 1
-                    else:
-                        self.brickMapArray[chunkIndex] = 0
                 
     def assignMaterials(self):
         materialDType = np.dtype([

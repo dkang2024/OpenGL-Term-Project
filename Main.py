@@ -21,7 +21,7 @@ class Window(mglw.WindowConfig):
 
         self.loadTextures()
         self.rayTracer = self.ctx.compute_shader(loadComputeShader(self.ctx, 'RayTracer', 'RayTracing'))
-        self.initRenderer(10, 1, 0.01, 10, 350)
+        self.initRenderer(10, 1, 0.01, 10, 500)
 
         self.ctx.gc_mode = 'auto'
         self.program = self.ctx.program(*loadVertexAndFrag('Window', 'Window', 'Window'))
@@ -111,7 +111,7 @@ class Window(mglw.WindowConfig):
         RandGen = np.random.default_rng()
         self.seed = RandGen.integers(128, 100000, (*self.window_size, 4), dtype = 'u4')
         self.seed = self.ctx.texture(self.window_size, 4, data = self.seed, dtype = 'u4')
-        self.seed.bind_to_image(4)
+        self.seed.bind_to_image(3)
 
     def cameraMovementKeys(self):
         '''
