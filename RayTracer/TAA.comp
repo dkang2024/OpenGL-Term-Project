@@ -15,10 +15,7 @@ ivec2 temporalReprojection(vec3 pointHit, ivec2 windowSize){
 
 // Check if the temporal reprojection is within the window. 
 bool inWindow(ivec2 pixelCoord, ivec2 windowSize){
-    if (!(0 <= pixelCoord.x && pixelCoord.x < windowSize.x) || !(0 <= pixelCoord.y && pixelCoord.y < windowSize.y)){
-        return false;
-    } 
-    return true;
+    return (0 <= pixelCoord.x && pixelCoord.x < windowSize.x) && (0 <= pixelCoord.y && pixelCoord.y < windowSize.y);
 }
 
 // Apply temporal reuse with blending across frames
