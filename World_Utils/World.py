@@ -15,7 +15,7 @@ class World:
 
         self.heightMap = generateHeightMap()
 
-        self.chunkList = []
+        self.chunks = {}
         self.generateChunks()
         self.worldArray[0, 1, 0] = 3
 
@@ -31,7 +31,7 @@ class World:
     @njit(cache = True)
     def convertWorldIndexToPosition(worldIndex):
         return (worldIndex[X_INDEX] * CHUNK_SIZE, worldIndex[Y_INDEX] * CHUNK_SIZE, worldIndex[Z_INDEX] * CHUNK_SIZE)
-
+    
     def generateChunks(self):
         for worldXIndex in range(WORLD_SIZE_XZ):
             for worldYIndex in range(WORLD_SIZE_Y):
@@ -40,7 +40,7 @@ class World:
                     chunkPosition = self.convertWorldIndexToPosition(chunkIndex)
                     
                     chunk = Chunk(self.worldArray, self.heightMap, chunkIndex, chunkPosition)
-                    self.chunkList.append(chunk)
+                    self.chunks[chunkIndex] = chunk
                     chunk.upload()
                 
     def assignMaterials(self):
