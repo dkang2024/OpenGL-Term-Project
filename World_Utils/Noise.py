@@ -1,7 +1,4 @@
 from Settings import *
-from opensimplex.internals import _noise2, _noise3, _init 
-
-perm, perm_grad_index3 = _init(SEED)
 
 @njit(cache = True)
 def shift(value):
@@ -11,15 +8,38 @@ def shift(value):
     return (value + 1) / 2
 
 @njit(cache = True)
-def noise2(x, y):
+def convertToNormalized(position, worldSize):
     '''
-    Generate 2d simplex noise
+    Convert the world position to [0, 1] for inputting into simplex noise 
     '''
-    return shift(_noise2(x, y, perm))
+    return position / (worldSize - 1)
 
 @njit(cache = True)
-def noise3(x, y, z):
+def applyHeightRedistribution(elevation, fudgeFactor, redistribution):
     '''
-    Generate 3d simplex noise
+    Apply height redistribution to make the valleys steeper or shallower
     '''
-    return shift(_noise3(x, y, z, perm, perm_grad_index3))
+    return (elevation * fudgeFactor) ** redistribution
+
+def generateHeightMap():
+    '''
+    Generate a height map given all the possible x coordinates and z coordinates
+    '''
+    worldSize = CHUNK_SIZE * WORLD_SIZE_XZ
+    xCoords = zCoords = convertToNormalized(np.arange(worldSize), worldSize)
+
+    NUM_OCTAVES, FUDGE_FACTOR, REDISTRIBUTION = 15, 1.2, 2.2
+
+    elevation = np.zeros((worldSize, worldSize))
+    amplitude, frequency, sumAmplitude = 1, 0.5, 0
+    for _ in range(NUM_OCTAVES):
+        elevation += amplitude * shift(generator.noise2array(xCoords * frequency, zCoords * frequency))
+        sumAmplitude += amplitude 
+
+        amplitude *= 0.5
+        frequency *= 2
+    
+    elevation /= sumAmplitude
+    elevation = applyHeightRedistribution(elevation, FUDGE_FACTOR, REDISTRIBUTION)
+
+    return elevation

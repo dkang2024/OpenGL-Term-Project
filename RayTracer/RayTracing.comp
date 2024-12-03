@@ -70,6 +70,8 @@ bool extractVoxel(ivec3 mapPos, inout Material material){
 
 // Branchless DDA with help from https://www.shadertoy.com/view/4dX3zl and https://www.shadertoy.com/view/mtyfRV (I know how branched DDA works, but this is more efficient)
 bool rayMarch(Ray ray, inout HitRecord record, inout uvec4 state){
+    clampRay(ray);
+    
     vec3 rayDirSign = sign(ray.direction);
     ivec3 mapPos = ivec3(floor(ray.origin));   
     vec3 deltaDist = abs(vec3(length(ray.direction)) / ray.direction);

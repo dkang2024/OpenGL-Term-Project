@@ -7,10 +7,12 @@ import time
 import glm 
 import os 
 from PIL import Image
-from numba import njit, prange
+from opensimplex import OpenSimplex
+from numba import njit, jit, prange
 from random import randint
 
 SEED = randint(0, 10000000)
+generator = OpenSimplex(SEED)
 
 X_INDEX = 0 
 Y_INDEX = 1

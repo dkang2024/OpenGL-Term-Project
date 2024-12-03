@@ -1,3 +1,5 @@
+const float RAY_EPSILON = 1e-20;
+
 // Ray Structure and functions
 struct Ray{
     vec3 origin;
@@ -7,6 +9,15 @@ struct Ray{
 // Find where the ray is at a specific t value (thanks 259)
 vec3 rayIntersectPoint(Ray ray, float t){
     return ray.origin + ray.direction * t;
+}
+
+// Clamp the ray direction so that it is at least a small epsilon to avoid division by 0 problems.
+void clampRay(inout Ray ray){
+    for (int i = 0; i < 3; i++){
+        if (abs(ray.direction[i]) < RAY_EPSILON){
+            ray.direction[i] == RAY_EPSILON;
+        }
+    }
 }
 
 // Initialize a default ray 

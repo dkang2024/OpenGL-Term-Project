@@ -26,35 +26,13 @@ class Grid:
     def getYIndex(self, ray):
         return max(1, math.ceil(ray.origin.y - self.minY))
 
-def initStep(ray):
-    direction = ray.direction 
-
-    if direction.x > 0:
-        dirX = 1 
-    elif direction.x < 0:
-        dirX = -1 
-    else: 
-        dirX = 0 
-    
-    if direction.y > 0:
-        dirY = 1 
-    elif direction.y < 0:
-        dirY = -1
-    else:
-        dirY = 0 
-
-    return dirX, dirY 
-
-def inGrid(x, y, grid):
-    return (grid.minX <= x and x <= grid.maxX) and (grid.minY <= y and y <= grid.maxY)
-
 grid = Grid(glm.vec3(0), glm.vec3(10))
-ray = Ray(glm.vec3(20), glm.vec3(0.2, 0.5, 0.1))
+ray = Ray(glm.vec3(-2), glm.vec3(0.2, 0.5, 0.1))
 
 rayDirSign = glm.sign(ray.direction)
 mapPos = glm.ivec3(glm.floor(ray.origin))
-deltaDist = 8 * glm.abs(glm.vec3(glm.length(ray.direction)) / ray.direction)
-rayStep = 8 *glm.ivec3(rayDirSign)
+deltaDist = glm.abs(glm.vec3(glm.length(ray.direction)) / ray.direction)
+rayStep = glm.ivec3(rayDirSign)
 
 sideDist = (rayDirSign * (glm.vec3(mapPos) - ray.origin) + (rayDirSign * 0.5) + 0.5) * deltaDist
 

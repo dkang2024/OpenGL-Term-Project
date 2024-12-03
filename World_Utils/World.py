@@ -10,11 +10,14 @@ class World:
     def __init__(self, ctx, rayTracer):
         self.ctx, self.rayTracer = ctx, rayTracer
 
-        self.worldSize = [WORLD_SIZE_XZ * CHUNK_SIZE, WORLD_SIZE_Y * CHUNK_SIZE, WORLD_SIZE_XZ * CHUNK_SIZE]
+        self.worldSize = (WORLD_SIZE_XZ * CHUNK_SIZE, WORLD_SIZE_Y * CHUNK_SIZE, WORLD_SIZE_XZ * CHUNK_SIZE)
         self.worldArray = np.zeros(self.worldSize, 'u1')
+
+        self.heightMap = generateHeightMap()
 
         self.chunkList = []
         self.generateChunks()
+        self.worldArray[0, 1, 0] = 3
 
         self.materialList = []
         self.materialList.append(LambertianMaterial(Texture('Grass')))
@@ -36,7 +39,7 @@ class World:
                     chunkIndex = (worldXIndex, worldYIndex, worldZIndex)
                     chunkPosition = self.convertWorldIndexToPosition(chunkIndex)
                     
-                    chunk = Chunk(self.worldArray, chunkIndex, chunkPosition)
+                    chunk = Chunk(self.worldArray, self.heightMap, chunkIndex, chunkPosition)
                     self.chunkList.append(chunk)
                     chunk.upload()
                 
