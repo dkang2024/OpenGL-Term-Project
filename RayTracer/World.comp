@@ -27,18 +27,23 @@ void ddaStep(inout vec3 mask, inout vec3 sideDist, inout ivec3 mapPos, vec3 delt
     mapPos += ivec3(mask) * rayStep;
 }
 
-// Set common record values in ray marching 
-void setCommonRecordValues(inout HitRecord record, vec3 rayDirSign, vec3 mask, ivec3 mapPos, Ray ray, Material material, inout uvec4 state){
-    record.normalVector = -rayDirSign * mask;
-    record.tValues.t = dot(record.normalVector, vec3(mapPos) + max(vec3(0), record.normalVector) - ray.origin) / dot(record.normalVector, ray.direction);
+// Determine the Ray's parameter for intersection with the world 
+float rayWorldIntersectionTime(ivec3 mapPos, Ray ray, vec3 rayDirSign, vec3 invRayDir){
+    vec3 miniStep = ((vec3(mapPos) - ray.origin) - (rayDirSign * 0.5) + 0.5) * invRayDir; 
+    return maxVector(miniStep);
+}
 
+// Set common record values in ray marching 
+void setCommonRecordValues(inout HitRecord record, vec3 rayDirSign, vec3 invRayDir, vec3 mask, ivec3 mapPos, Ray ray, Material material, inout uvec4 state){
+    record.normalVector = -rayDirSign * mask;
+    record.tValues.t = rayWorldIntersectionTime(mapPos, ray, rayDirSign, invRayDir);
     record.pointHit = rayIntersectPoint(ray, record.tValues.t);    
     scatter(material.materialID, material.materialParameter, ray, record, state);     
 }
 
 // Set record values in ray marching
-void setRecordValues(inout HitRecord record, vec3 rayDirSign, vec3 mask, ivec3 mapPos, Ray ray, Material material, inout uvec4 state){
-    setCommonRecordValues(record, rayDirSign, mask, mapPos, ray, material, state);
+void setRecordValues(inout HitRecord record, vec3 rayDirSign, vec3 invRayDir, vec3 mask, ivec3 mapPos, Ray ray, Material material, inout uvec4 state){
+    setCommonRecordValues(record, rayDirSign, invRayDir, mask, mapPos, ray, material, state);
     voxelFrontFace(record, ray, mapPos);
     record.objectColor = applyTexture(material.color, material.textureID, cubeDirection(record.pointHit, mapPos));   
 }

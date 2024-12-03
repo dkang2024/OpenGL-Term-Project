@@ -19,16 +19,22 @@ class Chunk:
     '''
     Create and render a chunk of blocks
     '''
-    def __init__(self, worldArray, heightMap, brickmapPosition, initChunkPosition):
-        self.worldArray, self.heightMap = worldArray, heightMap
-        self.brickmapPosition, self.initChunkPosition = brickmapPosition, initChunkPosition
+    def __init__(self, worldArray, brickMap, heightMap, worldChunkIndex):
+        self.worldArray, self.brickMap, self.heightMap = worldArray, brickMap, heightMap
+        self.worldChunkIndex, self.initChunkPosition = worldChunkIndex, self.convertWorldIndexToPosition(worldChunkIndex)
+
+    @staticmethod
+    @njit(cache = True)
+    def convertWorldIndexToPosition(worldIndex):
+        return (worldIndex[X_INDEX] * CHUNK_SIZE, worldIndex[Y_INDEX] * CHUNK_SIZE, worldIndex[Z_INDEX] * CHUNK_SIZE)
 
     @staticmethod 
     @njit(parallel = True, nogil = True, cache = True)
     def generate(worldArray, heightMap, initChunkPosition):
         '''
-        Upload and generate the chunk to the world array
+        Upload and generate the chunk to the world array (also return if the chunk is filled at all for the brickmap)
         '''
+        chunkNotEmpty = False 
         for x in prange(CHUNK_SIZE):
             worldX = getWorldIndex(x, initChunkPosition[X_INDEX])
 
@@ -39,12 +45,19 @@ class Chunk:
                 worldHeight = getWorldHeight(elevation)
                 localHeight = min(worldHeight - initChunkPosition[Y_INDEX], CHUNK_SIZE)
 
+                if localHeight > 0:
+                    chunkNotEmpty = True 
+
                 for y in range(localHeight):
                     worldY = getWorldIndex(y, initChunkPosition[Y_INDEX])
+                    
                     worldArray[worldX, worldY, worldZ] = 1
+
+        return chunkNotEmpty
 
     def upload(self):
         '''
         Upload the chunk to the world array
         '''
-        self.generate(self.worldArray, self.heightMap, self.initChunkPosition)
+        chunkNotEmpty = self.generate(self.worldArray, self.heightMap, self.initChunkPosition)
+        self.brickMap[self.worldChunkIndex[X_INDEX], self.worldChunkIndex[Y_INDEX], self.worldChunkIndex[Z_INDEX]] = int(chunkNotEmpty)

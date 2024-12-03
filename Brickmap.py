@@ -100,7 +100,7 @@ def convertToBrickmapPosition(mapPosition):
 brickmap = Brickmap()
 brickmap.generateChunks()
 
-ray = Ray(glm.vec3(0, -2, 1), glm.vec3(0.3, 0.5, 0.2))
+ray = Ray(glm.vec3(0, -2, 1), glm.vec3(0.2, 0.8, 0.9))
 
 invRayDir = 1 / ray.direction
 rayDirSign = glm.sign(ray.direction)
@@ -120,20 +120,14 @@ for i in range(25):
         
         continue 
 
-    print(mapPos)
-
-    newRay = Ray(rayBrickmapOrigin, ray.direction)
-    t = intersectionTest(mapPos * CHUNK_SIZE, (mapPos + 1) * CHUNK_SIZE, newRay)
-    print(ray.pointOnRay(t))
+    newRay = Ray(ray.origin, ray.direction)
+    tIntersection = intersectionTest(mapPos * CHUNK_SIZE, (mapPos + 1) * CHUNK_SIZE, ray)
     
-    mini = ((glm.vec3(mapPos) - rayBrickmapOrigin) - (rayDirSign * 0.5) + 0.5) * invRayDir
+    mini = ((glm.vec3(mapPos) - ray.origin) - (rayDirSign * 0.5) + 0.5) * invRayDir
     t = glm.max(mini.x, glm.max(mini.y, mini.z))
     intersectBrickmap = ray.pointOnRay(t)
 
-    localPosition = (intersectBrickmap - glm.vec3(mapPos)) * CHUNK_SIZE
-
-    mapPosition = mapPos * CHUNK_SIZE + glm.ivec3(localPosition)
-    
+    mapPosition = glm.ivec3(glm.floor(intersectBrickmap))
     while convertToBrickmapPosition(mapPosition) == mapPos:
         if not brickmap.checkWorld(mapPosition):
             mask = glm.step(sideDist.xyz, glm.min(sideDist.yzx, sideDist.zxy))
@@ -147,33 +141,10 @@ for i in range(25):
         
         break
 
-    print(f'Intersect Point (brickmap) {intersectBrickmap}, Intersect Point (world) {mapPos}, Map Pos: {mapPosition}')
+    print(f'Intersect Point (brickmap) {intersectBrickmap}, Intersect Point (ray-box) {ray.pointOnRay(tIntersection)}, Intersect World {intersectWorld}')
 
     break
 
-ray = Ray(glm.vec3(0, -2, 1), glm.vec3(0.3, 0.5, 0.2))
-
-invRayDir = 1 / ray.direction
-rayDirSign = glm.sign(ray.direction)
-mapPos = glm.ivec3(glm.floor(ray.origin))
-deltaDist = glm.abs(glm.vec3(glm.length(ray.direction)) * invRayDir)
-rayStep = glm.ivec3(rayDirSign)
-
-sideDist = (rayDirSign * (glm.vec3(mapPos) - ray.origin) + (rayDirSign * 0.5) + 0.5) * deltaDist
-
-for i in range(25):
-    if not brickmap.checkWorld(mapPos):
-        mask = glm.step(sideDist.xyz, glm.min(sideDist.yzx, sideDist.zxy))
-        
-        sideDist += mask * deltaDist 
-        mapPos += glm.ivec3(mask) * rayStep 
-        
-        continue 
-    
-    mini = ((glm.vec3(mapPos) - ray.origin) - (rayDirSign * 0.5) + 0.5) * invRayDir
-    t = glm.max(mini.x, glm.max(mini.y, mini.z))
-    intersectWorld = ray.pointOnRay(t)
-
-    print(f'Intersect World {intersectWorld}')
-
-    break
+mapPos = glm.ivec3(0)
+t = intersectionTest(mapPos * CHUNK_SIZE, (mapPos + 1) * CHUNK_SIZE, ray)
+print(f'True Map Intersection Point: {ray.pointOnRay(t)}')

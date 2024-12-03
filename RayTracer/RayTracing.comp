@@ -73,13 +73,16 @@ bool extractVoxel(ivec3 mapPos, inout Material material){
 
 // Branchless DDA with help from https://www.shadertoy.com/view/4dX3zl and https://www.shadertoy.com/view/mtyfRV (I know how branched DDA works, but this is more efficient)
 bool rayMarch(Ray ray, inout HitRecord record, inout uvec4 state){
-    clampRay(ray);
-    
+    clampRay(ray); // Clamp ray direction to avoid division by zero issues 
+
+    vec3 invRayDir = 1 / ray.direction;
     vec3 rayDirSign = sign(ray.direction);
-    ivec3 mapPos = ivec3(floor(ray.origin));   
-    vec3 deltaDist = abs(vec3(length(ray.direction)) / ray.direction);
+    vec3 deltaDist = abs(vec3(length(ray.direction)) * invRayDir);
     ivec3 rayStep = ivec3(rayDirSign);
+    
+    ivec3 mapPos = ivec3(floor(ray.origin));       
     vec3 sideDist = (rayDirSign * (vec3(mapPos) - ray.origin) + (rayDirSign * 0.5 + 0.5)) * deltaDist;
+    
     vec3 mask; Material material = initDefaultMaterial(); 
 
     for (int i = 0; i < maxRaySteps; i++){
@@ -88,20 +91,20 @@ bool rayMarch(Ray ray, inout HitRecord record, inout uvec4 state){
             continue;
         }
 
-        setRecordValues(record, rayDirSign, mask, mapPos, ray, material, state);
+        setRecordValues(record, rayDirSign, invRayDir, mask, mapPos, ray, material, state);
 
         if (material.materialID != DIELECTRIC){// If we can't refract, don't continue raymarching
             return true; 
         }
 
-        Material prevMaterial = material; record.frontFace = !record.frontFace; // IF we can refract, raymarch unitl we get out of the dielectric
+        Material prevMaterial = material; record.frontFace = !record.frontFace; // If we can refract, raymarch unitl we get out of the dielectric
         
         for (int j = 0; j < maxRaySteps; j++){ // Raymarch until we get out of the dielectric
             ddaStep(mask, sideDist, mapPos, deltaDist, rayStep);
             
             bool voxelExists = extractVoxel(mapPos, material);
             if (!(voxelExists && material.materialID == DIELECTRIC && material.materialParameter == prevMaterial.materialParameter)){
-                setCommonRecordValues(record, rayDirSign, mask, mapPos, ray, prevMaterial, state);
+                setCommonRecordValues(record, rayDirSign, invRayDir, mask, mapPos, ray, prevMaterial, state);
                 return true;
             }
         }
