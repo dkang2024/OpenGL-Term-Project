@@ -17,7 +17,6 @@ class World:
 
         self.chunks = {}
         self.generateChunks()
-        self.worldArray[0, 1, 0] = 3
 
         self.materialList = []
         self.materialList.append(LambertianMaterial(Texture('Grass')))

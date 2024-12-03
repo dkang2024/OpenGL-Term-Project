@@ -6,10 +6,11 @@ class Camera:
     Class for a moveable pinhole camera. I implemented all the key movement functions myself because it was pretty obvious how to do those things. However, I didn't know the exact math necessary for camera mouse movement so I used https://learnopengl.com/Getting-started/Camera for a reference on the math necessary for camera mouse movement. Any functions that I referenced the website on are explicitly marked.
     '''
     def __init__(self, app, cameraPosition, cameraSpeed, fov, mouseSensitivity, vectorUp = glm.vec3(0, 1, 0)):
-        self.app, self.MAX_ANGLE = app, MAX_ANGLE
+        self.app, self.rayTracer, self.MAX_ANGLE = app, app.rayTracer, MAX_ANGLE
         self.cameraPosition, self.cameraSpeed, self.fov = cameraPosition, cameraSpeed, fov
         self.dirX, self.dirY, self.dirZ, self.movingDown = 0, 0, 0, 1
         self.mouseSensitivity, self.vectorUp, self.yaw, self.pitch = mouseSensitivity, vectorUp, -90, 0
+        self.prevYaw, self.prevPitch, self.isMoving = self.yaw, self.pitch, False
 
         self.calculateUnitVectors()
         self.calculateLookAt()
@@ -134,6 +135,17 @@ class Camera:
         viewportBottomLeft = self.cameraPosition - self.k - (self.viewportWidthVector + self.viewportHeightVector) / 2
         self.initPixelPos = viewportBottomLeft + (self.pixelDX + self.pixelDY) / 2
 
+    @staticmethod
+    @ti.kernel 
+    def calculateIsMovingHelper(dirX: int, dirY: int, dirZ: int, prevPitch: float, pitch: float, prevYaw: float, yaw: float) -> bool:
+        '''
+        Calculates whether the camera is moving
+        '''
+        return dirX != 0 or dirY != 0 or dirZ != 0 or prevPitch != pitch or prevYaw != yaw
+
+    def calculateIsMoving(self):
+        self.isMoving = self.calculateIsMovingHelper(self.dirX, self.dirY, self.dirZ, self.prevPitch, self.pitch, self.prevYaw, self.yaw)
+
     def calculateRenderValues(self):
         '''
         Calculate the important camera render values
@@ -143,15 +155,17 @@ class Camera:
         self.calculateViewportVectors()
         self.calculatePixelDelta()
         self.calculateFirstPixelPos()
+        self.calculateIsMoving()
 
     def assignRenderValues(self):
         '''
         Assign each of the render values to the uniform input struct in the camera for the ray tracing compute shader
         '''
-        self.app.rayTracer['camera.position'] = self.cameraPosition
-        self.app.rayTracer['camera.pixelDX'] = self.pixelDX 
-        self.app.rayTracer['camera.pixelDY'] = self.pixelDY 
-        self.app.rayTracer['camera.initPixelPos'] = self.initPixelPos
+        self.rayTracer['camera.position'] = self.cameraPosition
+        self.rayTracer['camera.pixelDX'] = self.pixelDX 
+        self.rayTracer['camera.pixelDY'] = self.pixelDY 
+        self.rayTracer['camera.initPixelPos'] = self.initPixelPos
+        self.rayTracer['cameraMoving'] = self.isMoving
 
     def render(self, frameTime):
         '''
@@ -178,3 +192,4 @@ class Camera:
         Assign each of the render values for the previous camera in the prevCamera struct for the ray tracing compute shader with TAA
         '''
         self.app.rayTracer['prevViewProj'].write(self.calculateProjMat() * self.calculateViewMat())
+        self.prevYaw, self.prevPitch = self.yaw, self.pitch 

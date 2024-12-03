@@ -95,7 +95,7 @@ def intersectionTest(boxMin, boxMax, ray):
     return tMin
 
 def convertToBrickmapPosition(mapPosition):
-    return mapPosition // CHUNK_SIZE
+    return mapPosition / CHUNK_SIZE
 
 brickmap = Brickmap()
 brickmap.generateChunks()
@@ -104,24 +104,29 @@ ray = Ray(glm.vec3(0, -2, 1), glm.vec3(0.3, 0.5, 0.2))
 
 invRayDir = 1 / ray.direction
 rayDirSign = glm.sign(ray.direction)
-mapPos = convertToBrickmapPosition(glm.ivec3(glm.floor(ray.origin)))
 deltaDist = glm.abs(glm.vec3(glm.length(ray.direction)) * invRayDir)
 rayStep = glm.ivec3(rayDirSign)
 
-sideDist = (rayDirSign * (glm.vec3(mapPos) - ray.origin) + (rayDirSign * 0.5) + 0.5) * deltaDist
+rayBrickmapOrigin = convertToBrickmapPosition(ray.origin)
+mapPos = glm.ivec3(glm.floor(rayBrickmapOrigin))
+sideDist = (rayDirSign * (glm.vec3(mapPos) - rayBrickmapOrigin) + (rayDirSign * 0.5) + 0.5) * deltaDist
 
 for i in range(25):
     if not brickmap.checkBrickmap(mapPos):
         mask = glm.step(sideDist.xyz, glm.min(sideDist.yzx, sideDist.zxy))
-        
+
         sideDist += mask * deltaDist 
         mapPos += glm.ivec3(mask) * rayStep 
-
-        print(mapPos)
         
         continue 
+
+    print(mapPos)
+
+    newRay = Ray(rayBrickmapOrigin, ray.direction)
+    t = intersectionTest(mapPos * CHUNK_SIZE, (mapPos + 1) * CHUNK_SIZE, newRay)
+    print(ray.pointOnRay(t))
     
-    mini = ((glm.vec3(mapPos) - ray.origin) - (rayDirSign * 0.5) + 0.5) * invRayDir
+    mini = ((glm.vec3(mapPos) - rayBrickmapOrigin) - (rayDirSign * 0.5) + 0.5) * invRayDir
     t = glm.max(mini.x, glm.max(mini.y, mini.z))
     intersectBrickmap = ray.pointOnRay(t)
 
@@ -142,7 +147,7 @@ for i in range(25):
         
         break
 
-    print(f'Intersect Point (brickmap) {intersectBrickmap}, Intersect Point (world) {intersectWorld}, Map Pos: {mapPosition}')
+    print(f'Intersect Point (brickmap) {intersectBrickmap}, Intersect Point (world) {mapPos}, Map Pos: {mapPosition}')
 
     break
 
@@ -162,8 +167,6 @@ for i in range(25):
         
         sideDist += mask * deltaDist 
         mapPos += glm.ivec3(mask) * rayStep 
-
-        print(mapPos)
         
         continue 
     

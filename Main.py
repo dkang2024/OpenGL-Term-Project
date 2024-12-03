@@ -21,7 +21,7 @@ class Window(mglw.WindowConfig):
 
         self.loadTextures()
         self.rayTracer = self.ctx.compute_shader(loadComputeShader(self.ctx, 'RayTracer', 'RayTracing'))
-        self.initRenderer(10, 1, 0.01, 10, 500)
+        self.initRenderer(10, 1, 0.01, 25, 10, 500, 1)
 
         self.ctx.gc_mode = 'auto'
         self.program = self.ctx.program(*loadVertexAndFrag('Window', 'Window', 'Window'))
@@ -29,14 +29,15 @@ class Window(mglw.WindowConfig):
         self.initRand()
 
         # self.camera = Camera(self, glm.vec3(278, 278, -200), 100, 60, 0.2)
-        self.camera = Camera(self, glm.vec3(0, 0, -1), 50, 60, 0.2)
+        worldSize = WORLD_SIZE_XZ * CHUNK_SIZE
+        self.camera = Camera(self, glm.vec3(worldSize // 2, WORLD_CENTER_Y * 2, worldSize // 2), 20, 60, 0.2)
         self.screenCoords = mglw.geometry.quad_fs(attr_names = screenNames, normals = False, name = 'Screen Coordinates')
         self.crosshair = Crosshair(self, 0.03, glm.vec3(1.0, 1.0, 1.0), self.window_size) #type: ignore
         self.world = World(self.ctx, self.rayTracer)
     
         self.world.assignRender()
 
-    def initRenderer(self, maxBounces, samplesPerPixel, temporalReuseFactor, badLightSamples, maxRaySteps):
+    def initRenderer(self, maxBounces, samplesPerPixel, temporalReuseFactor, temporalBlendReduction, badLightSamples, maxRaySteps, neighborhoodSize):
         '''
         Initialize the quantities necessary for the renderer and pass them in (including the temporal reuse mix factor)
         '''
@@ -45,8 +46,10 @@ class Window(mglw.WindowConfig):
         self.rayTracer['rootSPP'] = rootSPP 
         self.rayTracer['invRootSPP'] = 1 / rootSPP
         self.rayTracer['temporalReuseFactor'] = temporalReuseFactor
+        self.rayTracer['temporalBlendReduction'] = temporalBlendReduction
         self.rayTracer['badLightSamples'] = badLightSamples
         self.rayTracer['maxRaySteps'] = maxRaySteps
+        self.rayTracer['neighborhoodSize'] = neighborhoodSize
     
     def loadTexture(self, name):
         '''

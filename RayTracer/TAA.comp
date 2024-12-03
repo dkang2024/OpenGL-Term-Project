@@ -22,8 +22,8 @@ bool inWindow(ivec2 pixelCoord, ivec2 windowSize){
 }
 
 // Apply temporal reuse with blending across frames
-void temporalReuse(vec4 prevPixel, inout vec4 pixel){
-    pixel = mix(prevPixel, pixel, temporalReuseFactor);
+void temporalReuse(vec4 prevPixel, inout vec4 pixel, float blendFactor){
+    pixel = mix(prevPixel, pixel, blendFactor);
 }
 
 // Apply TAA to the frame
@@ -44,6 +44,13 @@ void applyTAA(ivec2 pixelCoord, vec4 pixel, TemporalRecord tempRecord){
         }
         return;
     }
+
+    float blendFactor;
+    if (cameraMoving){ // If camera is barely moving, don't apply the temporal blend reduction
+        blendFactor = temporalReuseFactor * temporalBlendReduction;
+    } else {
+        blendFactor = temporalReuseFactor;
+    }
     
     vec3 minColor = vec3(1000000000); vec3 maxColor = vec3(-1000000000);
     
@@ -51,8 +58,8 @@ void applyTAA(ivec2 pixelCoord, vec4 pixel, TemporalRecord tempRecord){
         prevPixel = imageLoad(screen2, prevPixelCoord);
 
         // Neighborhood clamping
-        for (int i = -1; i <= 1; i++){
-            for (int j = -1; j <= 1; j++){
+        for (int i = -neighborhoodSize; i <= neighborhoodSize; i++){
+            for (int j = -neighborhoodSize; j <= neighborhoodSize; j++){
                 vec3 neighborColor = imageLoad(screen2, prevPixelCoord + ivec2(i, j)).rgb;
                 minColor = min(minColor, neighborColor);
                 maxColor = max(maxColor, neighborColor);
@@ -60,14 +67,14 @@ void applyTAA(ivec2 pixelCoord, vec4 pixel, TemporalRecord tempRecord){
         }
         prevPixel = clamp(prevPixel, vec4(minColor, 1), vec4(maxColor, 1));
 
-        temporalReuse(prevPixel, pixel);
+        temporalReuse(prevPixel, pixel, blendFactor);
         imageStore(screen1, pixelCoord, pixel);
     } else {
         prevPixel = imageLoad(screen1, prevPixelCoord);
         
         // Neighborhood clamping
-        for (int i = -1; i <= 1; i++){
-            for (int j = -1; j <= 1; j++){
+        for (int i = -neighborhoodSize; i <= neighborhoodSize; i++){
+            for (int j = -neighborhoodSize; j <= neighborhoodSize; j++){
                 vec3 neighborColor = imageLoad(screen1, prevPixelCoord + ivec2(i, j)).rgb;
                 minColor = min(minColor, neighborColor);
                 maxColor = max(maxColor, neighborColor);
@@ -75,7 +82,7 @@ void applyTAA(ivec2 pixelCoord, vec4 pixel, TemporalRecord tempRecord){
         }
         prevPixel = clamp(prevPixel, vec4(minColor, 1), vec4(maxColor, 1));
 
-        temporalReuse(prevPixel, pixel);
+        temporalReuse(prevPixel, pixel, blendFactor);
         imageStore(screen2, pixelCoord, pixel);
     } 
 }
