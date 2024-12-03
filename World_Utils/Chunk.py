@@ -34,7 +34,7 @@ class Chunk:
         '''
         Upload and generate the chunk to the world array (also return if the chunk is filled at all for the brickmap)
         '''
-        chunkNotEmpty = False 
+        isChunkEmpty = EMPTY_CHUNK
         for x in prange(CHUNK_SIZE):
             worldX = getWorldIndex(x, initChunkPosition[X_INDEX])
 
@@ -46,18 +46,18 @@ class Chunk:
                 localHeight = min(worldHeight - initChunkPosition[Y_INDEX], CHUNK_SIZE)
 
                 if localHeight > 0:
-                    chunkNotEmpty = True 
+                    isChunkEmpty = FILLED_CHUNK
 
                 for y in range(localHeight):
                     worldY = getWorldIndex(y, initChunkPosition[Y_INDEX])
                     
                     worldArray[worldX, worldY, worldZ] = 1
 
-        return chunkNotEmpty
+        return isChunkEmpty
 
     def upload(self):
         '''
         Upload the chunk to the world array
         '''
-        chunkNotEmpty = self.generate(self.worldArray, self.heightMap, self.initChunkPosition)
-        self.brickMap[self.worldChunkIndex[X_INDEX], self.worldChunkIndex[Y_INDEX], self.worldChunkIndex[Z_INDEX]] = int(chunkNotEmpty)
+        isChunkEmpty = self.generate(self.worldArray, self.heightMap, self.initChunkPosition)
+        self.brickMap[self.worldChunkIndex[X_INDEX], self.worldChunkIndex[Y_INDEX], self.worldChunkIndex[Z_INDEX]] = isChunkEmpty

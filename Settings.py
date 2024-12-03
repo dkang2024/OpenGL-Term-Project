@@ -29,5 +29,8 @@ EMPTY_VOXEL = 0
 GRASS = 1
 DIRT = 2
 
+EMPTY_CHUNK = 0 
+FILLED_CHUNK = 1
+
 ti.init(ti.cpu)
 MAX_ANGLE = 89
