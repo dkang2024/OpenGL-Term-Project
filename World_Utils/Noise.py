@@ -23,7 +23,7 @@ def applyHeightRedistribution(elevation, fudgeFactor, redistribution):
 
 def generateHeightMap():
     '''
-    Generate a height map given all the possible x coordinates and z coordinates
+    Generate a height map given all the possible x coordinates and z coordinates. Terrain generation with help from https://www.redblobgames.com/maps/terrain-from-noise/
     '''
     worldSize = CHUNK_SIZE * WORLD_SIZE_XZ
     xCoords = zCoords = convertToNormalized(np.arange(worldSize), worldSize)

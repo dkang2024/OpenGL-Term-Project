@@ -14,17 +14,22 @@ class World:
         self.worldArray = np.zeros(self.worldSize, 'u1')
 
         self.heightMap = generateHeightMap()
-
-        self.chunks = {}
         self.generateChunks()
+        
+        self.initMaterials()
 
+        self.lights = []
+
+    def initMaterials(self):
+        '''
+        Initialize the materials list
+        '''
         self.materialList = []
         self.materialList.append(LambertianMaterial(Texture('Grass')))
         self.materialList.append(LambertianMaterial(Texture('Dirt')))
+        self.materialList.append(LambertianMaterial(Texture('Stone')))
         self.materialList.append(DielectricMaterial(Texture(glm.vec3(0.3, 0.8, 0.3)), 1 / 1.5))
         self.materialList.append(ReflectiveMaterial(Texture(glm.vec3(0.5, 0.7, 0.5)), 0.1))
-        
-        self.lights = []
 
     @staticmethod
     @njit(cache = True)
@@ -39,7 +44,6 @@ class World:
                     chunkPosition = self.convertWorldIndexToPosition(chunkIndex)
                     
                     chunk = Chunk(self.worldArray, self.heightMap, chunkIndex, chunkPosition)
-                    self.chunks[chunkIndex] = chunk
                     chunk.upload()
                 
     def assignMaterials(self):

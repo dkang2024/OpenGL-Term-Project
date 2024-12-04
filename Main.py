@@ -21,7 +21,7 @@ class Window(mglw.WindowConfig):
 
         self.loadTextures()
         self.rayTracer = self.ctx.compute_shader(loadComputeShader(self.ctx, 'RayTracer', 'RayTracing'))
-        self.initRenderer(10, 1, 0.01, 25, 10, 500, 1)
+        self.initRenderer(10, 1, 0.01, 25, 10, 512, 1)
 
         self.ctx.gc_mode = 'auto'
         self.program = self.ctx.program(*loadVertexAndFrag('Window', 'Window', 'Window'))
@@ -57,9 +57,14 @@ class Window(mglw.WindowConfig):
         '''
         faces = []
         for side in ('Side', 'Side', 'Top', 'Bot', 'Side', 'Side'):
-            faces.append(Image.open(f'Textures/{name} {side}.jpg'))
+            try: 
+                image = Image.open(f'Textures/{name} {side}.jpg') 
+            except:
+                image = Image.open(f'Textures/{name} {side}.png') 
+            faces.append(image)
 
-        texture = self.ctx.texture_cube((512, 512), 3, dtype = 'f4')
+        imageSize = faces[0].size
+        texture = self.ctx.texture_cube(imageSize, 3, dtype = 'f4')
 
         for i, img in enumerate(faces):
             data = np.array(img).astype('f4') / 255
@@ -72,8 +77,14 @@ class Window(mglw.WindowConfig):
         '''
         load a specific texture into the ray tracer that has the same elements on all sides
         '''
-        faceData = np.array(Image.open(f'Textures/{name}.jpg')).astype('f4') / 255
-        texture = self.ctx.texture_cube((512, 512), 3, dtype = 'f4')
+        
+        try:
+            image = Image.open(f'Textures/{name}.jpg')
+        except:
+            image = Image.open(f'Textures/{name}.png')
+        
+        imageSize, faceData = image.size, np.array(image).astype('f4') / 255
+        texture = self.ctx.texture_cube(imageSize, 3, dtype = 'f4')
 
         for i in range(6):
             texture.write(i, faceData)
@@ -88,6 +99,7 @@ class Window(mglw.WindowConfig):
         self.textureBind = 2
         self.loadTexture('Grass')
         self.loadSameTexture('Dirt')
+        self.loadSameTexture('Stone')
            
     def initScreen(self):
         '''

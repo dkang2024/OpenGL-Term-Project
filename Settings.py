@@ -8,7 +8,7 @@ import glm
 import os 
 from PIL import Image
 from opensimplex import OpenSimplex
-from numba import njit, jit, prange
+from numba import njit, prange
 from random import randint
 
 SEED = randint(0, 10000000)
@@ -28,6 +28,7 @@ WORLD_CENTER_Y = WORLD_SIZE_Y // 2 * CHUNK_SIZE
 EMPTY_VOXEL = 0
 GRASS = 1
 DIRT = 2
+STONE = 3
 
 EMPTY_CHUNK = 0 
 FILLED_CHUNK = 1

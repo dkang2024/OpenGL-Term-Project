@@ -5,6 +5,7 @@ layout(binding = 0) uniform sampler2D screen1Texture;
 layout(binding = 1) uniform sampler2D screen2Texture;
 layout(binding = 2) uniform samplerCube grassTexture;
 layout(binding = 3) uniform samplerCube dirtTexture;
+layout(binding = 4) uniform samplerCube stoneTexture;
 
 // Set up invocation size and take in the screen texture to modify it per pixel. Note that the size volume is 32 (which is optimized for NVIDIA gpus rather than AMD gpus [which prefer a size of multiples of 64])
 layout(local_size_x = 8, local_size_y = 4, local_size_z = 1) in;

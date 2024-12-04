@@ -29,10 +29,6 @@ class Chunk:
         '''
         Upload and generate the chunk to the world array
         '''
-<<<<<<< HEAD
-        isChunkEmpty = EMPTY_CHUNK
-=======
->>>>>>> parent of 9557f96 (Changes)
         for x in prange(CHUNK_SIZE):
             worldX = getWorldIndex(x, initChunkPosition[X_INDEX])
 
@@ -43,28 +39,12 @@ class Chunk:
                 worldHeight = getWorldHeight(elevation)
                 localHeight = min(worldHeight - initChunkPosition[Y_INDEX], CHUNK_SIZE)
 
-<<<<<<< HEAD
-                if localHeight > 0:
-                    isChunkEmpty = FILLED_CHUNK
-
-=======
->>>>>>> parent of 9557f96 (Changes)
                 for y in range(localHeight):
                     worldY = getWorldIndex(y, initChunkPosition[Y_INDEX])
-                    worldArray[worldX, worldY, worldZ] = 1
+                    worldArray[worldX, worldY, worldZ] = STONE
 
-<<<<<<< HEAD
-        return isChunkEmpty
-
-=======
->>>>>>> parent of 9557f96 (Changes)
     def upload(self):
         '''
         Upload the chunk to the world array
         '''
-<<<<<<< HEAD
-        isChunkEmpty = self.generate(self.worldArray, self.heightMap, self.initChunkPosition)
-        self.brickMap[self.worldChunkIndex[X_INDEX], self.worldChunkIndex[Y_INDEX], self.worldChunkIndex[Z_INDEX]] = isChunkEmpty
-=======
         self.generate(self.worldArray, self.heightMap, self.initChunkPosition)
->>>>>>> parent of 9557f96 (Changes)

@@ -102,6 +102,8 @@ brickmap.generateChunks()
 
 ray = Ray(glm.vec3(0, -2, 1), glm.vec3(0.3, 0.5, 0.2))
 
+MAX_STEPS = 2000
+
 invRayDir = 1 / ray.direction
 rayDirSign = glm.sign(ray.direction)
 deltaDist = glm.abs(glm.vec3(glm.length(ray.direction)) * invRayDir)
@@ -111,7 +113,7 @@ rayBrickmapOrigin = convertToBrickmapPosition(ray.origin)
 mapPos = glm.ivec3(glm.floor(rayBrickmapOrigin))
 sideDist = (rayDirSign * (glm.vec3(mapPos) - rayBrickmapOrigin) + (rayDirSign * 0.5) + 0.5) * deltaDist
 
-for i in range(25):
+for i in range(MAX_STEPS):
     if not brickmap.checkBrickmap(mapPos):
         mask = glm.step(sideDist.xyz, glm.min(sideDist.yzx, sideDist.zxy))
 
@@ -161,7 +163,7 @@ rayStep = glm.ivec3(rayDirSign)
 
 sideDist = (rayDirSign * (glm.vec3(mapPos) - ray.origin) + (rayDirSign * 0.5) + 0.5) * deltaDist
 
-for i in range(25):
+for i in range(MAX_STEPS):
     if not brickmap.checkWorld(mapPos):
         mask = glm.step(sideDist.xyz, glm.min(sideDist.yzx, sideDist.zxy))
         
