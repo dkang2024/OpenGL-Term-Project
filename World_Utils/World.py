@@ -13,9 +13,6 @@ class World:
         self.worldSize = (WORLD_SIZE_XZ * CHUNK_SIZE, WORLD_SIZE_Y * CHUNK_SIZE, WORLD_SIZE_XZ * CHUNK_SIZE)
         self.worldArray = np.zeros(self.worldSize, 'u1')
 
-        self.brickMapSize = (WORLD_SIZE_XZ, WORLD_SIZE_Y, WORLD_SIZE_XZ)
-        self.brickMap = np.zeros(self.brickMapSize, 'u1')
-
         self.heightMap = generateHeightMap()
 
         self.chunks = {}
@@ -28,13 +25,20 @@ class World:
         self.materialList.append(ReflectiveMaterial(Texture(glm.vec3(0.5, 0.7, 0.5)), 0.1))
         
         self.lights = []
+
+    @staticmethod
+    @njit(cache = True)
+    def convertWorldIndexToPosition(worldIndex):
+        return (worldIndex[X_INDEX] * CHUNK_SIZE, worldIndex[Y_INDEX] * CHUNK_SIZE, worldIndex[Z_INDEX] * CHUNK_SIZE)
     
     def generateChunks(self):
         for worldXIndex in range(WORLD_SIZE_XZ):
             for worldYIndex in range(WORLD_SIZE_Y):
                 for worldZIndex in range(WORLD_SIZE_XZ):
-                    chunkIndex = (worldXIndex, worldYIndex, worldZIndex)                
-                    chunk = Chunk(self.worldArray, self.brickMap, self.heightMap, chunkIndex)
+                    chunkIndex = (worldXIndex, worldYIndex, worldZIndex)
+                    chunkPosition = self.convertWorldIndexToPosition(chunkIndex)
+                    
+                    chunk = Chunk(self.worldArray, self.heightMap, chunkIndex, chunkPosition)
                     self.chunks[chunkIndex] = chunk
                     chunk.upload()
                 
