@@ -2,6 +2,9 @@ const int CONSTCOLOR = 0;
 const int GRASS = 1;
 const int DIRT = 2;
 const int STONE = 3;
+const int SAND = 4;
+const int SNOW = 5;
+const int CLAY = 6;
 
 // Apply a texture color to return the color of the pixel
 vec3 applyTexture(vec3 objectColor, int objectTextureID, vec3 uv){
@@ -13,5 +16,11 @@ vec3 applyTexture(vec3 objectColor, int objectTextureID, vec3 uv){
         return texture(dirtTexture, uv).rgb;
     } else if (objectTextureID == STONE){
         return texture(stoneTexture, uv).rgb;
+    } else if (objectTextureID == SAND){
+        return texture(sandTexture, uv).rgb;
+    } else if (objectTextureID == SNOW){
+        return texture(snowTexture, uv).rgb;
+    } else if (objectTextureID == CLAY){
+        return texture(clayTexture, uv).rgb;
     }
 }

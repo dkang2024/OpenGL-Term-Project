@@ -1,6 +1,7 @@
 from Settings import *
 from Chunk import *
 from Materials import *
+from Noise import * 
 from World_Utils.Textures import Texture
 
 class World:
@@ -28,8 +29,9 @@ class World:
         self.materialList.append(LambertianMaterial(Texture('Grass')))
         self.materialList.append(LambertianMaterial(Texture('Dirt')))
         self.materialList.append(LambertianMaterial(Texture('Stone')))
-        self.materialList.append(DielectricMaterial(Texture(glm.vec3(0.3, 0.8, 0.3)), 1 / 1.5))
-        self.materialList.append(ReflectiveMaterial(Texture(glm.vec3(0.5, 0.7, 0.5)), 0.1))
+        self.materialList.append(LambertianMaterial(Texture('Sand')))
+        self.materialList.append(ReflectiveMaterial(Texture('Snow'), 0.2))
+        self.materialList.append(LambertianMaterial(Texture('Clay')))
 
     @staticmethod
     @njit(cache = True)

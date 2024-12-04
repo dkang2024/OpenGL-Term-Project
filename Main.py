@@ -100,6 +100,9 @@ class Window(mglw.WindowConfig):
         self.loadTexture('Grass')
         self.loadSameTexture('Dirt')
         self.loadSameTexture('Stone')
+        self.loadSameTexture('Sand')
+        self.loadSameTexture('Snow')
+        self.loadSameTexture('Clay')
            
     def initScreen(self):
         '''

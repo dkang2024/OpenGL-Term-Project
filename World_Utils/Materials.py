@@ -23,18 +23,6 @@ class ReflectiveMaterial:
         renderArray[i]['materialID'] = 1
         renderArray[i]['materialParameter'] = self.fuzz
 
-class DielectricMaterial:
-    '''
-    Class for storing all the attributes with a dielectric material and uploading the attributes to the render array
-    '''
-    def __init__(self, texture, refractionIndex):
-        self.texture, self.refractionIndex = texture, refractionIndex
-    
-    def record(self, renderArray, i):
-        self.texture.record(renderArray, i)
-        renderArray[i]['materialID'] = 2 
-        renderArray[i]['materialParameter'] = self.refractionIndex
-
 class PointLight:
     '''
     Class for storing all the attributes with a point light and uploading the attributes to the render array
@@ -45,4 +33,4 @@ class PointLight:
     def record(self, renderArray, i):
         renderArray[i]['color'] = self.lightColor
         renderArray[i]['textureID'] = 0
-        renderArray[i]['materialID'] = 3
+        renderArray[i]['materialID'] = 2

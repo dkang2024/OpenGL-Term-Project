@@ -23,6 +23,12 @@ class Texture:
             return DIRT
         elif texture == 'Stone':
             return STONE 
+        elif texture == 'Sand':
+            return SAND
+        elif texture == 'Snow':
+            return SNOW
+        elif texture == 'Clay':
+            return CLAY 
         raise RuntimeError('This texture does not exist!')
         
     def record(self, renderArray, i):

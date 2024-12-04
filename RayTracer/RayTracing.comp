@@ -6,6 +6,9 @@ layout(binding = 1) uniform sampler2D screen2Texture;
 layout(binding = 2) uniform samplerCube grassTexture;
 layout(binding = 3) uniform samplerCube dirtTexture;
 layout(binding = 4) uniform samplerCube stoneTexture;
+layout(binding = 5) uniform samplerCube sandTexture;
+layout(binding = 6) uniform samplerCube snowTexture;
+layout(binding = 7) uniform samplerCube clayTexture;
 
 // Set up invocation size and take in the screen texture to modify it per pixel. Note that the size volume is 32 (which is optimized for NVIDIA gpus rather than AMD gpus [which prefer a size of multiples of 64])
 layout(local_size_x = 8, local_size_y = 4, local_size_z = 1) in;
@@ -90,22 +93,7 @@ bool rayMarch(Ray ray, inout HitRecord record, inout uvec4 state){
         }
 
         setRecordValues(record, rayDirSign, mask, mapPos, ray, material, state);
-
-        if (material.materialID != DIELECTRIC){// If we can't refract, don't continue raymarching
-            return true; 
-        }
-
-        Material prevMaterial = material; record.frontFace = !record.frontFace; // IF we can refract, raymarch unitl we get out of the dielectric
-        
-        for (int j = 0; j < maxRaySteps; j++){ // Raymarch until we get out of the dielectric
-            ddaStep(mask, sideDist, mapPos, deltaDist, rayStep);
-            
-            bool voxelExists = extractVoxel(mapPos, material);
-            if (!(voxelExists && material.materialID == DIELECTRIC && material.materialParameter == prevMaterial.materialParameter)){
-                setCommonRecordValues(record, rayDirSign, mask, mapPos, ray, prevMaterial, state);
-                return true;
-            }
-        }
+        return true; 
     }
     return false;
 }

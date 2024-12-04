@@ -28,10 +28,10 @@ def generateHeightMap():
     worldSize = CHUNK_SIZE * WORLD_SIZE_XZ
     xCoords = zCoords = convertToNormalized(np.arange(worldSize), worldSize)
 
-    NUM_OCTAVES, FUDGE_FACTOR, REDISTRIBUTION = 15, 1.2, 2.2
+    NUM_OCTAVES, FUDGE_FACTOR, REDISTRIBUTION = 15, 1.2, 2.1
 
     elevation = np.zeros((worldSize, worldSize))
-    amplitude, frequency, sumAmplitude = 1, 3, 0
+    amplitude, frequency, sumAmplitude = 1, 2, 0
     for _ in range(NUM_OCTAVES):
         elevation += amplitude * shift(generator.noise2array(xCoords * frequency, zCoords * frequency))
         sumAmplitude += amplitude 
