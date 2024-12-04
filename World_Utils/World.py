@@ -30,7 +30,7 @@ class World:
         self.materialList.append(LambertianMaterial(Texture('Dirt')))
         self.materialList.append(LambertianMaterial(Texture('Stone')))
         self.materialList.append(LambertianMaterial(Texture('Sand')))
-        self.materialList.append(ReflectiveMaterial(Texture('Snow'), 0.2))
+        self.materialList.append(ReflectiveMaterial(Texture('Snow'), 0.5))
         self.materialList.append(LambertianMaterial(Texture('Clay')))
 
     @staticmethod
