@@ -32,6 +32,7 @@ class World:
         self.materialList.append(LambertianMaterial(Texture('Sand')))
         self.materialList.append(ReflectiveMaterial(Texture('Snow'), 0.5))
         self.materialList.append(LambertianMaterial(Texture('Clay')))
+        self.materialList.append(DielectricMaterial(Texture(glm.vec3(1)), 1.52))
 
     @staticmethod
     @njit(cache = True)

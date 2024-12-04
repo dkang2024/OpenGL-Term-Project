@@ -45,7 +45,7 @@ def decideVoxel(elevation, rand):
         if normalizeToElevation(elevation, rand) > 0.45:
             return SNOW 
         return DIRT 
-    return SNOW 
+    return SNOW
 
 class Chunk:
     '''

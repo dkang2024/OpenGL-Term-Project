@@ -1,7 +1,8 @@
 // Dealing with seperate structures for materials
 const int LAMBERTIAN = 0;
 const int REFLECTIVE = 1;
-const int LIGHT = 2;
+const int DIELECTRIC = 2;
+const int LIGHT = 3;
 
 const float RAY_ERROR_BOUND = 0.00001;
 
@@ -85,6 +86,8 @@ void scatter(int materialID, float materialParameter, Ray ray, inout HitRecord r
         lambertianScatter(record, state);
     } else if (materialID == REFLECTIVE){
         reflectiveScatter(materialParameter, ray, record, state);
+    } else if (materialID == DIELECTRIC){
+        dielectricScatter(materialParameter, ray, record, state);
     } else if (materialID == LIGHT){
         if (!record.frontFace){
             record.objectColor = vec3(0);
@@ -92,4 +95,3 @@ void scatter(int materialID, float materialParameter, Ray ray, inout HitRecord r
         record.isLight = true;
     }
 }
-
