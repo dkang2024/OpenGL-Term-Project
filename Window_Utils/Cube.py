@@ -37,5 +37,5 @@ class Cube:
         Render the cube on the screen 
         '''
         self.assignCameraProj()
-        self.program['textureID'] = self.world.voxelPlaceID
+        self.program['voxelID'] = self.world.voxelPlaceID
         self.vao.render(self.program)
