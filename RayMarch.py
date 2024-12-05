@@ -2,6 +2,9 @@ import glm
 import math 
 
 class Ray:
+    '''
+    Ray used for raymarching
+    '''
     def __init__(self, origin, direction):
         self.origin = origin 
         self.direction = direction 

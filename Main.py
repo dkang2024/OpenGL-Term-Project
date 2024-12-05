@@ -21,20 +21,19 @@ class Window(mglw.WindowConfig):
 
         self.loadTextures()
         self.rayTracer = self.ctx.compute_shader(loadComputeShader(self.ctx, 'RayTracer', 'RayTracing'))
-        self.initRenderer(10, 1, 0.01, 25, 10, 256, 1)
+        self.initRenderer(10, 1, 0.01, 25, 10, 512, 1)
 
         self.ctx.gc_mode = 'auto'
         self.program = self.ctx.program(*loadVertexAndFrag('Window', 'Window', 'Window'))
         self.initScreen()
         self.initRand()
 
-        # self.camera = Camera(self, glm.vec3(278, 278, -200), 100, 60, 0.2)
         worldSize = WORLD_SIZE_XZ * CHUNK_SIZE
         self.camera = Camera(self, glm.vec3(worldSize // 2, WORLD_CENTER_Y * 2, worldSize // 2), 20, 60, 0.2)
         self.screenCoords = mglw.geometry.quad_fs(attr_names = screenNames, normals = False, name = 'Screen Coordinates')
-        self.crosshair = Crosshair(self, 0.03, glm.vec3(1.0, 1.0, 1.0), self.window_size) #type: ignore
-        self.world = World(self.ctx, self.rayTracer)
-    
+        self.crosshair = Crosshair(self, 0.03, glm.vec3(1), self.window_size) #type: ignore
+        self.world = World(self.ctx, self.rayTracer, self.camera)
+
         self.world.assignRender()
 
     def initRenderer(self, maxBounces, samplesPerPixel, temporalReuseFactor, temporalBlendReduction, badLightSamples, maxRaySteps, neighborhoodSize):
@@ -77,7 +76,6 @@ class Window(mglw.WindowConfig):
         '''
         load a specific texture into the ray tracer that has the same elements on all sides
         '''
-        
         try:
             image = Image.open(f'Textures/{name}.jpg')
         except:
@@ -169,6 +167,13 @@ class Window(mglw.WindowConfig):
         
     def on_mouse_position_event(self, mouseX, mouseY, dx, dy):
         self.camera.updateMouse(dx, -dy) 
+
+    def on_mouse_press_event(self, mouseX, mouseY, button):
+        if button == LEFT_MOUSE_BUTTON:
+            mapPos, _ = self.world.rayMarch(self.camera.getCameraCenterRay(), PLACE_MINE_DISTANCE)
+            self.world.removeVoxel(mapPos)
+        elif button == RIGHT_MOUSE_BUTTON:
+            mapPos, normal = self.world.rayMarch(self.camera.getCameraCenterRay(), PLACE_MINE_DISTANCE)
 
     def on_resize(self, screenWidth, screenHeight):
         '''

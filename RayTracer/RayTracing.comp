@@ -61,7 +61,7 @@ bool extractVoxel(ivec3 mapPos, inout Material material){
         return false;
     }
 
-    uint voxelData = imageLoad(world, mapPos).x;
+    uint voxelData = imageLoad(world, convertToImagePos(mapPos)).x;
     if (voxelData == emptyVoxel){
         return false;
     }

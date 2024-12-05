@@ -1,4 +1,5 @@
 from Settings import *
+from World_Utils.Ray import Ray #Just for Pylance : ) 
 
 @ti.data_oriented
 class Camera:
@@ -191,5 +192,23 @@ class Camera:
         '''
         Assign each of the render values for the previous camera in the prevCamera struct for the ray tracing compute shader with TAA
         '''
-        self.app.rayTracer['prevViewProj'].write(self.calculateProjMat() * self.calculateViewMat())
+        self.rayTracer['prevViewProj'].write(self.calculateProjMat() * self.calculateViewMat())
         self.prevYaw, self.prevPitch = self.yaw, self.pitch 
+
+    @staticmethod 
+    def clampVector(vector):
+        '''
+        Clamp a vector to never have components that are equal to 0
+        '''
+        EPSILON = 1e-5
+        for component in range(3):
+            if glm.abs(vector[component]) < EPSILON:
+                vector[component] = EPSILON 
+
+        return vector 
+
+    def getCameraCenterRay(self):
+        '''
+        Return a ray that points out from the camera's center straight in the direction it's facing
+        '''
+        return Ray(self.cameraPosition, -self.k)

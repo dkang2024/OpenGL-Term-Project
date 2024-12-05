@@ -1,9 +1,14 @@
 const int emptyVoxel = 0;
 
+// Convert a map position to an OpenGL 3D image position (note that the x and z coordinates are swapped [I found this out in a nasty way after I was pulling my hair out])
+ivec3 convertToImagePos(ivec3 pos){
+    return ivec3(pos.z, pos.y, pos.x);
+}
+
 // Check whether a map position is within the world
 bool inWorld(ivec3 mapPos){
     ivec3 worldSize = imageSize(world);
-    return all(greaterThanEqual(mapPos, ivec3(0))) && all(lessThan(mapPos, worldSize));
+    return all(greaterThanEqual(mapPos, ivec3(0))) && all(lessThan(convertToImagePos(mapPos), worldSize));
 }
 
 // Get the direction vector for cube texture map sampling 
