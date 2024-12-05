@@ -31,8 +31,8 @@ void applyTAA(ivec2 pixelCoord, vec4 pixel, TemporalRecord tempRecord){
     }
 
     ivec2 windowSize = imageSize(screen1); vec4 prevPixel; 
-    ivec2 prevPixelCoord = temporalReprojection(tempRecord.pointHit, windowSize);
-
+    ivec2 prevPixelCoord = temporalReprojection(tempRecord.pointHit, windowSize); // Get the prev pixel coord by doing a temporal reprojection 
+    
     if (!inWindow(prevPixelCoord, windowSize) || !tempRecord.didHit){ // If the previous pixel is not in the window or we didn't hit anything with first bounce, don't do a temporal reuse
         if (frameCount % 2 == 0){
             imageStore(screen1, pixelCoord, pixel);
@@ -43,7 +43,7 @@ void applyTAA(ivec2 pixelCoord, vec4 pixel, TemporalRecord tempRecord){
     }
 
     float blendFactor;
-    if (cameraMoving){ // If camera is moving, apply the temporal blend reduction to try and avoid occlusion
+    if (cameraMoving || updatedVoxel){ // If camera is moving or we just placed a voxel, apply the temporal blend reduction to try and avoid occlusion
         blendFactor = temporalReuseFactor * temporalBlendReduction;
     } else {
         blendFactor = temporalReuseFactor;

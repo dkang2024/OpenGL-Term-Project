@@ -29,8 +29,8 @@ class Window(mglw.WindowConfig):
         self.initRand()
 
         worldSize = WORLD_SIZE_XZ * CHUNK_SIZE
-        self.camera = Camera(self, glm.vec3(0, 0, -1), 20, 60, 0.2)
-        #self.camera = Camera(self, glm.vec3(worldSize // 2, WORLD_CENTER_Y * 2, worldSize // 2), 20, 60, 0.2)
+        #self.camera = Camera(self, glm.vec3(0, 0, -1), 20, 60, 0.2)
+        self.camera = Camera(self, glm.vec3(worldSize // 2, WORLD_CENTER_Y * 2, worldSize // 2), 20, 60, 0.2)
         self.screenCoords = mglw.geometry.quad_fs(attr_names = screenNames, normals = False, name = 'Screen Coordinates')
         self.crosshair = Crosshair(self, 0.03, glm.vec3(1), self.window_size) #type: ignore
         self.world = World(self.ctx, self.rayTracer, self.camera)
@@ -176,6 +176,8 @@ class Window(mglw.WindowConfig):
         elif button == RIGHT_MOUSE_BUTTON:
             mapPos, normal = self.world.rayMarch(self.camera.getCameraCenterRay(), PLACE_MINE_DISTANCE)
             self.world.placeVoxel(mapPos, normal)
+        else:
+            self.world.placedVoxel = False 
 
     def on_resize(self, screenWidth, screenHeight):
         '''
@@ -195,6 +197,12 @@ class Window(mglw.WindowConfig):
         self.rayTracer['frameCount'] = self.frameCount
         self.program['frameCount'] = self.frameCount
 
+    def resetRayTracer(self):
+        '''
+        Reset the ray tracer's uniform values to defaults
+        '''
+        self.rayTracer['updatedVoxel'] = False 
+
     def on_render(self, t, frameTime):
         '''
         Render the screen and display the fps
@@ -212,6 +220,7 @@ class Window(mglw.WindowConfig):
         
         self.updateFrameCount()
         self.camera.assignPrevRenderValues()
+        self.resetRayTracer()
         if frameTime != 0:
             self.wnd.title = f'FPS: {1 / frameTime: .2f}'
 

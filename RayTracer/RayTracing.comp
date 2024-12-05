@@ -25,6 +25,7 @@ uniform mat4 prevViewProj;
 uniform float temporalBlendReduction;
 uniform int neighborhoodSize;
 uniform bool cameraMoving;
+uniform bool updatedVoxel;
 
 // Import files here using the "include" statement that Python processes with string processing and txt file processing
 #include "Random"

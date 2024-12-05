@@ -12,7 +12,7 @@ class World:
     def __init__(self, ctx, rayTracer, camera):
         self.ctx, self.rayTracer, self.camera = ctx, rayTracer, camera
 
-        self.voxelPlaceID = GRASS 
+        self.voxelPlaceID = GRASS
 
         self.worldSize = (WORLD_SIZE_XZ * CHUNK_SIZE, WORLD_SIZE_Y * CHUNK_SIZE, WORLD_SIZE_XZ * CHUNK_SIZE)
         self.worldArray = np.zeros(self.worldSize, 'u1')
@@ -94,6 +94,7 @@ class World:
         '''
         self.worldArray[mapPos.x, mapPos.y, mapPos.z] = voxelID
         self.world.write(self.worldArray)
+        self.rayTracer['updatedVoxel'] = True 
     
     def removeVoxel(self, mapPos):
         '''
