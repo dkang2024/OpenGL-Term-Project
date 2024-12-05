@@ -13,6 +13,7 @@ class World:
         self.ctx, self.rayTracer, self.camera = ctx, rayTracer, camera
 
         self.voxelPlaceID = GRASS
+        self.voxels = np.arange(1, 10) # Numpy array of voxels that can be selected using teh arrow keys
 
         self.worldSize = (WORLD_SIZE_XZ * CHUNK_SIZE, WORLD_SIZE_Y * CHUNK_SIZE, WORLD_SIZE_XZ * CHUNK_SIZE)
         self.worldArray = np.zeros(self.worldSize, 'u1')
@@ -23,6 +24,12 @@ class World:
         self.initMaterials()
 
         self.lights = []
+
+    def setVoxel(self, keyIndex):
+        '''
+        Set the current voxel place id based on the key number pressed
+        '''
+        self.voxelPlaceID = self.voxels[keyIndex]
 
     @staticmethod
     def initRayMarchVars(ray):

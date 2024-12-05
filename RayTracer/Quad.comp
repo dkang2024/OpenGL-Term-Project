@@ -67,7 +67,7 @@ bool hitQuad(Quad quad, Ray ray, inout HitRecord record, inout uvec4 state){
     isFrontFace(ray, record);
     scatter(quad.materialID, quad.materialParameter, ray, record, state);
 
-    record.objectColor = applyTexture(quad.color, quad.textureID, vec3(alpha, beta, 0));
+    //record.objectColor = applyTexture(quad.color, quad.textureID, vec3(alpha, beta, 0));
 
     return true;
 }

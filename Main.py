@@ -21,7 +21,7 @@ class Window(mglw.WindowConfig):
 
         self.loadTextures()
         self.rayTracer = self.ctx.compute_shader(loadComputeShader(self.ctx, 'RayTracer', 'RayTracing'))
-        self.initRenderer(10, 1, 0.01, 25, 10, 512, 1)
+        self.initRenderer(10, 1, 0.01, 25, 10, 215, 1)
 
         self.ctx.gc_mode = 'auto'
         self.ctx.enable(mgl.CULL_FACE)
@@ -37,6 +37,7 @@ class Window(mglw.WindowConfig):
 
         self.crosshair = Crosshair(self, 0.03, glm.vec3(1), self.window_size) #type: ignore
         self.cube = Cube(self, glm.vec3(1.2, -0.7, -1.5), 0.5) #type: ignore
+        self.numberKeys = list(range(self.wnd.keys.NUMBER_1, self.wnd.keys.NUMBER_9 + 1))
         self.showUI = True 
 
         self.world.assignRender()
@@ -75,9 +76,8 @@ class Window(mglw.WindowConfig):
             texture.write(i, data)
         
         texture.build_mipmaps()
-        texture.use(self.textureBind)
-        self.textureBind += 1
-
+        self.textureHandles = np.append(self.textureHandles, texture.get_handle())   
+    
     def loadSameTexture(self, name):
         '''
         load a specific texture into the ray tracer that has the same elements on all sides
@@ -94,20 +94,28 @@ class Window(mglw.WindowConfig):
             texture.write(i, faceData)
         
         texture.build_mipmaps()
-        texture.use(self.textureBind)
-        self.textureBind += 1
+        self.textureHandles = np.append(self.textureHandles, texture.get_handle())
+
+    def uploadTextureHandles(self):
+        '''
+        Upload the texture handles to the GPU 
+        '''
+        self.textureHandles = self.ctx.buffer(self.textureHandles)
+        self.textureHandles.bind_to_storage_buffer(2)
 
     def loadTextures(self):
         '''
         Register the texture directory to moderngl window and load all the textures
         '''
-        self.textureBind = 2
+        self.textureHandles = np.array([], dtype = 'u4')
+
         self.loadTexture('Grass')
         self.loadSameTexture('Dirt')
         self.loadSameTexture('Stone')
         self.loadSameTexture('Sand')
         self.loadSameTexture('Snow')
         self.loadSameTexture('Clay')
+        self.uploadTextureHandles()
            
     def initScreen(self):
         '''
@@ -159,6 +167,16 @@ class Window(mglw.WindowConfig):
         else:
             self.camera.dirY = 0
 
+    def blockSelectionKeys(self, key):
+        '''
+        Select the block to be placed based on the key press
+        '''
+        if key not in self.numberKeys:
+            return 
+        
+        keyIndex = self.numberKeys.index(key)
+        self.world.setVoxel(keyIndex)
+
     def on_key_event(self, key, action, modifiers):
         '''
         Set the camera to be moving down if you're pressing / holding shift
@@ -170,6 +188,8 @@ class Window(mglw.WindowConfig):
 
         if action != self.wnd.keys.ACTION_PRESS:
             return 
+        
+        self.blockSelectionKeys(key)
         
         if key == self.wnd.keys.F1:
             self.wnd.mouse_exclusivity = not self.wnd.mouse_exclusivity

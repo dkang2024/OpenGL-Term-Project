@@ -47,3 +47,63 @@ void setRecordValues(inout HitRecord record, vec3 rayDirSign, vec3 mask, ivec3 m
     voxelFrontFace(record, ray, mapPos);
     record.objectColor = applyTexture(material.color, material.textureID, cubeDirection(record.pointHit, mapPos));   
 }
+
+// Extract important information from the voxel world space given the map position 
+bool extractVoxel(ivec3 mapPos, inout Material material){
+    if (!inWorld(mapPos)){
+        return false;
+    }
+
+    uint voxelData = imageLoad(world, convertToImagePos(mapPos)).x;
+    if (voxelData == emptyVoxel){
+        return false;
+    }
+
+    uint materialIndex = voxelData - 1;
+    if (materialIndex >= 0 && materialIndex < materials.length()){ // Check whether this materialIndex actually exists
+        material = materials[materialIndex];
+    } 
+
+    return true; 
+}
+
+// Branchless DDA with help from https://www.shadertoy.com/view/4dX3zl and https://www.shadertoy.com/view/mtyfRV (I know how branched DDA works, but this is more efficient)
+bool rayMarch(Ray ray, inout HitRecord record, inout uvec4 state){
+    clampRay(ray);
+    
+    vec3 invRayDir = 1 / ray.direction;
+    vec3 rayDirSign = sign(ray.direction);
+    vec3 deltaDist = abs(vec3(length(ray.direction)) * invRayDir);
+    ivec3 rayStep = ivec3(rayDirSign);
+    
+    ivec3 mapPos = ivec3(floor(ray.origin));       
+    vec3 sideDist = (rayDirSign * (vec3(mapPos) - ray.origin) + (rayDirSign * 0.5 + 0.5)) * deltaDist;
+    
+    vec3 mask; Material material = initDefaultMaterial(); Material prevMaterial = initDefaultMaterial(); 
+
+    for (int i = 0; i < maxRaySteps; i++){
+        if (!extractVoxel(mapPos, material)){ // If the voxel isn't filled, continue raymarching
+            ddaStep(mask, sideDist, mapPos, deltaDist, rayStep);
+            continue;
+        }
+        
+        setRecordValues(record, rayDirSign, mask, mapPos, ray, material, state);
+        if (material.materialID != DIELECTRIC){// If we can't refract, don't continue raymarching
+            return true; 
+        }
+
+        Material prevMaterial = material; record.frontFace = !record.frontFace; // If we can refract, raymarch unitl we get out of the dielectric
+        
+        for (int j = 0; j < maxRaySteps; j++){ // Raymarch until we get out of the dielectric
+            ddaStep(mask, sideDist, mapPos, deltaDist, rayStep);
+            
+            bool voxelExists = extractVoxel(mapPos, material);
+            
+            if (!(voxelExists && material.materialID == DIELECTRIC && material.materialParameter == prevMaterial.materialParameter)){
+                setCommonRecordValues(record, rayDirSign, mask, mapPos, ray, prevMaterial, state);
+                return true;
+            } 
+        } 
+    } 
+    return false;
+}

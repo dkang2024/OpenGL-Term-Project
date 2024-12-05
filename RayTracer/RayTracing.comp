@@ -1,12 +1,7 @@
 // Initialize the version
 #version 460 core
-
-layout(binding = 2) uniform samplerCube grassTexture;
-layout(binding = 3) uniform samplerCube dirtTexture;
-layout(binding = 4) uniform samplerCube stoneTexture;
-layout(binding = 5) uniform samplerCube sandTexture;
-layout(binding = 6) uniform samplerCube snowTexture;
-layout(binding = 7) uniform samplerCube clayTexture;
+#extension GL_ARB_bindless_texture : enable
+#extension GL_ARB_gpu_shader_int64 : enable
 
 // Set up invocation size and take in the screen texture to modify it per pixel. Note that the size volume is 32 (which is optimized for NVIDIA gpus rather than AMD gpus [which prefer a size of multiples of 64])
 layout(local_size_x = 8, local_size_y = 4, local_size_z = 1) in;
@@ -16,6 +11,7 @@ layout(rgba32f, binding = 1) uniform image2D screen2;
 layout(r8ui, binding = 2) uniform uimage3D world;
 layout(rgba32ui, binding = 3) uniform uimage2D seeds;
 
+// Files below are reliant on having these declared first
 uniform int frameCount;
 uniform float temporalReuseFactor;
 uniform int maxRaySteps;
@@ -24,6 +20,11 @@ uniform float temporalBlendReduction;
 uniform int neighborhoodSize;
 uniform bool cameraMoving;
 uniform bool updatedVoxel;
+uniform int numLights;
+uniform int maxBounces;
+uniform int rootSPP;
+uniform float invRootSPP;
+uniform int badLightSamples;
 
 // Import files here using the "include" statement that Python processes with string processing and txt file processing
 #include "Random"
@@ -31,21 +32,12 @@ uniform bool updatedVoxel;
 #include "Ray"
 #include "Interval"
 #include "HitRecord"
-#include "Materials"
 #include "Camera"
-#include "Textures"
 #include "TAA" 
 #include "Light"
 #include "Reservoir"
-#include "World"
+#include "Materials" 
 #include "Quad"
-
-uniform int numLights;
-uniform int maxBounces;
-uniform int rootSPP;
-uniform float invRootSPP;
-uniform int badLightSamples;
-uniform ViewerCamera camera;
 
 layout(std430, binding = 0) buffer MatBuffer {
     Material materials[];
@@ -53,67 +45,14 @@ layout(std430, binding = 0) buffer MatBuffer {
 layout(std430, binding = 1) buffer LightBuffer{
     Quad lights[];
 };
+layout(std430, binding = 2) buffer TextureBuffer {
+    uint64_t textures[];
+};
 
-// Extract important information from the voxel world space given the map position 
-bool extractVoxel(ivec3 mapPos, inout Material material){
-    if (!inWorld(mapPos)){
-        return false;
-    }
-
-    uint voxelData = imageLoad(world, convertToImagePos(mapPos)).x;
-    if (voxelData == emptyVoxel){
-        return false;
-    }
-
-    uint materialIndex = voxelData - 1;
-    if (materialIndex >= 0 && materialIndex < materials.length()){ // Check whether this materialIndex actually exists
-        material = materials[materialIndex];
-    } 
-
-    return true; 
-    
-}
-
-// Branchless DDA with help from https://www.shadertoy.com/view/4dX3zl and https://www.shadertoy.com/view/mtyfRV (I know how branched DDA works, but this is more efficient)
-bool rayMarch(Ray ray, inout HitRecord record, inout uvec4 state){
-    clampRay(ray);
-    
-    vec3 invRayDir = 1 / ray.direction;
-    vec3 rayDirSign = sign(ray.direction);
-    vec3 deltaDist = abs(vec3(length(ray.direction)) * invRayDir);
-    ivec3 rayStep = ivec3(rayDirSign);
-    
-    ivec3 mapPos = ivec3(floor(ray.origin));       
-    vec3 sideDist = (rayDirSign * (vec3(mapPos) - ray.origin) + (rayDirSign * 0.5 + 0.5)) * deltaDist;
-    
-    vec3 mask; Material material = initDefaultMaterial(); Material prevMaterial = initDefaultMaterial(); 
-
-    for (int i = 0; i < maxRaySteps; i++){
-        if (!extractVoxel(mapPos, material)){ // If the voxel isn't filled, continue raymarching
-            ddaStep(mask, sideDist, mapPos, deltaDist, rayStep);
-            continue;
-        }
-        
-        setRecordValues(record, rayDirSign, mask, mapPos, ray, material, state);
-        if (material.materialID != DIELECTRIC){// If we can't refract, don't continue raymarching
-            return true; 
-        }
-
-        Material prevMaterial = material; record.frontFace = !record.frontFace; // If we can refract, raymarch unitl we get out of the dielectric
-        
-        for (int j = 0; j < maxRaySteps; j++){ // Raymarch until we get out of the dielectric
-            ddaStep(mask, sideDist, mapPos, deltaDist, rayStep);
-            
-            bool voxelExists = extractVoxel(mapPos, material);
-            
-            if (!(voxelExists && material.materialID == DIELECTRIC && material.materialParameter == prevMaterial.materialParameter)){
-                setCommonRecordValues(record, rayDirSign, mask, mapPos, ray, prevMaterial, state);
-                return true;
-            } 
-        } 
-    } 
-    return false;
-}
+// Reliant on above importations
+#include "Textures"
+#include "World"
+uniform ViewerCamera camera;
 
 // Create a gradient from the top of the screen to the bottom of the screen based on the ray's y direction 
 vec3 gradientColor(vec3 rayDirection){

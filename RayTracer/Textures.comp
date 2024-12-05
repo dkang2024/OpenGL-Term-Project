@@ -10,17 +10,10 @@ const int CLAY = 6;
 vec3 applyTexture(vec3 objectColor, int objectTextureID, vec3 uv){
     if (objectTextureID == CONSTCOLOR){
         return objectColor;
-    } else if (objectTextureID == GRASS){
-        return texture(grassTexture, uv).rgb;
-    } else if (objectTextureID == DIRT){
-        return texture(dirtTexture, uv).rgb;
-    } else if (objectTextureID == STONE){
-        return texture(stoneTexture, uv).rgb;
-    } else if (objectTextureID == SAND){
-        return texture(sandTexture, uv).rgb;
-    } else if (objectTextureID == SNOW){
-        return texture(snowTexture, uv).rgb;
-    } else if (objectTextureID == CLAY){
-        return texture(clayTexture, uv).rgb;
-    }
+    } 
+
+    int textureIndex = objectTextureID - 1;
+    uvec2 textureHandle = unpackUint2x32(textures[textureIndex]);
+
+    return texture(samplerCube(textureHandle), uv).rgb;
 }
