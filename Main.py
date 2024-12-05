@@ -1,6 +1,5 @@
 from Settings import *
 from Window_Utils import *
-from Window_Utils.Cube import Cube
 from World_Utils import *
 from World_Utils.Textures import Texture #Just because Pylance doesn't like working
 
@@ -34,9 +33,11 @@ class Window(mglw.WindowConfig):
         #self.camera = Camera(self, glm.vec3(0, 0, -1), 20, 60, 0.2)
         self.camera = Camera(self, glm.vec3(worldSize // 2, WORLD_CENTER_Y * 2, worldSize // 2), 20, 60, 0.2)
         self.screenCoords = mglw.geometry.quad_fs(attr_names = screenNames, normals = False, name = 'Screen Coordinates')
-        self.crosshair = Crosshair(self, 0.03, glm.vec3(1), self.window_size) #type: ignore
         self.world = World(self.ctx, self.rayTracer, self.camera)
-        self.cube = Cube(self, glm.vec3(1.2, -0.7, -1.5), 0.5)
+
+        self.crosshair = Crosshair(self, 0.03, glm.vec3(1), self.window_size) #type: ignore
+        self.cube = Cube(self, glm.vec3(1.2, -0.7, -1.5), 0.5) #type: ignore
+        self.showUI = True 
 
         self.world.assignRender()
 
@@ -167,9 +168,14 @@ class Window(mglw.WindowConfig):
         else:
             self.camera.movingDown = 1
 
-        if self.wnd.is_key_pressed(self.wnd.keys.F1):
+        if action != self.wnd.keys.ACTION_PRESS:
+            return 
+        
+        if key == self.wnd.keys.F1:
             self.wnd.mouse_exclusivity = not self.wnd.mouse_exclusivity
-            self.wnd.cursor = not self.wnd.cursor
+            self.wnd.cursor = not self.wnd.cursor 
+        elif key == self.wnd.keys.F2:
+            self.showUI = not self.showUI
         
     def on_mouse_position_event(self, mouseX, mouseY, dx, dy):
         self.camera.updateMouse(dx, -dy) 
@@ -219,8 +225,10 @@ class Window(mglw.WindowConfig):
         self.ctx.memory_barrier(mgl.SHADER_IMAGE_ACCESS_BARRIER_BIT)
 
         self.screenCoords.render(self.program)
-        self.crosshair.render()
-        self.cube.render()
+        
+        if self.showUI:
+            self.crosshair.render()
+            self.cube.render()
         
         self.updateFrameCount()
         self.camera.assignPrevRenderValues()
