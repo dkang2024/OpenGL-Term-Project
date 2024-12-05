@@ -43,6 +43,6 @@ vec4 applyTexture(int textureID, vec3 color, vec3 uv){
 }
 
 void main(){
-    Material currMaterial = materials[voxelID];
+    Material currMaterial = materials[voxelID - 1];
     fragColor = applyTexture(currMaterial.textureID, currMaterial.color, textureCoords);
 }

@@ -1,0 +1,14 @@
+const float TIME_ERROR_BOUND = 0.001;
+
+// Determine the ray exit point for a dielectric using the slab intersection method. Modified from https://jcgt.org/published/0007/03/04/.
+vec3 intersectDielectric(ivec3 mapPos, Ray ray){
+    vec3 boxMin = vec3(mapPos);
+    vec3 boxMax = boxMin + vec3(1);
+    vec3 invRayDir = 1 / ray.direction;
+
+    vec3 t0 = (boxMin - ray.origin) * invRayDir;
+    vec3 t1 = (boxMax - ray.origin) * invRayDir;
+    float tMax = minVector(max(t0, t1));
+
+    return rayIntersectPoint(ray, tMax + TIME_ERROR_BOUND);
+}

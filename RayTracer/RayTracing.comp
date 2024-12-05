@@ -37,6 +37,7 @@ uniform int badLightSamples;
 #include "Light"
 #include "Reservoir"
 #include "Materials" 
+#include "AABB"
 #include "Quad"
 
 layout(std430, binding = 0) buffer MatBuffer {
@@ -83,7 +84,6 @@ Ray constructCameraRay(ivec2 pixelCoord, int i, int j, inout uvec4 state){
     vec3 rayDir = camera.initPixelPos + (pixelCoord.x + sampledVector.x) * camera.pixelDX + (pixelCoord.y + sampledVector.y) * camera.pixelDY - camera.position;
     return Ray(camera.position, rayDir);
 }
-
 
 // Check if a light is visible 
 bool lightVisible(vec3 objectNormal, Ray ray, float lightTime, int lightIndex){

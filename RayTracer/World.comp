@@ -1,4 +1,5 @@
 const int emptyVoxel = 0;
+const vec3 voxelRadius = vec3(0.5);
 
 // Convert a map position to an OpenGL 3D image position (note that the x and z coordinates are swapped [I found this out in a nasty way after I was pulling my hair out])
 ivec3 convertToImagePos(ivec3 pos){
@@ -13,15 +14,13 @@ bool inWorld(ivec3 mapPos){
 
 // Get the direction vector for cube texture map sampling 
 vec3 cubeDirection(vec3 hitPoint, ivec3 mapPos){
-    vec3 centerCube = vec3(mapPos) + vec3(0.5);
+    vec3 centerCube = vec3(mapPos) + voxelRadius;
     return hitPoint - centerCube;
 }
 
 // Determine whether we're inside the voxel for the ray tracing 
-void voxelFrontFace(inout HitRecord record, Ray ray, ivec3 mapPos) {
-    // Calculate the voxel center
-    vec3 voxelCenter = vec3(mapPos) + vec3(0.5);
-    record.frontFace = distance(ray.origin, voxelCenter) > 0.5;
+void voxelFrontFace(inout HitRecord record, Ray ray, ivec3 mapPos){
+    record.frontFace = distance(ray.origin, vec3(mapPos) + voxelRadius) > 0.5;
 }
 
 // DDA Step forward
@@ -43,8 +42,8 @@ void setCommonRecordValues(inout HitRecord record, vec3 rayDirSign, vec3 mask, i
 
 // Set record values in ray marching
 void setRecordValues(inout HitRecord record, vec3 rayDirSign, vec3 mask, ivec3 mapPos, Ray ray, Material material, inout uvec4 state){
-    setCommonRecordValues(record, rayDirSign, mask, mapPos, ray, material, state);
     voxelFrontFace(record, ray, mapPos);
+    setCommonRecordValues(record, rayDirSign, mask, mapPos, ray, material, state);    
     record.objectColor = applyTexture(material.color, material.textureID, cubeDirection(record.pointHit, mapPos));   
 }
 
@@ -67,19 +66,25 @@ bool extractVoxel(ivec3 mapPos, inout Material material){
     return true; 
 }
 
+// Initialize the DDA variables
+void initDDAVars(Ray ray, out vec3 invRayDir, out vec3 rayDirSign, out vec3 deltaDist, out ivec3 rayStep){
+    invRayDir = 1 / ray.direction;
+    rayDirSign = sign(ray.direction);
+    deltaDist = abs(vec3(length(ray.direction)) * invRayDir);
+    rayStep = ivec3(rayDirSign);
+};
+
 // Branchless DDA with help from https://www.shadertoy.com/view/4dX3zl and https://www.shadertoy.com/view/mtyfRV (I know how branched DDA works, but this is more efficient)
 bool rayMarch(Ray ray, inout HitRecord record, inout uvec4 state){
-    //clampRay(ray);
+    clampRay(ray);
     
-    vec3 invRayDir = 1 / ray.direction;
-    vec3 rayDirSign = sign(ray.direction);
-    vec3 deltaDist = abs(vec3(length(ray.direction)) * invRayDir);
-    ivec3 rayStep = ivec3(rayDirSign);
+    vec3 invRayDir; vec3 rayDirSign; vec3 deltaDist; ivec3 rayStep;
+    initDDAVars(ray, invRayDir, rayDirSign, deltaDist, rayStep);
     
     ivec3 mapPos = ivec3(floor(ray.origin));       
     vec3 sideDist = (rayDirSign * (vec3(mapPos) - ray.origin) + (rayDirSign * 0.5 + 0.5)) * deltaDist;
     
-    vec3 mask; Material material = initDefaultMaterial(); Material prevMaterial = initDefaultMaterial(); 
+    vec3 mask; Material material = initDefaultMaterial(); // Material prevMaterial = initDefaultMaterial(); 
 
     for (int i = 0; i < maxRaySteps; i++){
         if (!extractVoxel(mapPos, material)){ // If the voxel isn't filled, continue raymarching
@@ -88,22 +93,16 @@ bool rayMarch(Ray ray, inout HitRecord record, inout uvec4 state){
         }
         
         setRecordValues(record, rayDirSign, mask, mapPos, ray, material, state);
-        if (material.materialID != DIELECTRIC){// If we can't refract, don't continue raymarching
+        
+        if (!record.didRefract){// If we didn't refract, don't continue raymarching
             return true; 
         }
 
-        Material prevMaterial = material; record.frontFace = !record.frontFace; // If we can refract, raymarch unitl we get out of the dielectric
-        
-        for (int j = 0; j < maxRaySteps; j++){ // Raymarch until we get out of the dielectric
-            ddaStep(mask, sideDist, mapPos, deltaDist, rayStep);
-            
-            bool voxelExists = extractVoxel(mapPos, material);
-            
-            if (!(voxelExists && material.materialID == DIELECTRIC && material.materialParameter == prevMaterial.materialParameter)){
-                setCommonRecordValues(record, rayDirSign, mask, mapPos, ray, prevMaterial, state);
-                return true;
-            } 
-        } 
+        // Determine the exit point for the dielectric and set the scattered ray to that position
+        vec3 exitPoint = intersectDielectric(mapPos, record.scatteredRay); 
+        record.scatteredRay = Ray(exitPoint, record.scatteredRay.direction); 
+
+        return true;
     } 
     return false;
 }
