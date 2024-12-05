@@ -29,7 +29,8 @@ class Window(mglw.WindowConfig):
         self.initRand()
 
         worldSize = WORLD_SIZE_XZ * CHUNK_SIZE
-        self.camera = Camera(self, glm.vec3(worldSize // 2, WORLD_CENTER_Y * 2, worldSize // 2), 20, 60, 0.2)
+        self.camera = Camera(self, glm.vec3(0, 0, -1), 20, 60, 0.2)
+        #self.camera = Camera(self, glm.vec3(worldSize // 2, WORLD_CENTER_Y * 2, worldSize // 2), 20, 60, 0.2)
         self.screenCoords = mglw.geometry.quad_fs(attr_names = screenNames, normals = False, name = 'Screen Coordinates')
         self.crosshair = Crosshair(self, 0.03, glm.vec3(1), self.window_size) #type: ignore
         self.world = World(self.ctx, self.rayTracer, self.camera)
@@ -174,6 +175,7 @@ class Window(mglw.WindowConfig):
             self.world.removeVoxel(mapPos)
         elif button == RIGHT_MOUSE_BUTTON:
             mapPos, normal = self.world.rayMarch(self.camera.getCameraCenterRay(), PLACE_MINE_DISTANCE)
+            self.world.placeVoxel(mapPos, normal)
 
     def on_resize(self, screenWidth, screenHeight):
         '''

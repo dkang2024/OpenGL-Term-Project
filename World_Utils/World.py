@@ -12,6 +12,8 @@ class World:
     def __init__(self, ctx, rayTracer, camera):
         self.ctx, self.rayTracer, self.camera = ctx, rayTracer, camera
 
+        self.voxelPlaceID = GRASS 
+
         self.worldSize = (WORLD_SIZE_XZ * CHUNK_SIZE, WORLD_SIZE_Y * CHUNK_SIZE, WORLD_SIZE_XZ * CHUNK_SIZE)
         self.worldArray = np.zeros(self.worldSize, 'u1')
 
@@ -82,9 +84,16 @@ class World:
                 continue 
             
             normal = -rayDirSign * mask 
-            return mapPos, normal 
+            return mapPos, glm.ivec3(normal)
         
         return None, None # Didn't intersect anything so return None 
+    
+    def writeToMapPos(self, mapPos, voxelID):
+        '''
+        Write to a specific map position  for the worldArray and then update the world
+        '''
+        self.worldArray[mapPos.x, mapPos.y, mapPos.z] = voxelID
+        self.world.write(self.worldArray)
     
     def removeVoxel(self, mapPos):
         '''
@@ -93,8 +102,20 @@ class World:
         if mapPos == None:
             return 
         
-        self.worldArray[mapPos.x, mapPos.y, mapPos.z] = EMPTY_VOXEL 
-        self.world.write(self.worldArray)
+        self.writeToMapPos(mapPos, EMPTY_VOXEL)
+
+    def placeVoxel(self, mapPos, normal):
+        '''
+        Place a voxel in the world given a mapPos and a normal vector
+        '''
+        if mapPos == None: 
+            return 
+        
+        mapPos += normal 
+        if not self.checkInWorld(mapPos):
+            return 
+        
+        self.writeToMapPos(mapPos, self.voxelPlaceID)
         
     def initMaterials(self):
         '''
