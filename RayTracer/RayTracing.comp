@@ -1,8 +1,6 @@
 // Initialize the version
 #version 460 core
 
-layout(binding = 0) uniform sampler2D screen1Texture;
-layout(binding = 1) uniform sampler2D screen2Texture;
 layout(binding = 2) uniform samplerCube grassTexture;
 layout(binding = 3) uniform samplerCube dirtTexture;
 layout(binding = 4) uniform samplerCube stoneTexture;

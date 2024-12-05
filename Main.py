@@ -1,5 +1,6 @@
 from Settings import *
 from Window_Utils import *
+from Window_Utils.Cube import Cube
 from World_Utils import *
 from World_Utils.Textures import Texture #Just because Pylance doesn't like working
 
@@ -24,6 +25,7 @@ class Window(mglw.WindowConfig):
         self.initRenderer(10, 1, 0.01, 25, 10, 512, 1)
 
         self.ctx.gc_mode = 'auto'
+        self.ctx.enable(mgl.CULL_FACE)
         self.program = self.ctx.program(*loadVertexAndFrag('Window', 'Window', 'Window'))
         self.initScreen()
         self.initRand()
@@ -34,6 +36,7 @@ class Window(mglw.WindowConfig):
         self.screenCoords = mglw.geometry.quad_fs(attr_names = screenNames, normals = False, name = 'Screen Coordinates')
         self.crosshair = Crosshair(self, 0.03, glm.vec3(1), self.window_size) #type: ignore
         self.world = World(self.ctx, self.rayTracer, self.camera)
+        self.cube = Cube(self, glm.vec3(1.2, -0.7, -1.5), 0.5)
 
         self.world.assignRender()
 
@@ -70,6 +73,7 @@ class Window(mglw.WindowConfig):
             data = np.array(img).astype('f4') / 255
             texture.write(i, data)
         
+        texture.build_mipmaps()
         texture.use(self.textureBind)
         self.textureBind += 1
 
@@ -88,6 +92,7 @@ class Window(mglw.WindowConfig):
         for i in range(6):
             texture.write(i, faceData)
         
+        texture.build_mipmaps()
         texture.use(self.textureBind)
         self.textureBind += 1
 
@@ -176,8 +181,6 @@ class Window(mglw.WindowConfig):
         elif button == RIGHT_MOUSE_BUTTON:
             mapPos, normal = self.world.rayMarch(self.camera.getCameraCenterRay(), PLACE_MINE_DISTANCE)
             self.world.placeVoxel(mapPos, normal)
-        else:
-            self.world.placedVoxel = False 
 
     def on_resize(self, screenWidth, screenHeight):
         '''
@@ -211,12 +214,13 @@ class Window(mglw.WindowConfig):
         self.cameraMovementKeys()
         self.camera.render(frameTime)
 
-        workgroupX, workgroupY = math.ceil(self.window_size[0] / 8), math.ceil(self.window_size[1] / 4)
+        workgroupX, workgroupY = math.ceil(self.window_size[X_INDEX] / 8), math.ceil(self.window_size[Y_INDEX] / 4)
         self.rayTracer.run(workgroupX, workgroupY)
         self.ctx.memory_barrier(mgl.SHADER_IMAGE_ACCESS_BARRIER_BIT)
 
         self.screenCoords.render(self.program)
         self.crosshair.render()
+        self.cube.render()
         
         self.updateFrameCount()
         self.camera.assignPrevRenderValues()
