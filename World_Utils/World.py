@@ -23,7 +23,8 @@ class World:
         
         self.initMaterials()
 
-        self.lights = []
+        self.lights = {}
+        self.lightIDs = {RED_LIGHT}
 
     def setVoxel(self, keyIndex):
         '''
@@ -102,7 +103,45 @@ class World:
         self.worldArray[mapPos.x, mapPos.y, mapPos.z] = voxelID
         self.world.write(self.worldArray)
         self.rayTracer['updatedVoxel'] = True 
-    
+
+    def writeLightsToSSBO(self):
+        '''
+        Write the lights array to the SSBO 
+        '''
+        lenLights = len(self.lights)
+        self.rayTracer['numLights'] = lenLights
+
+        lightDType = np.dtype([
+            ('mapPos', 'i4', 3),
+            ('voxelID', 'i4')
+        ])
+        
+        if lenLights == 0:
+            self.lightArray = np.ones(1, lightDType)
+        else: 
+            self.lightArray = np.empty(lenLights, lightDType)
+
+            for i, (mapPos, voxelID) in zip(range(lenLights), self.lights.items()):
+                self.lightArray[i]['mapPos'] = mapPos 
+                self.lightArray[i]['voxelID'] = voxelID 
+
+        self.lightBuffer = self.ctx.buffer(self.lightArray)
+        self.lightBuffer.bind_to_storage_buffer(1)
+
+    def writeToLights(self, mapPos, voxelID):
+        '''
+        Write to the light dictionary if the voxelID is a light
+        '''
+        if (mapPos not in self.lights and voxelID == EMPTY_VOXEL) or (voxelID not in self.lightIDs and voxelID != EMPTY_VOXEL):
+            return 
+        
+        if voxelID == EMPTY_VOXEL:
+            self.lights.pop(mapPos)
+        else:
+            self.lights[mapPos] = voxelID 
+        
+        self.writeLightsToSSBO()
+
     def removeVoxel(self, mapPos):
         '''
         Remove a voxel from the world given a mapPosition
@@ -111,6 +150,7 @@ class World:
             return 
         
         self.writeToMapPos(mapPos, EMPTY_VOXEL)
+        self.writeToLights(mapPos, EMPTY_VOXEL)
 
     def placeVoxel(self, mapPos, normal):
         '''
@@ -124,18 +164,23 @@ class World:
             return 
         
         self.writeToMapPos(mapPos, self.voxelPlaceID)
+        self.writeToLights(mapPos, self.voxelPlaceID)
         
     def initMaterials(self):
         '''
         Initialize the materials list
         '''
         self.materialList = []
+
         self.materialList.append(LambertianMaterial(Texture('Grass')))
         self.materialList.append(LambertianMaterial(Texture('Dirt')))
         self.materialList.append(LambertianMaterial(Texture('Stone')))
         self.materialList.append(LambertianMaterial(Texture('Sand')))
         self.materialList.append(ReflectiveMaterial(Texture('Snow'), 0.5))
         self.materialList.append(LambertianMaterial(Texture('Clay')))
+
+        self.materialList.append(PointLight(glm.vec3(15, 0.7, 0.7)))
+
         self.materialList.append(DielectricMaterial(Texture(glm.vec3(1, 0.8, 0.8)), 1.52))
         self.materialList.append(DielectricMaterial(Texture(glm.vec3(0.8, 1, 0.8)), 1.52))
         self.materialList.append(DielectricMaterial(Texture(glm.vec3(0.8, 0.8, 1)), 1.52))
@@ -195,4 +240,4 @@ class World:
         '''
         self.assignMaterials()        
         self.assignWorld()
-        self.rayTracer['numLights'] = len(self.lights)
+        self.writeLightsToSSBO()

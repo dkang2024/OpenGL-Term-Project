@@ -1,4 +1,17 @@
 struct Light {
-    vec3 color;
-    int position;
+    ivec3 mapPos;
+    int voxelID;
 };
+
+// Light PDF (given by the modified rendering equation for directly sampling lights) [Note that all the surface area is now 1 to simplify calculations]
+float getLightPDF(Light light, HitRecord record, out Ray lightRay){
+    vec3 toLight = vec3(light.mapPos) + voxelRadius - record.pointHit;
+    float distanceSquared = dot(toLight, toLight);
+
+    vec3 normalizedToLight = normalize(toLight);
+
+    lightRay = Ray(record.pointHit, normalizedToLight);
+    float cosLight = abs(dot(normalizedToLight, normalVoxel(light.mapPos, lightRay)));
+
+    return distanceSquared / cosLight;
+}

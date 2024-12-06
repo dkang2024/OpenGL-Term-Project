@@ -1,5 +1,4 @@
 const int emptyVoxel = 0;
-const vec3 voxelRadius = vec3(0.5);
 
 // Convert a map position to an OpenGL 3D image position (note that the x and z coordinates are swapped [I found this out in a nasty way after I was pulling my hair out])
 ivec3 convertToImagePos(ivec3 pos){
@@ -45,6 +44,20 @@ void setRecordValues(inout HitRecord record, vec3 rayDirSign, vec3 mask, ivec3 m
     voxelFrontFace(record, ray, mapPos);
     setCommonRecordValues(record, rayDirSign, mask, mapPos, ray, material, state);    
     record.objectColor = applyTexture(material.color, material.textureID, cubeDirection(record.pointHit, mapPos));   
+}
+
+// Check whether a voxel exists
+bool checkVoxelExists(ivec3 mapPos){
+    if (!inWorld(mapPos)){
+        return false;
+    }
+
+    uint voxelData = imageLoad(world, convertToImagePos(mapPos)).x;
+    if (voxelData == emptyVoxel){
+        return false;
+    }
+
+    return true;
 }
 
 // Extract important information from the voxel world space given the map position 
@@ -104,5 +117,31 @@ bool rayMarch(Ray ray, inout HitRecord record, inout uvec4 state){
 
         return true;
     } 
+    return false;
+}
+
+// Essentially the function above but only caring about whether or not the ray his the light
+bool lightRayMarch(Ray ray, ivec3 lightPos){
+    clampRay(ray);
+    
+    vec3 invRayDir; vec3 rayDirSign; vec3 deltaDist; ivec3 rayStep;
+    initDDAVars(ray, invRayDir, rayDirSign, deltaDist, rayStep);
+    
+    ivec3 mapPos = ivec3(floor(ray.origin));       
+    vec3 sideDist = (rayDirSign * (vec3(mapPos) - ray.origin) + (rayDirSign * 0.5 + 0.5)) * deltaDist;
+
+    vec3 mask;
+
+    for (int i = 0; i < maxRaySteps; i++){
+        if (!checkVoxelExists(mapPos) && mapPos != lightPos){ // If the voxel isn't filled, continue raymarching
+            ddaStep(mask, sideDist, mapPos, deltaDist, rayStep);
+            continue;
+        } else if (mapPos == lightPos){
+            return false;
+        }
+        
+        return true;
+    } 
+
     return false;
 }

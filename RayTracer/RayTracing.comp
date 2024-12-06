@@ -34,17 +34,16 @@ uniform int badLightSamples;
 #include "HitRecord"
 #include "Camera"
 #include "TAA" 
+#include "AABB"
 #include "Light"
 #include "Reservoir"
 #include "Materials" 
-#include "AABB"
-#include "Quad"
 
 layout(std430, binding = 0) buffer MatBuffer {
     Material materials[];
 };
 layout(std430, binding = 1) buffer LightBuffer{
-    Quad lights[];
+    Light lights[];
 };
 layout(std430, binding = 2) buffer TextureBuffer {
     uint64_t textures[];
@@ -60,8 +59,13 @@ vec3 gradientColor(vec3 rayDirection){
     float rayDirY = normalize(rayDirection).y;
     float t = 0.5 * (rayDirY + 1.0);
 
+    /*
     vec3 colorTop = vec3(1.0, 1.0, 1.0);
     vec3 colorBottom = vec3(0.5, 0.7, 1.0);
+    */
+
+    vec3 colorTop = vec3(0.02);
+    vec3 colorBottom = vec3(0.01);
 
     return mix(colorTop, colorBottom, t);
 }
@@ -86,52 +90,51 @@ Ray constructCameraRay(ivec2 pixelCoord, int i, int j, inout uvec4 state){
 }
 
 // Check if a light is visible 
-bool lightVisible(vec3 objectNormal, Ray ray, float lightTime, int lightIndex){
+bool lightVisible(vec3 objectNormal, Ray ray, ivec3 lightPos){
     if (dot(objectNormal, ray.direction) <= 0){ // If the normal vector of the record that points against the origin of the ray is at all antiparallel to the lightray, the light is on the opposite side of the object
         return false;
     }
-
-    Interval lightInterval = {rayMin, lightTime};
     
-    uvec4 state = uvec4(0);
-    HitRecord record = initDefaultHitRecord();
-    rayMarch(ray, record, state);
-    return true;
+    return !lightRayMarch(ray, lightPos);
 }
 
 // Get the light's radiance through the modified version of the rendering equation
-vec3 getLightRadiance(HitRecord record, Ray lightRay, int lightIndex, float lightPDF){
-    return lambertianBRDF(record.objectColor) * scatteredCos(record.normalVector, lightRay.direction) * lights[lightIndex].color / lightPDF;
+vec3 getLightRadiance(HitRecord record, Ray lightRay, Light light, float lightPDF){
+    Material material = materials[light.voxelID - 1];
+
+    return lambertianBRDF(record.objectColor) * scatteredCos(record.normalVector, lightRay.direction) * material.color / lightPDF;
 }
 
 // Direct Lighting for lambertian materials with direct light sampling (don't include BRDF sampling because it doesn't matter / help for a Lambertian BRDF that's constant)
 void directLighting(HitRecord record, inout vec3 accumulatedColor, vec3 throughput, inout uvec4 state){    
-    Ray lightRay; float lightTime;
+    Ray lightRay; Light currLight; float lightPDF; int lightIndex; float pHat; float lightWeight;
+    Reservoir lightReservoir = Reservoir(-1, 0); 
 
-    vec3 directLight = vec3(0); Reservoir lightReservoir;
-    
     for (int i = 0; i < badLightSamples; i++){ // Generate a bunch of bad samples and add them to the reservoir
-        int lightIndex = randInt(state, 0, numLights);
+        lightIndex = randInt(state, 0, numLights);
+    
+        currLight = lights[lightIndex];
 
-        float lightPDF = quadLightPDF(lights[lightIndex], record, lightTime, lightRay, state);
-        float pHat = length(getLightRadiance(record, lightRay, lightIndex, lightPDF)); // This is the weight given for weighted importance sampling (we're sampling from the PDF of the rendering equation without knowing what it is)
-
-        float lightWeight = pHat * numLights / badLightSamples; // Get the final light weight by multiplying the sampled pHat by the number of lights (because the uniform pdf for the light sampling is 1 / numLights) and dividing by the total number of bad light samples for the w_i term. 
+        lightPDF = getLightPDF(currLight, record, lightRay);
+        pHat = length(getLightRadiance(record, lightRay, currLight, lightPDF)); // This is the weight given for weighted importance sampling (we're sampling from the PDF of the rendering equation without knowing what it is)
+        
+        lightWeight = pHat * numLights / badLightSamples; // Get the final light weight by multiplying the sampled pHat by the number of lights (because the uniform pdf for the light sampling is 1 / numLights) and dividing by the total number of bad light samples for the w_i term. 
 
         updateReservoir(lightReservoir, lightIndex, lightWeight, state);
     }
 
-    int lightIndex = lightReservoir.lightIndex;
+    lightIndex = lightReservoir.lightIndex;
     float weightSum = lightReservoir.sumWeight;
+    currLight = lights[lightIndex];
 
-    float lightPDF = quadLightPDF(lights[lightIndex], record, lightTime, lightRay, state);
+    lightPDF = getLightPDF(currLight, record, lightRay);
 
-    if (!lightVisible(record.normalVector, lightRay, lightTime, lightIndex)){
+    if (!lightVisible(record.normalVector, lightRay, currLight.mapPos)){
         return; // Don't do anything if the light isn't visible.
-    }
+    } 
 
-    vec3 radiance = getLightRadiance(record, lightRay, lightIndex, lightPDF);
-    float pHat = length(radiance);
+    vec3 radiance = getLightRadiance(record, lightRay, currLight, lightPDF);
+    pHat = length(radiance);
 
     accumulatedColor += weightSum / pHat * radiance * throughput; // Add the light's radiance to the accumulated color with the Monte Carlo integration of getting the W_r with weightSum / pHat and multiplying that quantity by the radiance and the throughput 
 } 

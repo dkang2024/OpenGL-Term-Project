@@ -31,7 +31,7 @@ class Window(mglw.WindowConfig):
 
         worldSize = WORLD_SIZE_XZ * CHUNK_SIZE
         #self.camera = Camera(self, glm.vec3(0, 0, -1), 20, 60, 0.2)
-        self.camera = Camera(self, glm.vec3(worldSize // 2, WORLD_CENTER_Y * 2, worldSize // 2), 20, 60, 0.2)
+        self.camera = Camera(self, glm.vec3(worldSize // 27, WORLD_CENTER_Y * 2, worldSize // 2), 20, 60, 0.2)
         self.screenCoords = mglw.geometry.quad_fs(attr_names = screenNames, normals = False, name = 'Screen Coordinates')
         self.world = World(self.ctx, self.rayTracer, self.camera)
 

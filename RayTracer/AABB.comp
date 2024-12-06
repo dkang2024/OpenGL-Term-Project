@@ -1,14 +1,34 @@
+const vec3 voxelRadius = vec3(0.5);
 const float TIME_ERROR_BOUND = 0.001;
 
-// Determine the ray exit point for a dielectric using the slab intersection method. Modified from https://jcgt.org/published/0007/03/04/.
-vec3 intersectDielectric(ivec3 mapPos, Ray ray){
+// Calculate common AABB intersection values 
+void commonAABB(ivec3 mapPos, Ray ray, out vec3 t0, out vec3 t1){
     vec3 boxMin = vec3(mapPos);
     vec3 boxMax = boxMin + vec3(1);
     vec3 invRayDir = 1 / ray.direction;
 
-    vec3 t0 = (boxMin - ray.origin) * invRayDir;
-    vec3 t1 = (boxMax - ray.origin) * invRayDir;
+    t0 = (boxMin - ray.origin) * invRayDir;
+    t1 = (boxMax - ray.origin) * invRayDir;
+}
+
+// Determine the ray exit point for a dielectric using the slab intersection method. Modified from https://jcgt.org/published/0007/03/04/.
+vec3 intersectDielectric(ivec3 mapPos, Ray ray){
+    vec3 t0; vec3 t1;
+    commonAABB(mapPos, ray, t0, t1);
     float tMax = minVector(max(t0, t1));
 
     return rayIntersectPoint(ray, tMax + TIME_ERROR_BOUND);
+}
+
+// Determine the normal for a voxel using the slab method.
+vec3 normalVoxel(ivec3 mapPos, Ray ray){
+    vec3 t0; vec3 t1;
+
+    commonAABB(mapPos, ray, t0, t1);
+    float tMin = maxVector(min(t0, t1));
+
+    vec3 boxCenter = vec3(mapPos) + voxelRadius;
+    vec3 boxIntersection = rayIntersectPoint(ray, tMin);
+
+    return normalize(boxIntersection - boxCenter);
 }
