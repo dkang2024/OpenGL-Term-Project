@@ -10,7 +10,7 @@ class Texture:
             self.textureID = self.convertToIndex(texture)
         else:
             self.color = texture
-            self.textureID = 0
+            self.textureID = CONST_COLOR
     
     @staticmethod 
     def convertToIndex(texture):
@@ -29,6 +29,8 @@ class Texture:
             return SNOW
         elif texture == 'Clay':
             return CLAY 
+        elif texture == 'Wood':
+            return WOOD
         raise RuntimeError('This texture does not exist!')
         
     def record(self, renderArray, i):

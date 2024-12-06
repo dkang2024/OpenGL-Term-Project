@@ -3,12 +3,6 @@
 #extension GL_ARB_gpu_shader_int64 : enable
 
 const int CONSTCOLOR = 0;
-const int GRASS = 1;
-const int DIRT = 2;
-const int STONE = 3;
-const int SAND = 4;
-const int SNOW = 5;
-const int CLAY = 6;
 
 // General material structure to hold important information (so that each voxel doesn't hold this information but rather an index to this material)
 struct Material {

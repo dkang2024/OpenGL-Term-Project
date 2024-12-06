@@ -12,8 +12,9 @@ class World:
     def __init__(self, ctx, rayTracer, camera):
         self.ctx, self.rayTracer, self.camera = ctx, rayTracer, camera
 
-        self.voxelPlaceID = GRASS
-        self.voxels = np.arange(1, 10) # Numpy array of voxels that can be selected using teh arrow keys
+        START_INDEX = WOOD
+        self.voxels = np.arange(START_INDEX, START_INDEX + 10) # Numpy array of voxels that can be selected using the number keys
+        self.voxelPlaceID = self.voxels[0]
 
         self.worldSize = (WORLD_SIZE_XZ * CHUNK_SIZE, WORLD_SIZE_Y * CHUNK_SIZE, WORLD_SIZE_XZ * CHUNK_SIZE)
         self.worldArray = np.zeros(self.worldSize, 'u1')
@@ -24,7 +25,7 @@ class World:
         self.initMaterials()
 
         self.lights = {}
-        self.lightIDs = {RED_LIGHT}
+        self.lightIDs = {RED_LIGHT, GREEN_LIGHT, BLUE_LIGHT}
 
     def setVoxel(self, keyIndex):
         '''
@@ -178,8 +179,11 @@ class World:
         self.materialList.append(LambertianMaterial(Texture('Sand')))
         self.materialList.append(ReflectiveMaterial(Texture('Snow'), 0.5))
         self.materialList.append(LambertianMaterial(Texture('Clay')))
+        self.materialList.append(LambertianMaterial(Texture('Wood')))
 
-        self.materialList.append(PointLight(glm.vec3(15, 0.7, 0.7)))
+        self.materialList.append(PointLight(glm.vec3(15, 0.9, 0.9)))
+        self.materialList.append(PointLight(glm.vec3(0.9, 15, 0.9)))
+        self.materialList.append(PointLight(glm.vec3(0.9, 0.9, 15)))
 
         self.materialList.append(DielectricMaterial(Texture(glm.vec3(1, 0.8, 0.8)), 1.52))
         self.materialList.append(DielectricMaterial(Texture(glm.vec3(0.8, 1, 0.8)), 1.52))

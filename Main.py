@@ -31,7 +31,7 @@ class Window(mglw.WindowConfig):
 
         worldSize = WORLD_SIZE_XZ * CHUNK_SIZE
         #self.camera = Camera(self, glm.vec3(0, 0, -1), 20, 60, 0.2)
-        self.camera = Camera(self, glm.vec3(worldSize // 27, WORLD_CENTER_Y * 2, worldSize // 2), 20, 60, 0.2)
+        self.camera = Camera(self, glm.vec3(worldSize // 2, WORLD_CENTER_Y * 2, worldSize // 2), 20, 60, 0.2)
         self.screenCoords = mglw.geometry.quad_fs(attr_names = screenNames, normals = False, name = 'Screen Coordinates')
         self.world = World(self.ctx, self.rayTracer, self.camera)
 
@@ -66,6 +66,8 @@ class Window(mglw.WindowConfig):
                 image = Image.open(f'Textures/{name} {side}.jpg') 
             except:
                 image = Image.open(f'Textures/{name} {side}.png') 
+            
+            image = image.convert('RGB')
             faces.append(image)
 
         imageSize = faces[0].size
@@ -86,7 +88,8 @@ class Window(mglw.WindowConfig):
             image = Image.open(f'Textures/{name}.jpg')
         except:
             image = Image.open(f'Textures/{name}.png')
-        
+        image = image.convert('RGB')
+
         imageSize, faceData = image.size, np.array(image).astype('f4') / 255
         texture = self.ctx.texture_cube(imageSize, 3, dtype = 'f4')
 
@@ -115,6 +118,7 @@ class Window(mglw.WindowConfig):
         self.loadSameTexture('Sand')
         self.loadSameTexture('Snow')
         self.loadSameTexture('Clay')
+        self.loadSameTexture('Wood')
         self.uploadTextureHandles()
            
     def initScreen(self):
