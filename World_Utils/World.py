@@ -38,8 +38,8 @@ class World:
         Set the time of the day in the renderer (background color)
         '''
         if time == 'Night':
-            self.rayTracer['topColor'] = glm.vec3(0.001)
-            self.rayTracer['botColor'] = glm.vec3(0.01)
+            self.rayTracer['topColor'] = glm.vec3(0.01)
+            self.rayTracer['botColor'] = glm.vec3(0.02)
         elif time == 'Day':
             self.rayTracer['topColor'] = glm.vec3(1)
             self.rayTracer['botColor'] = glm.vec3(0.5, 0.7, 1.0)

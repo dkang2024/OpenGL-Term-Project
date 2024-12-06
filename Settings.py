@@ -58,7 +58,7 @@ RIGHT_MOUSE_BUTTON = 2
 
 CONST_COLOR = 0
 
-TIME_DAY = 'Dawn'
+TIME_DAY = 'Night'
 
 ti.init(ti.cpu)
 MAX_ANGLE = 89
