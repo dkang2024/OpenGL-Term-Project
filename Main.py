@@ -237,6 +237,14 @@ class Window(mglw.WindowConfig):
         '''
         self.rayTracer['updatedVoxel'] = False 
 
+    def on_close(self):
+        '''
+        On window close, save the world. DO NOT STOP RUNNING THE CODE BEFORE THIS FUNCTION ENDS OR THE WORLD SAVE WILL BE BAD
+        '''
+        print('Currently Saving World')
+        self.world.saveWorld()
+        print('Finished Saving')
+
     def on_render(self, t, frameTime):
         '''
         Render the screen and display the fps

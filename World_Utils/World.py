@@ -12,20 +12,58 @@ class World:
     def __init__(self, ctx, rayTracer, camera):
         self.ctx, self.rayTracer, self.camera = ctx, rayTracer, camera
 
-        START_INDEX = WOOD
         self.voxels = np.arange(START_INDEX, START_INDEX + 10) # Numpy array of voxels that can be selected using the number keys
         self.voxelPlaceID = self.voxels[0]
 
-        self.worldSize = (WORLD_SIZE_XZ * CHUNK_SIZE, WORLD_SIZE_Y * CHUNK_SIZE, WORLD_SIZE_XZ * CHUNK_SIZE)
-        self.worldArray = np.zeros(self.worldSize, 'u1')
-
-        self.heightMap = generateHeightMap()
-        self.generateChunks()
-        
+        self.lightIDs = {RED_LIGHT, GREEN_LIGHT, BLUE_LIGHT}
         self.initMaterials()
 
+        self.filePath = f'Worlds/{SAVE_NAME}.npz'
+
+        if os.path.isfile(self.filePath):
+            self.loadWorld()
+        else:
+            self.worldSize = (WORLD_SIZE_XZ * CHUNK_SIZE, WORLD_SIZE_Y * CHUNK_SIZE, WORLD_SIZE_XZ * CHUNK_SIZE)
+            self.worldArray = np.zeros(self.worldSize, 'u1')
+
+            self.heightMap = generateHeightMap()
+            self.generateChunks()
+
+            self.lights = {}
+
+    def saveWorld(self):
+        '''
+        Save the world to a file 
+        '''
+        np.savez_compressed(self.filePath, worldArray = self.worldArray, lightArray = self.lightArray, cameraPosition = self.camera.cameraPosition)
+
+    def loadWorld(self):
+        '''
+        Load the world array and lights
+        '''
+        try:
+            loadedWorld = np.load(self.filePath)
+        except:
+            raise RuntimeError('''Bad Load Save. Remember to KEEP THE PROGRAM RUNNING even when the window looks closed because numpy is compressing and saving during that time. You're save to close Python when the terminal says ('Finished Saving')''')
+    
+        self.worldArray = loadedWorld['worldArray']
+        self.worldSize = np.shape(self.worldArray)
+
+        self.lightArray = loadedWorld['lightArray']
+
+        self.camera.cameraPosition = loadedWorld['cameraPosition']
+
+        self.loadLights()
+    
+    def loadLights(self):
+        '''
+        Load all the lights dictionary from the worldArray
+        '''
         self.lights = {}
-        self.lightIDs = {RED_LIGHT, GREEN_LIGHT, BLUE_LIGHT}
+        for light in np.nditer(self.lightArray):
+            mapPos, voxelID = light['mapPos'], light['voxelID']
+
+            self.lights[tuple(mapPos)] = int(voxelID)
 
     def setVoxel(self, keyIndex):
         '''
@@ -149,6 +187,7 @@ class World:
         '''
         Write to the light dictionary if the voxelID is a light
         '''
+        mapPos, voxelID = tuple(mapPos), int(voxelID)
         if (mapPos not in self.lights and voxelID == EMPTY_VOXEL) or (voxelID not in self.lightIDs and voxelID != EMPTY_VOXEL):
             return 
         

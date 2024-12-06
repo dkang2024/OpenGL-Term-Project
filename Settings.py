@@ -58,7 +58,11 @@ RIGHT_MOUSE_BUTTON = 2
 
 CONST_COLOR = 0
 
-TIME_DAY = 'Night'
+START_INDEX = WOOD
+
+TIME_DAY = 'Dawn'
+
+SAVE_NAME = 'Hello World'
 
 ti.init(ti.cpu)
 MAX_ANGLE = 89
