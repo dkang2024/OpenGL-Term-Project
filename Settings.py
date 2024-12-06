@@ -64,7 +64,7 @@ TIME_DAY = 'Night' #Possible times of day are 'Night', 'Day', and 'Dawn'
 
 SAVE_NAME = 'Demo' #Enter the file name you want to save to here (or load from if it already exists)
 
-VIEW_RANGE = 350 #Change the voxel view range (decrease this if potato pc)
+VIEW_RANGE = 125 #Change the voxel view range (decrease this if potato pc)
 
 ti.init(ti.cpu)
 MAX_ANGLE = 89
