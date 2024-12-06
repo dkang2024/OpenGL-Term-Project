@@ -33,6 +33,22 @@ class World:
         '''
         self.voxelPlaceID = self.voxels[keyIndex]
 
+    def setTime(self, time):
+        '''
+        Set the time of the day in the renderer (background color)
+        '''
+        if time == 'Night':
+            self.rayTracer['topColor'] = glm.vec3(0.001)
+            self.rayTracer['botColor'] = glm.vec3(0.01)
+        elif time == 'Day':
+            self.rayTracer['topColor'] = glm.vec3(1)
+            self.rayTracer['botColor'] = glm.vec3(0.5, 0.7, 1.0)
+        elif time == 'Dawn':
+            self.rayTracer['topColor'] = glm.vec3(0.3)
+            self.rayTracer['botColor'] = glm.vec3(0.98, 0.48, 0.38)
+        else:
+            raise RuntimeError('This day-night time does not exist!')
+
     @staticmethod
     def initRayMarchVars(ray):
         '''
@@ -180,6 +196,7 @@ class World:
         self.materialList.append(ReflectiveMaterial(Texture('Snow'), 0.5))
         self.materialList.append(LambertianMaterial(Texture('Clay')))
         self.materialList.append(LambertianMaterial(Texture('Wood')))
+        self.materialList.append(ReflectiveMaterial(Texture(glm.vec3(0.5)), 0))
 
         self.materialList.append(PointLight(glm.vec3(15, 0.9, 0.9)))
         self.materialList.append(PointLight(glm.vec3(0.9, 15, 0.9)))

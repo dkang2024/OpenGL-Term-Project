@@ -40,6 +40,7 @@ class Window(mglw.WindowConfig):
         self.numberKeys = list(range(self.wnd.keys.NUMBER_1, self.wnd.keys.NUMBER_9 + 1))
         self.showUI = True 
 
+        self.world.setTime(TIME_DAY)
         self.world.assignRender()
 
     def initRenderer(self, maxBounces, samplesPerPixel, temporalReuseFactor, temporalBlendReduction, badLightSamples, maxRaySteps, neighborhoodSize):
