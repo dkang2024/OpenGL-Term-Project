@@ -21,7 +21,7 @@ class Window(mglw.WindowConfig):
 
         self.loadTextures()
         self.rayTracer = self.ctx.compute_shader(loadComputeShader(self.ctx, 'RayTracer', 'RayTracing'))
-        self.initRenderer(10, 1, 0.01, 25, 10, 215, 1)
+        self.initRenderer(10, 1, 0.01, 25, 10, VIEW_RANGE, 1)
 
         self.ctx.gc_mode = 'auto'
         self.ctx.enable(mgl.CULL_FACE)
