@@ -266,8 +266,8 @@ class Window(mglw.WindowConfig):
         self.updateFrameCount()
         self.camera.assignPrevRenderValues()
         self.resetRayTracer()
-        if frameTime != 0:
-            self.wnd.title = f'FPS: {1 / frameTime: .2f}'
+        
+        self.wnd.title = f'FPS: {self.timer.fps: .2f}'
 
 if __name__ == '__main__':  
     Window.run()
